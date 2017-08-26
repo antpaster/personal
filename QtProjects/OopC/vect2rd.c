@@ -41,3 +41,67 @@ void deleteVect2Rd( TVect2Rd *pV2Rd) {
     free( pV2Rd->_privateVect2Rd);
     free( pV2Rd);
 }
+
+int addVect2Rd( TVect2Rd *pResult, TVect2Rd *pV2Rd1, TVect2Rd *pV2Rd2) {
+    int result = 1;
+
+    if( pV2Rd1 && pV2Rd2) {
+        double resXvalue = pV2Rd1->_getXvalue( pV2Rd1) + pV2Rd2->_getXvalue( pV2Rd2);
+        double resYvalue = pV2Rd1->_getYvalue( pV2Rd1) + pV2Rd2->_getYvalue( pV2Rd2);
+        uint8_t resValid = pV2Rd1->_getValid( pV2Rd1) & pV2Rd2->_getValid( pV2Rd2);
+
+        pResult->_setVect2Rd( pResult, resXvalue, resYvalue, resValid);
+
+        result = 0;
+    }
+
+    return result;
+}
+
+int subtractVect2Rd( TVect2Rd *pResult, TVect2Rd *pV2Rd1, TVect2Rd *pV2Rd2) {
+    int result = 1;
+
+    if( pV2Rd1 && pV2Rd2) {
+        double resXvalue = pV2Rd1->_getXvalue( pV2Rd1) - pV2Rd2->_getXvalue( pV2Rd2);
+        double resYvalue = pV2Rd1->_getYvalue( pV2Rd1) - pV2Rd2->_getYvalue( pV2Rd2);
+        uint8_t resValid = pV2Rd1->_getValid( pV2Rd1) & pV2Rd2->_getValid( pV2Rd2);
+
+        pResult->_setVect2Rd( pResult, resXvalue, resYvalue, resValid);
+
+        result = 0;
+    }
+
+    return result;
+}
+
+//int multiplyVect2Rd( TVect2Rd *pResult, TVect2Rd *pV2Rd1, TVect2Rd *pV2Rd2) {
+//    int result = 1;
+
+//    if( pV2Rd1 && pV2Rd2) {
+//        double resXvalue = pV2Rd1->_getXvalue( pV2Rd1) + pV2Rd2->_getXvalue( pV2Rd2);
+//        double resYvalue = pV2Rd1->_getYvalue( pV2Rd1) + pV2Rd2->_getYvalue( pV2Rd2);
+//        uint8_t resValid = pV2Rd1->_getValid( pV2Rd1) & pV2Rd2->_getValid( pV2Rd2);
+
+//        pResult->_setVect2Rd( pResult, resXvalue, resYvalue, resValid);
+
+//        result = 0;
+//    }
+
+//    return result;
+//}
+
+//int divideVect2Rd( TVect2Rd *pResult, TVect2Rd *pV2Rd1, TVect2Rd *pV2Rd2) {
+//    int result = 1;
+
+//    if( pV2Rd1 && pV2Rd2) {
+//        double resXvalue = pV2Rd1->_getXvalue( pV2Rd1) + pV2Rd2->_getXvalue( pV2Rd2);
+//        double resYvalue = pV2Rd1->_getYvalue( pV2Rd1) + pV2Rd2->_getYvalue( pV2Rd2);
+//        uint8_t resValid = pV2Rd1->_getValid( pV2Rd1) & pV2Rd2->_getValid( pV2Rd2);
+
+//        pResult->_setVect2Rd( pResult, resXvalue, resYvalue, resValid);
+
+//        result = 0;
+//    }
+
+//    return result;
+//}

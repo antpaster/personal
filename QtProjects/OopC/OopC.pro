@@ -7,7 +7,8 @@ SOURCES += main.c \
     triangle.c \
     vect2rd.c \
     scalar.c \
-    vect_lib.c
+    vect3rd.c \
+    matr3x3.c
 
 include(deployment.pri)
 qtcAddDeployment()
@@ -17,5 +18,7 @@ HEADERS += \
     figures.h \
     vect2rd.h \
     scalar.h \
-    vect_lib.h
+    vect_lib.h \
+    vect3rd.h \
+    matr3x3.h
 

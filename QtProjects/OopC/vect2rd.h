@@ -23,5 +23,10 @@ typedef struct SVect2Rd {
 TVect2Rd* newVect2Rd( );
 void deleteVect2Rd( TVect2Rd*);
 
+int addVect2Rd( TVect2Rd*, TVect2Rd*, TVect2Rd*);
+int subtractVect2Rd( TVect2Rd*, TVect2Rd*, TVect2Rd*);
+int multiplyVect2Rd( TVect2Rd*, TVect2Rd*, TVect2Rd*);
+int divideVect2Rd( TVect2Rd*, TVect2Rd*, TVect2Rd*);
+
 #endif // VECT2RD_H
 

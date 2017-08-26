@@ -30,7 +30,25 @@ int main( ) {
 
     printf( "Scalar value: %f\n", value);
 
+    TScalar *pSextra = newScalar( );
+    pSextra->_setScalar( pSextra, 2.0, 1);
+
+    TScalar *pResult = newScalar( );
+    add( pResult, pS, pSextra);
+    printf( "Scalar sum: %f\n", pResult->_getValue( pResult));
+
+    subtract( pResult, pS, pSextra);
+    printf( "Scalar subtraction: %f\n", pResult->_getValue( pResult));
+
+    multiply( pResult, pS, pSextra);
+    printf( "Scalar multiplication: %f\n", pResult->_getValue( pResult));
+
+    divide( pResult, pS, pSextra);
+    printf( "Scalar division: %f\n", pResult->_getValue( pResult));
+
     deleteScalar( pS);
+    deleteScalar( pSextra);
+    deleteScalar( pResult);
 
 
     TVect2Rd *pV2Rd = newVect2Rd( );
@@ -50,7 +68,9 @@ int main( ) {
     printf( "Vect sum: {%f, %f}\n", pV2RdSum->_getXvalue( pV2RdSum),
         pV2RdSum->_getYvalue( pV2RdSum));
 
-    deleteScalar( pV2Rd);
+    deleteVect2Rd( pV2Rd);
+    deleteVect2Rd( pV2RdAdd);
+    deleteVect2Rd( pV2RdSum);
 
     return 0;
 }

@@ -22,5 +22,10 @@ typedef struct SScalar {
 TScalar* newScalar( );
 void deleteScalar( TScalar*);
 
+int addScalar( TScalar*, TScalar*, TScalar*);
+int subtractScalar( TScalar*, TScalar*, TScalar*);
+int multiplyScalar( TScalar*, TScalar*, TScalar*);
+int divideScalar( TScalar*, TScalar*, TScalar*);
+
 #endif // SCALAR_H
 

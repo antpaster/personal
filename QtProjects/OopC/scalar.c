@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdint.h>
+
 #include "scalar.h"
+#include "vect_lib.h"
 
 /*! Scalar
  **************************************************************************************************/
@@ -32,4 +34,65 @@ TScalar *newScalar( ) {
 void deleteScalar( TScalar *pS) {
     free( pS->_privateScalar);
     free( pS);
+}
+
+int addScalar( TScalar *pResult, TScalar *pS1, TScalar *pS2) {
+    int result = 1;
+
+    if( pS1 && pS2) {
+        double resValue = pS1->_getValue( pS1) + pS2->_getValue( pS2);
+        uint8_t resValid = pS1->_getValid( pS1) & pS2->_getValid( pS2);
+
+        pResult->_setScalar( pResult, resValue, resValid);
+
+        result = 0;
+    }
+
+    return result;
+}
+
+int subtractScalar( TScalar *pResult, TScalar *pS1, TScalar *pS2) {
+    int result = 1;
+
+    if( pS1 && pS2) {
+        double resValue = pS1->_getValue( pS1) - pS2->_getValue( pS2);
+        uint8_t resValid = pS1->_getValid( pS1) & pS2->_getValid( pS2);
+
+        pResult->_setScalar( pResult, resValue, resValid);
+
+        result = 0;
+    }
+
+    return result;
+}
+
+int multiplyScalar( TScalar *pResult, TScalar *pS1, TScalar *pS2) {
+    int result = 1;
+
+    if( pS1 && pS2) {
+        double resValue = pS1->_getValue( pS1) * pS2->_getValue( pS2);
+        uint8_t resValid = pS1->_getValid( pS1) & pS2->_getValid( pS2);
+
+        pResult->_setScalar( pResult, resValue, resValid);
+
+        result = 0;
+    }
+
+    return result;
+}
+
+int divideScalar( TScalar *pResult, TScalar *pS1, TScalar *pS2) {
+    int result = 1;
+
+    if( pS1 && pS2) {
+        double denom = ( fabs( pS2->_getValue( pS2)) > F_NULL) ? pS2->_getValue( pS2) :  F_NULL;
+        double resValue = pS1->_getValue( pS1) / denom;
+        uint8_t resValid = pS1->_getValid( pS1) & pS2->_getValid( pS2);
+
+        pResult->_setScalar( pResult, resValue, resValid);
+
+        result = 0;
+    }
+
+    return result;
 }
