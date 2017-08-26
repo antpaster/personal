@@ -1,0 +1,3 @@
+Packets recieved from the source node count: 228
+Total packets count: 9330
+The per cent of the packets from the destination node: 2.44373%

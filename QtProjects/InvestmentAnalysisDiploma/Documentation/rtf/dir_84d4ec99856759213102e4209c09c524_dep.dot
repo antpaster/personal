@@ -1,0 +1,6 @@
+digraph "C:/Users/Anton/Documents/QtProjects/InvestmentAnalysisDiploma/debug" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  dir_84d4ec99856759213102e4209c09c524 [shape=box, label="debug", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_84d4ec99856759213102e4209c09c524.html"];
+}

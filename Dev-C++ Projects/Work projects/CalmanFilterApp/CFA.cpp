@@ -1,5 +1,5 @@
 /**
-	This program is for .
+	This program implements simple version of one dimensional Calman filter.
 
 	Author: Pasternak A.E., antpaster@gmail.com
 	
@@ -11,3 +11,10 @@
 #include <conio.h>
 #include <stdlib.h>
 #include <time.h>
+
+using namespace std;
+
+/// Controlling function for filtering
+double initialFunc(double x)
+{
+}

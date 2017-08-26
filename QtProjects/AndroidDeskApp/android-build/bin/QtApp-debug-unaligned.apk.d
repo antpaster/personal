@@ -1,0 +1,23 @@
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\bin\QtApp-debug-unaligned.apk : \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\bin\QtApp.ap_ \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\bin\classes.dex \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\QtAndroid-bundled.jar \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\QtAndroidAccessibility-bundled.jar \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\armeabi-v7a\gdbserver \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\armeabi-v7a\libAndroidDeskApp.so \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\armeabi-v7a\libgnustl_shared.so \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\armeabi-v7a\libplugins_accessible_libqtaccessiblewidgets.so \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\armeabi-v7a\libplugins_imageformats_libqgif.so \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\armeabi-v7a\libplugins_imageformats_libqico.so \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\armeabi-v7a\libplugins_imageformats_libqjpeg.so \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\armeabi-v7a\libplugins_imageformats_libqmng.so \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\armeabi-v7a\libplugins_imageformats_libqtga.so \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\armeabi-v7a\libplugins_imageformats_libqtiff.so \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\armeabi-v7a\libplugins_imageformats_libqwbmp.so \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\armeabi-v7a\libplugins_platforms_android_libqtforandroid.so \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\armeabi-v7a\libplugins_platforms_android_libqtforandroidGL.so \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\armeabi-v7a\libplugins_platforms_libqminimal.so \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\armeabi-v7a\libplugins_platforms_libqoffscreen.so \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\armeabi-v7a\libQt5Core.so \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\armeabi-v7a\libQt5Gui.so \
+C:\Users\Anton\Documents\QtProjects\AndroidDeskApp\android-build\libs\armeabi-v7a\libQt5Widgets.so \

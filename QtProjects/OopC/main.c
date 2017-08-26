@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include "figures.h"
+#include "triangle.h"
+
+#include "scalar.h"
+#include "vect2rd.h"
+#include "vect_lib.h"
+
+int main( ) {
+//    TTriangle *pTr = newTriangle();
+
+//    pTr->_setSideA( pTr, 10.0);
+
+//    double side;// = pTr->_getSideA( pTr);
+//    side = pTr->_getSideA( pTr);
+
+//    printf( "Side A = %f\n", side);
+
+//    deleteTriangle( pTr);
+
+//    puts( typename( pTr));
+
+
+    TScalar *pS = newScalar( );
+
+    pS->_setScalar( pS, 15.0, 1);
+
+    double value;
+    value = pS->_getValue( pS);
+
+    printf( "Scalar value: %f\n", value);
+
+    deleteScalar( pS);
+
+
+    TVect2Rd *pV2Rd = newVect2Rd( );
+    pV2Rd->_setVect2Rd( pV2Rd, 15.0, 10.0, 1);
+
+    double xValue, yValue;
+    xValue = pV2Rd->_getXvalue( pV2Rd);
+    yValue = pV2Rd->_getYvalue( pV2Rd);
+
+    printf( "Vect2Rd value: {%f, %f}\n", xValue, yValue);
+
+    TVect2Rd *pV2RdAdd = newVect2Rd( );
+    pV2RdAdd->_setVect2Rd( pV2RdAdd, -5.0, 13.0, 0);
+
+    TVect2Rd *pV2RdSum = newVect2Rd( );
+    add( pV2RdSum, pV2Rd, pV2RdAdd);
+    printf( "Vect sum: {%f, %f}\n", pV2RdSum->_getXvalue( pV2RdSum),
+        pV2RdSum->_getYvalue( pV2RdSum));
+
+    deleteScalar( pV2Rd);
+
+    return 0;
+}
