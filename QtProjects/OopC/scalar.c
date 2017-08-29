@@ -1,16 +1,31 @@
-#include <stdlib.h>
-#include <stdint.h>
+/********************************** ukbo42 *************************************
+ ** ОРГАНИЗАЦИЯ:     ОАО "РПКБ"
+ ** СОЗДАН:          28 августа 2017 г. APasternak
+ ** ИЗМЕНЕН:         28 августа 2017 г. APasternak
+ *******************************************************************************
+ ** ПЕРЕЧЕНЬ ИЗМЕНЕНИЙ:
+ ** 28 августа 2017 г. APasternak. Суть внесенных изменений
+ *******************************************************************************
+ */
+/*!
+ ** \file  scalar.c
+ ** \brief Краткий комментарий к файлу
+ **      Реализация класса Скаляр
+ ** Расширенный комментарий к файлу
+ */
 
-#include "scalar.h"
-#include "vect_lib.h"
+#include "oop_math_include.h"
+
+#if ADV_MATH_LIB
 
 /*! Scalar
- **************************************************************************************************/
+ ***************************************************************************************************
+ */
 static double getValue( TScalar *pS) {
     return ( ( TPrivateScalar*)( pS->_privateScalar))->_value;
 }
 
-static double getValid( TScalar *pS) {
+static uint8_t getValid( TScalar *pS) {
     return ( ( TPrivateScalar*)( pS->_privateScalar))->_valid;
 }
 
@@ -96,3 +111,5 @@ int divideScalar( TScalar *pResult, TScalar *pS1, TScalar *pS2) {
 
     return result;
 }
+
+#endif

@@ -1,12 +1,28 @@
-#include <stdlib.h>
-#include <string.h>
+/********************************** ukbo42 *************************************
+ ** ОРГАНИЗАЦИЯ:     ОАО "РПКБ"
+ ** СОЗДАН:          28 августа 2017 г. APasternak
+ ** ИЗМЕНЕН:         28 августа 2017 г. APasternak
+ *******************************************************************************
+ ** ПЕРЕЧЕНЬ ИЗМЕНЕНИЙ:
+ ** 28 августа 2017 г. APasternak. Суть внесенных изменений
+ *******************************************************************************
+ */
+/*!
+ ** \file  matr3x3.c
+ ** \brief Краткий комментарий к файлу
+ **      Реализация класса Вещественная матрица 3х3
+ ** Расширенный комментарий к файлу
+ */
 
-#include "scalar.h"
-#include "vect3rd.h"
-#include "matr3x3.h"
+#include <stdlib.h>
+
+#include "oop_math_include.h"
+
+#if ADV_MATH_LIB
 
 /*! Matr3x3
- **************************************************************************************************/
+ ***************************************************************************************************
+ */
 static double getValueByIndex( TMatr3x3 *pM3x3, uint8_t iRow, uint8_t iColumn) {
     return *( *( ( ( TPrivateMatr3x3*)( pM3x3->_privateMatr3x3))->_matr) + ( 3 * iRow) + iColumn);
 }
@@ -130,3 +146,24 @@ int multiplyMatr3x3( TMatr3x3 *pResult, TMatr3x3 *pM3x3_1, TMatr3x3 *pM3x3_2) {
 
 //    return result;
 //}
+
+int transposeMatr3x3( TMatr3x3 *pResult, TMatr3x3 *pM3x3) {
+    int result = 1;
+
+    if( pM3x3) {
+        double **resMatr;
+        double *currAddr;
+
+        int i;
+        for( i = 0; i < 9; ++i) {
+            currAddr = *resMatr + i;
+            *currAddr = pM3x3->_getValueByIndex( pM3x3, i, i % 3);
+        }
+
+        result = 0;
+    }
+
+    return result;
+}
+
+#endif

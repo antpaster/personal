@@ -1,12 +1,32 @@
+/********************************** ukbo42 *************************************
+ ** ОРГАНИЗАЦИЯ:     ОАО "РПКБ"
+ ** СОЗДАН:          28 августа 2017 г. APasternak
+ ** ИЗМЕНЕН:         28 августа 2017 г. APasternak
+ *******************************************************************************
+ ** ПЕРЕЧЕНЬ ИЗМЕНЕНИЙ:
+ ** 28 августа 2017 г. APasternak. Суть внесенных изменений
+ *******************************************************************************
+ */
+/*!
+ ** \file  vect_lib.h
+ ** \brief Краткий комментарий к файлу
+ **      Мастер-файл ООП математической библиотеки
+ ** Расширенный комментарий к файлу
+ */
+
 #ifndef VECT_LIB_H
 #define VECT_LIB_H
 
-#include "scalar.h"
-#include "vect2rd.h"
-#include "vect3rd.h"
-#include "matr3x3.h"
+#include "oop_math_include.h"
 
-#define F_NULL 1e-20
+#if ADV_MATH_LIB
+
+//#define create( ) _Generic( ( ), \
+//    TScalar* : newScalar, \
+//    TVect2Rd* : newVect2Rd, \
+//    TVect3Rd* : newVect3Rd, \
+//    TMatr3x3* : newMatr3x3 \
+//) ( )
 
 #define add( R, X, Y) _Generic( ( R, X, Y), \
     TScalar* : addScalar, \
@@ -39,6 +59,15 @@
 #define transpose( R, X) _Generic( ( R, X), \
     TMatr3x3* : transposeMatr3x3 \
 ) ( R, X, Y)
+
+#define remove( R) _Generic( ( R), \
+    TScalar* : newScalar, \
+    TVect2Rd* : newVect2Rd, \
+    TVect3Rd* : newVect3Rd, \
+    TMatr3x3* : newMatr3x3 \
+) ( R)
+
+#endif
 
 #endif // VECT_LIB_H
 

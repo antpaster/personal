@@ -1,11 +1,29 @@
-#include <stdlib.h>
-#include <stdint.h>
+/********************************** ukbo42 *************************************
+ ** ОРГАНИЗАЦИЯ:     ОАО "РПКБ"
+ ** СОЗДАН:          28 августа 2017 г. APasternak
+ ** ИЗМЕНЕН:         28 августа 2017 г. APasternak
+ *******************************************************************************
+ ** ПЕРЕЧЕНЬ ИЗМЕНЕНИЙ:
+ ** 28 августа 2017 г. APasternak. Суть внесенных изменений
+ *******************************************************************************
+ */
+/*!
+ ** \file  vect2rd.c
+ ** \brief Краткий комментарий к файлу
+ **      Реализация класса Двумерный вещественный вектор с достоверностью
+ ** Расширенный комментарий к файлу
+ */
 
-#include "scalar.h"
-#include "vect2rd.h"
+#include <stdlib.h>
+
+#include "oop_math_include.h"
+//#include "vect2rd.h"
+
+#if ADV_MATH_LIB
 
 /*! Vect2Rd
- **************************************************************************************************/
+ ***************************************************************************************************
+ */
 static double getXvalue( TVect2Rd *pV2Rd) {
     return ( ( TPrivateVect2Rd*)( pV2Rd->_privateVect2Rd))->_privateScalar._value;
 }
@@ -14,7 +32,7 @@ static double getYvalue( TVect2Rd *pV2Rd) {
     return ( ( TPrivateVect2Rd*)( pV2Rd->_privateVect2Rd))->_yValue;
 }
 
-static double getValid( TVect2Rd *pV2Rd) {
+static uint8_t getValid( TVect2Rd *pV2Rd) {
     return ( ( TPrivateVect2Rd*)( pV2Rd->_privateVect2Rd))->_privateScalar._valid;
 }
 
@@ -105,3 +123,5 @@ int subtractVect2Rd( TVect2Rd *pResult, TVect2Rd *pV2Rd1, TVect2Rd *pV2Rd2) {
 
 //    return result;
 //}
+
+#endif
