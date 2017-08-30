@@ -8,28 +8,37 @@
  *******************************************************************************
  */
 /*!
- ** \file  templates.h
+ ** \file  all_possible_divisions.c
  ** \brief Краткий комментарий к файлу
- **      Заголовочный мастер-файл библиотеки шаблонов
+ **      Реализация допустимых типов для шаблона деления
  ** Расширенный комментарий к файлу
  */
 
-#ifndef TEMPLATES_H
-#define TEMPLATES_H
+#include "templates.h"
 
-#ifndef F_NULL
-#define F_NULL 1e-20 /* очень маленькое число для защиты от деления на 0 */
-#endif
+#ifdef TEMPLATE_LIB
 
-#define TEMPLATE_LIB /* триггер библиотеки */
-
-#define CAT( X, Y) X##_##Y
-#define TEMPLATE( X, Y) CAT( X, Y)
-
-#include "all_possible_sums.h"
-#include "all_possible_subtractions.h"
-#include "all_possible_multiplications.h"
 #include "all_possible_divisions.h"
 
-#endif // TEMPLATES_H
+#ifdef T
+#undef T
+#endif
 
+#define T float
+#include "division_as_template.c"
+
+#ifdef T
+#undef T
+#endif
+
+#define T double
+#include "division_as_template.c"
+
+#ifdef T
+#undef T
+#endif
+
+#define T int
+#include "division_as_template.c"
+
+#endif

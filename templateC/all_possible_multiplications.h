@@ -8,28 +8,41 @@
  *******************************************************************************
  */
 /*!
- ** \file  templates.h
+ ** \file  all_possible_multiplications.h
  ** \brief Краткий комментарий к файлу
- **      Заголовочный мастер-файл библиотеки шаблонов
+ **      Описание допустимых типов для шаблона умножения
  ** Расширенный комментарий к файлу
  */
 
-#ifndef TEMPLATES_H
-#define TEMPLATES_H
+#ifndef ALL_POSSIBLE_MULTIPLICATIONS_H
+#define ALL_POSSIBLE_MULTIPLICATIONS_H
 
-#ifndef F_NULL
-#define F_NULL 1e-20 /* очень маленькое число для защиты от деления на 0 */
+#include "templates.h"
+
+#ifdef TEMPLATE_LIB
+
+#ifdef T
+#undef T
 #endif
 
-#define TEMPLATE_LIB /* триггер библиотеки */
+#define T float
+#include "multiplication_as_template.h"
 
-#define CAT( X, Y) X##_##Y
-#define TEMPLATE( X, Y) CAT( X, Y)
+#ifdef T
+#undef T
+#endif
 
-#include "all_possible_sums.h"
-#include "all_possible_subtractions.h"
-#include "all_possible_multiplications.h"
-#include "all_possible_divisions.h"
+#define T double
+#include "multiplication_as_template.h"
 
-#endif // TEMPLATES_H
+#ifdef T
+#undef T
+#endif
+
+#define T int
+#include "multiplication_as_template.h"
+
+#endif
+
+#endif // ALL_POSSIBLE_MULTIPLICATIONS_H
 

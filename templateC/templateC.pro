@@ -5,10 +5,22 @@ CONFIG -= qt
 
 SOURCES += main.c \
     all_possible_sums.c \
-    sum_as_template.c
+    sum_as_template.c \
+    subtraction_as_template.c \
+    all_possible_subtractions.c \
+    multiplication_as_template.c \
+    all_possible_multiplications.c \
+    division_as_template.c \
+    all_possible_divisions.c
 
 HEADERS += \
     all_possible_sums.h \
     sum_as_template.h \
-    templates.h
+    templates.h \
+    subtraction_as_template.h \
+    all_possible_subtractions.h \
+    multiplication_as_template.h \
+    all_possible_multiplications.h \
+    division_as_template.h \
+    all_possible_divisions.h
 
