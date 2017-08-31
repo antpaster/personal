@@ -11,7 +11,11 @@ SOURCES += main.c \
     multiplication_as_template.c \
     all_possible_multiplications.c \
     division_as_template.c \
-    all_possible_divisions.c
+    all_possible_divisions.c \
+    all_possible_min_max.c \
+    min_max_as_template.c \
+    all_possible_insert_sorts.c \
+    insert_sort_as_template.c
 
 HEADERS += \
     all_possible_sums.h \
@@ -22,5 +26,9 @@ HEADERS += \
     multiplication_as_template.h \
     all_possible_multiplications.h \
     division_as_template.h \
-    all_possible_divisions.h
+    all_possible_divisions.h \
+    all_possible_min_max.h \
+    min_max_as_template.h \
+    all_possible_insert_sorts.h \
+    insert_sort_as_template.h
 
