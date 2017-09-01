@@ -3,20 +3,23 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <stdint.h>
 
 #ifndef GrToRad
-#define GrToRad (M_PI / 180.0)
+#define GrToRad ( M_PI / 180.0)
 #endif
 
 #ifndef RadToGr
-#define RadToGr (180.0 / M_PI)
+#define RadToGr ( 180.0 / M_PI)
 #endif
 
 /*! Количество опорных точек ограничения обзора КОЭП */
 #define NODE_POINT_COUNT_KOEP 151
 
 /*! Нуль для вычислений */
+#ifndef F_NULL
 #define F_NULL 1e-20
+#endif
 
 /*! Система координат:
  * Азимут +Y --> положительный поворот вправо
@@ -41,11 +44,11 @@ typedef enum EhangPointShadow
     TP12_RVV              = 14, /*!< ТП12 РВВ (кроме РВВ БД), значения азимута [0; 150] градусов */
     TP9_UNCONTROL_AB      = 13, /*!< ТП9 неуправляемые АБ, значения азимута [-150; 0] градусов */
     TP12_KAB_RVP_RVV_BD   = 16, /*!< ТП12 КАБ, РВП, РВВ БД, значения азимута [0; 150] градусов */
-
+    SHALLOW_15            = 15, /*!< заглушка, [ -150; 0] */
     TP12_UNCONTROL_AB_NAR = 18, /*!< ТП12 неуправляемые АБ, НАР, значения азимута [0; 150] градусов */
-
+    SHALLOW_17            = 17, /*!< заглушка, [ -150; 0] */
     TP8_L265M10           = 12, /*!< ТП6 Л-265М10, значения азимута [0; 150] градусов */
-    HANG_POINT_SHADOW_ALL
+    HANG_POINT_SHADOW_ALL = 19  /*!< всего теней - размер массива данных */
 } ThangPointShadow;
 
 /*! Функция ограничения углов обзора КОЭП
@@ -55,10 +58,10 @@ void koep35checkVisionAngles(
     const ThangPointShadow hangPointShadow, /*!< тип тени на подвеске */
     double *Y, /*!< азимут в ССК */
     double *Z, /*!< угол места в ССК */
-    char *limY, /*!< 0 - допустимое значение по Y, 1 - недопустимое значение по Y */
-    char *limZ, /*!< 0 - допустимое значение по Z, 1 - недопустимое значение по Z */
-    char *shadow1deg, /*!< признак затенения 1 град. */
-    char *shadow5deg  /*!< признак затенения 5 град. */
+    uint8_t *limY, /*!< 0 - допустимое значение по Y, 1 - недопустимое значение по Y */
+    uint8_t *limZ, /*!< 0 - допустимое значение по Z, 1 - недопустимое значение по Z */
+    uint8_t *shadow1deg, /*!< признак затенения 1 град. */
+    uint8_t *shadow5deg  /*!< признак затенения 5 град. */
 );
 
 #endif /* KOEP35SHADOWZONE_H */
