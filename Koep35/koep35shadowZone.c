@@ -1,6 +1,7 @@
 #include <stdint.h>
 
 #include "koep35shadowZone.h"
+#include "types_suo.h"
 
 /*! Координаты области обзора в связанной СК */
 const double cMaxY = 150.0; /*!< максимальный угол (градусы) обзора КОЭП по Y */
@@ -1114,89 +1115,6 @@ void setHangPointFlag( const ThangPointShadow hps, const uint8_t value)
     hangPointFlags[ hps] = value;
 }
 
-///*! Преобразование типы формы тени из перечисления в индекс в массиве данных
-// **************************************************************************************************/
-//size_t enumValToIndex(
-//    const ThangPointShadow hps /*!< тип формы тени */
-//) {
-//    switch( hps)
-//    {
-//    case PLANE_SHAPE_Y_POS:
-//        return 0;
-
-//    case PLANE_SHAPE_Y_NEG:
-//        return 1;
-
-//    case TP4_RVV:
-//        return 2;
-
-//    case TP1_RVV:
-//        return 3;
-
-//    case TP4_RVV_LD:
-//        return 4;
-
-//    case TP1_KAB_RVP_RVV_BD:
-//        return 5;
-
-//    case TP4_KAB_RVP:
-//        return 6;
-
-//    case TP1_UNCONTROL_AB:
-//        return 7;
-
-//    case TP4_KAB_RVP_LD:
-//        return 8;
-
-//    case TP9_RVV:
-//        return 9;
-
-//    case TP4_UNCONTROL_AB_NAR:
-//        return 10;
-
-//    case TP9_RVV_LD:
-//        return 11;
-
-//    case TP6_RVV:
-//        return 14;
-
-
-
-//    case TP8_RVV:
-//        return 10;
-
-//    case TP9_KAB_RVP_RVV_BD:
-//        return 11;
-
-//    case TP12_RVV:
-//        return 12;
-
-//    case TP9_UNCONTROL_AB:
-//        return 13;
-
-//    case TP12_KAB_RVP_RVV_BD:
-//        return 14;
-
-//    case SHALLOW_15:
-//        return 15;
-
-//    case TP12_UNCONTROL_AB_NAR:
-//        return 16;
-
-//    case SHALLOW_17:
-//        return 17;
-
-//    case TP8_L265M10:
-//        return 18;
-
-//    default:
-//        break;
-//    }
-
-//    return 0;
-//}
-
-
 /*! Подготовка знаменателя к делению, проверка на равенство нулю
  **************************************************************************************************/
 double zeroSafeDenom(
@@ -1264,6 +1182,140 @@ double arrValLinearInterpol(
     }
 
     return 0.0;
+}
+
+/*! Функция определения принадлежности данного АСП к классу РВВ
+ **************************************************************************************************/
+uint8_t isAspRvv( const TSUO_PR_ASP asp)
+{
+    if( ( eASP_750 == asp) || ( eASP_72E == asp))
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+/*! Функция определения принадлежности данного АСП к классу РВВ БД
+ **************************************************************************************************/
+uint8_t isAspRvvBd( const TSUO_PR_ASP asp)
+{
+    if( ( eASP_190 == asp) || ( eASP_470T1 == asp) || ( eASP_470R1 == asp) || ( eASP_470P1 == asp)
+        || ( eASP_610M == asp) || ( eASP_470ET1 == asp) || ( eASP_170_1 == asp)
+        || ( eASP_470ER1 == asp) || ( eASP_470EP1 == asp) || ( eASP_610M_C == asp))
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+/*! Функция определения принадлежности данного АСП к классу РВП
+ **************************************************************************************************/
+uint8_t isAspRvp( const TSUO_PR_ASP asp)
+{
+    if( ( eASP_S_8 == asp) || ( eASP_S_8UV == asp) || ( eASP_S_13 == asp) || ( eASP_S_25 == asp)
+        || ( eASP_AB_MBD == asp) || ( eASP_AB_RBK == asp))
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+/*! Функция определения принадлежности данного АСП к классу КАБ
+ **************************************************************************************************/
+uint8_t isAspKab( const TSUO_PR_ASP asp)
+{
+    if( ( eASP_K_07_05_07U == asp) || ( eASP_K_022 == asp) || ( eASP_K_05 == asp)
+        || ( eASP_K_07U == asp) || ( eASP_K_01S == asp) || ( eASP_K_021 == asp)
+        || ( eASP_K_08B == asp) || ( eASP_K_029B == asp) || ( eASP_K_08TB == asp)
+        || ( eASP_K_029TB == asp) || ( eASP_K_047 == asp) || ( eASP_K_310A == asp)
+        || ( eASP_K_07M == asp) || ( eASP_K_01LG == asp) || ( eASP_K_021M == asp))
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+/*! Функция обновления флагов теней
+ **************************************************************************************************/
+void assignHangPointFlags( const TIKAR_BACK_TP *tbt, const uint8_t tpCount)
+{
+    size_t i;
+    for( i = 0; i < tpCount; ++i)
+    {
+        if( ( 3 == i) && isAspRvv( ( tbt + i)->Priz_ASP))
+        {
+            hangPointFlags[ TP4_RVV] = 1;
+        }
+
+        if( ( 0 == i) && isAspRvv( ( tbt + i)->Priz_ASP))
+        {
+            hangPointFlags[ TP1_RVV] = 1;
+        }
+
+        if( ( 0 == i) && isAspKab( ( tbt + i)->Priz_ASP) && isAspRvp( ( tbt + i)->Priz_ASP)
+            && isAspRvvBd( ( tbt + i)->Priz_ASP))
+        {
+            hangPointFlags[ TP1_KAB_RVP_RVV_BD] = 1;
+        }
+
+        if( ( 3 == i) && isAspKab( ( tbt + i)->Priz_ASP) && isAspRvp( ( tbt + i)->Priz_ASP))
+        {
+            hangPointFlags[ TP4_KAB_RVP] = 1;
+        }
+
+        if( ( 0 == i)/* && isAspUncontrolAb( ( tbt + i)->Priz_ASP)*/)
+        {
+            hangPointFlags[ TP1_UNCONTROL_AB] = 1;
+        }
+
+        if( ( 8 == i) && isAspRvv( ( tbt + i)->Priz_ASP))
+        {
+            hangPointFlags[ TP9_RVV] = 1;
+        }
+
+        if( ( 3 == i)/* && isAspUncontrolAb( ( tbt + i)->Priz_ASP)
+           && isAspUncontrolNar( ( tbt + i)->Priz_ASP)*/)
+        {
+            hangPointFlags[ TP4_UNCONTROL_AB_NAR] = 1;
+        }
+
+        if( ( 8 == i) && isAspKab( ( tbt + i)->Priz_ASP) && isAspRvp( ( tbt + i)->Priz_ASP)
+            && isAspRvvBd( ( tbt + i)->Priz_ASP))
+        {
+            hangPointFlags[ TP9_KAB_RVP_RVV_BD] = 1;
+        }
+
+        if( ( 7 == i) && isAspRvv( ( tbt + i)->Priz_ASP))
+        {
+            hangPointFlags[ TP8_RVV] = 1;
+        }
+
+        if( ( 11 == i) && isAspRvv( ( tbt + i)->Priz_ASP))
+        {
+            hangPointFlags[ TP12_RVV] = 1;
+        }
+
+        if( ( 11 == i) && isAspKab( ( tbt + i)->Priz_ASP) && isAspRvp( ( tbt + i)->Priz_ASP)
+            && isAspRvvBd( ( tbt + i)->Priz_ASP))
+        {
+            hangPointFlags[ TP12_KAB_RVP_RVV_BD] = 1;
+        }
+
+        if( ( 11 == i)/* && isAspUncontrolAb( ( tbt + i)->Priz_ASP)
+           && isAspUncontrolNar( ( tbt + i)->Priz_ASP)*/)
+        {
+            hangPointFlags[ TP12_UNCONTROL_AB_NAR] = 1;
+        }
+
+        if( ( 7 == i)/* && ( eASP_L265M10 == ( tbt + i)->Priz_ASP)*/)
+        {
+            hangPointFlags[ TP8_L265M10] = 1;
+        }
+    }
 }
 
 /*! Функция ограничения углов обзора КОЭП
@@ -1357,16 +1409,13 @@ void koep35checkVisionAngles(
             }
         }
 
-        /* Предварительное заполнение массива флагов теней */
-        ThangPointShadow iHps;
-//        for( iHps = PLANE_SHAPE_Y_POS; iHps < HANG_POINT_SHADOW_ALL; ++iHps)
-//        {
-//            //            setHangPointFlag( iHps, 1);
-//            hangPointFlags[ iHps] = ( iHps % 2) ? 1 : 0;
-//        }
+        /* Обнуление информации по теням */
+        memset( hangPointFlags, 0, HANG_POINT_SHADOW_ALL * sizeof( uint8_t));
 
+        /* Заполнение теней силуэта самолета */
         hangPointFlags[ PLANE_SHAPE_Y_NEG] = hangPointFlags[ PLANE_SHAPE_Y_POS] = 1;
 
+        /* Заполнение теней пусковых установок */
         hangPointFlags[ TP4_RVV_LD] = hangPointFlags[ TP1_KAB_RVP_RVV_BD]
             = hangPointFlags[ TP4_KAB_RVP_LD] = hangPointFlags[ TP9_RVV_LD]
             = hangPointFlags[ TP4_UNCONTROL_AB_NAR_LD] = hangPointFlags[ TP6_RVV_LD]
@@ -1374,10 +1423,12 @@ void koep35checkVisionAngles(
             = hangPointFlags[ TP12_KAB_RVP_RVV_BD_LD] = hangPointFlags[ TP12_UNCONTROL_AB_NAR_LD]
             = 1;
 
-        hangPointFlags[ TP4_KAB_RVP] = 1;
+        /* Заполнение теней подвешенного в данный момент оружия */
+        assignHangPointFlags( IkarBackTp, 16);
 
         /* Формула линейной интерполяции на найденном участке */
         double limitZ;
+        ThangPointShadow iHps;
         if( 150 != iYvalWholePart)
         {
             /* Не дошли до последнего значения азимута */

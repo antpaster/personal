@@ -7,5 +7,6 @@ SOURCES += main.c \
     koep35shadowZone.c
 
 HEADERS += \
-    koep35shadowZone.h
+    koep35shadowZone.h \
+    types_suo.h
 
