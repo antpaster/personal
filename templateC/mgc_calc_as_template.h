@@ -8,11 +8,14 @@
  *******************************************************************************
  */
 /*!
- ** \file  multiplication_as_template.c
+ ** \file  mgc_calc_as_template.h
  ** \brief Краткий комментарий к файлу
- **      Реализация шаблона умножения
+ **      Определение шаблона вычисления матрицы направляющих косинусов
  ** Расширенный комментарий к файлу
  */
+
+#ifndef MGC_CALC_AS_TEMPLATE_H
+#define MGC_CALC_AS_TEMPLATE_H
 
 #ifdef T
 #include <stdlib.h>
@@ -21,15 +24,28 @@
 
 #ifdef TEMPLATE_LIB
 
-void TEMPLATE( multiply, T) ( T *res, T *a, T *b, size_t size) {
-    int i;
-    T *currAddr;
-    for( i = 0; i < size; ++i) {
-        currAddr = res + i;
-        *currAddr = *( a + i) * *( b + i);
-    }
-}
+typedef enum EmgcTypes {
+    CONNECTED_TO_SPEED_CS = 0,
+    SPEED_TO_CONNECTED_CS,
+
+    HORIZONTED_TO_NORMAL_CS,
+    NORMAL_TO_CONNECTED_CS,
+
+    HORIZONTED_TO_CONNECTED_CS,
+    CONNECTED_TO_HORIZONTED_CS,
+
+    TRAJECTORY_TO_CONNECTED_CS,
+    CONNECTED_TO_TRAJECTORY_CS,
+
+    SPEED_TO_CONNECTED_CS,
+    CONNECTED_TO_SPEED_CS
+} TmgcTypes;
+
+int TEMPLATE( mgc_calc, T) ( T*, const T*, const TmgcTypes);
 
 #endif
 
 #endif
+
+#endif // MGC_CALC_AS_TEMPLATE_H
+

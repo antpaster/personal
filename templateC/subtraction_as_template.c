@@ -26,7 +26,7 @@ void TEMPLATE( subtract, T) ( T *res, T *a, T *b, size_t size) {
     T *currAddr;
     for( i = 0; i < size; ++i) {
         currAddr = res + i;
-        *currAddr = *(a + i) - *(b + i);
+        *currAddr = *( a + i) - *( b + i);
     }
 }
 

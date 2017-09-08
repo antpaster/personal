@@ -27,7 +27,7 @@ void TEMPLATE( divide, T) ( T *res, T *a, T *b, size_t size) {
     T *currAddr;
     for( i = 0; i < size; ++i) {
         currAddr = res + i;
-        *currAddr = *(a + i) / ( fabs( *(b + i)) > F_NULL ? *( b + i) : F_NULL);
+        *currAddr = *( a + i) / ( fabs( *( b + i)) > F_NULL ? *( b + i) : F_NULL);
     }
 }
 
