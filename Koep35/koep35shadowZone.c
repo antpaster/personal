@@ -1108,12 +1108,8 @@ double zLimArrKoep[ HANG_POINT_SHADOW_ALL][ NODE_POINT_COUNT_KOEP] =
     },
 };
 
+/*! Массив флагов теней на подвесках, обновляется циклически */
 uint8_t hangPointFlags[ HANG_POINT_SHADOW_ALL];
-
-void setHangPointFlag( const ThangPointShadow hps, const uint8_t value)
-{
-    hangPointFlags[ hps] = value;
-}
 
 /*! Подготовка знаменателя к делению, проверка на равенство нулю
  **************************************************************************************************/
@@ -1200,9 +1196,10 @@ uint8_t isAspRvv( const TSUO_PR_ASP asp)
  **************************************************************************************************/
 uint8_t isAspRvvBd( const TSUO_PR_ASP asp)
 {
-    if( ( eASP_190 == asp) || ( eASP_470T1 == asp) || ( eASP_470R1 == asp) || ( eASP_470P1 == asp)
-        || ( eASP_610M == asp) || ( eASP_470ET1 == asp) || ( eASP_170_1 == asp)
-        || ( eASP_470ER1 == asp) || ( eASP_470EP1 == asp) || ( eASP_610M_C == asp))
+    if( ( eASP_RVV_SD == asp) || ( eASP_190 == asp) || ( eASP_470T1 == asp) || ( eASP_470R1 == asp)
+        || ( eASP_470P1 == asp) || ( eASP_620 == asp) || ( eASP_610M == asp)
+        || ( eASP_470ET1 == asp) || ( eASP_170_1 == asp) || ( eASP_470ER1 == asp)
+        || ( eASP_470EP1 == asp) || ( eASP_610M_C == asp))
     {
         return 1;
     }
@@ -1214,8 +1211,10 @@ uint8_t isAspRvvBd( const TSUO_PR_ASP asp)
  **************************************************************************************************/
 uint8_t isAspRvp( const TSUO_PR_ASP asp)
 {
-    if( ( eASP_S_8 == asp) || ( eASP_S_8UV == asp) || ( eASP_S_13 == asp) || ( eASP_S_25 == asp)
-        || ( eASP_AB_MBD == asp) || ( eASP_AB_RBK == asp))
+    if( ( eASP_77P_AA1) || ( eASP_64) || ( eASP_77A) || ( eASP_D9M2A) || ( eASP_D9MK)
+        || ( eASP_D_7USh) || ( eASP_77PK_B1) || ( eASP_77P_BC) || ( eASP_77PK_AA1)
+        || ( eASP_77PK_B1) || ( eASP_77PK_BC) || ( eASP_63ME) || ( eASP_C_06_K) || ( eASP_C_06_Y)
+        || ( eASP_77AD) || ( eASP_65ML_P) || ( eASP_65ML_O))
     {
         return 1;
     }
@@ -1232,6 +1231,31 @@ uint8_t isAspKab( const TSUO_PR_ASP asp)
         || ( eASP_K_08B == asp) || ( eASP_K_029B == asp) || ( eASP_K_08TB == asp)
         || ( eASP_K_029TB == asp) || ( eASP_K_047 == asp) || ( eASP_K_310A == asp)
         || ( eASP_K_07M == asp) || ( eASP_K_01LG == asp) || ( eASP_K_021M == asp))
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+/*! Функция определения принадлежности данного АСП к классу Неуправляемых НАР
+ **************************************************************************************************/
+uint8_t isAspUncontrolNar( const TSUO_PR_ASP asp)
+{
+    if( ( eASP_S_8 == asp) || ( eASP_S_8UV == asp) || ( eASP_S_13 == asp) || ( eASP_S_25 == asp))
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+/*! Функция определения принадлежности данного АСП к классу Неуправляемых АБ
+ **************************************************************************************************/
+uint8_t isAspUncontrolAb( const TSUO_PR_ASP asp)
+{
+    if( ( eASP_AB_MBD == asp) || ( eASP_AB2_MBD == asp) || ( eASP_AB_RBK == asp)
+        || ( eASP_AB2_RBK == asp))
     {
         return 1;
     }
@@ -1267,7 +1291,7 @@ void assignHangPointFlags( const TIKAR_BACK_TP *tbt, const uint8_t tpCount)
             hangPointFlags[ TP4_KAB_RVP] = 1;
         }
 
-        if( ( 0 == i)/* && isAspUncontrolAb( ( tbt + i)->Priz_ASP)*/)
+        if( ( 0 == i) && isAspUncontrolAb( ( tbt + i)->Priz_ASP))
         {
             hangPointFlags[ TP1_UNCONTROL_AB] = 1;
         }
@@ -1277,8 +1301,8 @@ void assignHangPointFlags( const TIKAR_BACK_TP *tbt, const uint8_t tpCount)
             hangPointFlags[ TP9_RVV] = 1;
         }
 
-        if( ( 3 == i)/* && isAspUncontrolAb( ( tbt + i)->Priz_ASP)
-           && isAspUncontrolNar( ( tbt + i)->Priz_ASP)*/)
+        if( ( 3 == i) && isAspUncontrolAb( ( tbt + i)->Priz_ASP)
+           && isAspUncontrolNar( ( tbt + i)->Priz_ASP))
         {
             hangPointFlags[ TP4_UNCONTROL_AB_NAR] = 1;
         }
@@ -1305,13 +1329,13 @@ void assignHangPointFlags( const TIKAR_BACK_TP *tbt, const uint8_t tpCount)
             hangPointFlags[ TP12_KAB_RVP_RVV_BD] = 1;
         }
 
-        if( ( 11 == i)/* && isAspUncontrolAb( ( tbt + i)->Priz_ASP)
-           && isAspUncontrolNar( ( tbt + i)->Priz_ASP)*/)
+        if( ( 11 == i) && isAspUncontrolAb( ( tbt + i)->Priz_ASP)
+           && isAspUncontrolNar( ( tbt + i)->Priz_ASP))
         {
             hangPointFlags[ TP12_UNCONTROL_AB_NAR] = 1;
         }
 
-        if( ( 7 == i)/* && ( eASP_L265M10 == ( tbt + i)->Priz_ASP)*/)
+        if( ( 7 == i) && ( eASP_L265M10 == ( tbt + i)->Priz_ASP))
         {
             hangPointFlags[ TP8_L265M10] = 1;
         }
@@ -1423,8 +1447,12 @@ void koep35checkVisionAngles(
             = hangPointFlags[ TP12_KAB_RVP_RVV_BD_LD] = hangPointFlags[ TP12_UNCONTROL_AB_NAR_LD]
             = 1;
 
-        /* Заполнение теней подвешенного в данный момент оружия */
-        assignHangPointFlags( IkarBackTp, 16);
+        if( IkarBackSum.Pit_UR_VP)
+        {
+            /* Заполнение теней подвешенного в данный момент оружия в случае наличия сигнала от
+             * СУО */
+            assignHangPointFlags( IkarBackTp, cOneBoardSideShadowsCount);
+        }
 
         /* Формула линейной интерполяции на найденном участке */
         double limitZ;
@@ -1511,8 +1539,8 @@ void koep35checkVisionAngles(
             limitZ = minVal( borderYvalArr, cOneBoardSideShadowsCount);
         }
 
-        //        double limitZ = arrValLinearInterpol( yLocal, yValArr, cZlimArrKoep[ iCurrShape],
-        //            NODE_POINT_COUNT_KOEP);
+//        double limitZ = arrValLinearInterpol( yLocal, yValArr, cZlimArrKoep[ iCurrShape],
+//            NODE_POINT_COUNT_KOEP);
 
         if( zLocal >= limitZ)
         {

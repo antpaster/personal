@@ -33,12 +33,17 @@ typedef enum 				// Признаки типов АСП
     eASP_S_25		 = 0x02,			// С-25		[только 35]
     eASP_S_8         = 0x04,			// С-8
     eASP_AB_MBD      = 0x05,			// АБ на МБД
+    eASP_AB2_MBD     = 0x06,			// АБ на МБД код 2
 	eASP_S_13        = 0x07,			// С-13
 	eASP_AB_RBK      = 0x08,			// АБ РБК
+	eASP_AB2_RBK     = 0x09,			// АБ РБК код 2
     eASP_K_07_05_07U = 0x0B,            // К-07, (К-05, К-07У)
     eASP_K_022       = 0x19,			// К-022
     eASP_K_05        = 0x1B,			// К-05**
     eASP_77P_AA1     = 0x21,            // 77П (АА?)
+
+    eASP_RVV_SD      = 0x23,			// 270			[только 35]
+
     eASP_190         = 0x24,			// 190			[только 35]
 	eASP_470T1       = 0x25,			// 470Т
     eASP_72E         = 0x29,			// 72 (72У)
@@ -46,15 +51,16 @@ typedef enum 				// Признаки типов АСП
 	eASP_470R1       = 0x2E,			// 470Р1
     eASP_470P1       = 0x2F,			// 470П1		[только 35]
     eASP_64          = 0x30,			// 64
-    eASP_610M        = 0x33,			// 610M		[только 35С]
+    eASP_620         = 0x31,			// РВВ-БД		[только 35]
+    eASP_610M        = 0x33,			// 610M			[только 35С]
     eASP_77A         = 0x34,			// 77А
     eASP_470ET1      = 0x35,			// 470ЭТ 
-    eASP_170_1       = 0x36,			// 170-1* (РВВ-СД)
+    eASP_170_1       = 0x36,			// 170-1* 
     eASP_K_07U       = 0x3B,			// К-07У**
 	eASP_470ER1      = 0x3E,			// 470ЭР	
 	eASP_470EP1      = 0x3F,			// 470ЭП
 	eASP_D9M2A       = 0x44,			// Д9М2А
-	eASP_D9MK        = 0x45,			// Д9МК		[только 35]
+	eASP_D9MK        = 0x45,			// Д9МК			[только 35]
 	eASP_PTB         = 0x46,			// ПТБ
 	eASP_195PLD      = 0x4A,			// 195ПЛД		[только 35]
     eASP_K_01S       = 0x50,			// К-01С*
@@ -72,8 +78,8 @@ typedef enum 				// Признаки типов АСП
     eASP_63ME       = 0x70,             // 63M/63МЕ
     eASP_50         = 0x78,             // изд.50
     eASP_50_1       = 0x79,             // изд.50-1
-    eASP_K_06_K     = 0x7A,             // П-06(K)
-    eASP_K_06_Y     = 0x7B,             // П-06(У)
+    eASP_P_06_K     = 0x7A,             // П-06(K)
+    eASP_P_06_Y     = 0x7B,             // П-06(У)
     eASP_C_06_K     = 0x7C,             // C-06(K)
     eASP_C_06_Y     = 0x7D,             // C-06(У)
     eASP_810        = 0x26,             // 810
@@ -363,6 +369,46 @@ typedef struct TIKAR_BACK_SUM
 	unsigned char IKAR_0_PUS_12TP;		// 0 ПУС ТП12	
 	unsigned Var_Smen;					// Вариант смены
 	unsigned char Ust;					// Юстировка	
+
+	unsigned char UV_Activ;				/* Актив */
+	unsigned char UV_Allowed_Disp;		/* Разрешение на отстрел */
+	unsigned char UV_Auto;				/* Автомат */
+	unsigned char UV_CritPPI;			/* Критическое количество ППИ */
+	unsigned char UV_CritPPL;			/* Критическое количество ППЛ */
+	unsigned char UV_CritPPR;			/* Критическое количество ППР */
+	unsigned UV_Dispensing;				/* Идет отстрел */
+	unsigned char UV_Dost_Record;		/* Достов-ть записи */
+	unsigned char UV_Ispr;				/* Испр. УВ */
+	unsigned UV_Kol_P_Type10;			/* Количество патронов типа 10 */
+	unsigned UV_Kol_P_Type11;			/* Количество патронов типа 11 */
+	unsigned UV_Kol_P_Type2;			/* Количество патронов типа 2 */
+	unsigned UV_Kol_P_Type22;			/* Количество патронов типа 22 */
+	unsigned UV_Kol_P_Type3;			/* Количество патронов типа 3 */
+	unsigned UV_Kol_P_Type31;			/* Количество патронов типа 31 */
+	unsigned UV_Kol_P_Type32;			/* Количество патронов типа 32 */
+	unsigned UV_Kol_P_Type33;			/* Количество патронов типа 33 */
+	unsigned UV_Kol_P_Type35;			/* Количество патронов типа 35 */
+	unsigned UV_Kol_P_Type7;			/* Количество патронов типа 7 */
+	unsigned UV_Kol_P_Type8;			/* Количество патронов типа 8 */
+	unsigned UV_Mode;					/* Режим работы УВ */
+	unsigned char UV_NK;				/* НК УВ */
+	unsigned UV_N_Prog_Otstrela;		/* Номер программы отстрела */
+	unsigned UV_N_Zap_Mas;				/* Номер записанного массива */
+	unsigned char UV_Otk_Sv_BV_1_IKAR;	/* Отказ св. БВ1-ИКАР */
+	unsigned char UV_Otk_Sv_BV_2_IKAR;	/* Отказ св. БВ2-ИКАР */
+	unsigned char UV_Otk_Sv_BV_3_IKAR;	/* Отказ св. БВ3-ИКАР */
+	unsigned char UV_Otk_Sv_BV_4_IKAR;	/* Отказ св. БВ4-ИКАР */
+	unsigned char UV_Otk_Sv_BV_5_IKAR;	/* Отказ св. БВ5-ИКАР */
+	unsigned char UV_Otk_Sv_BV_6_IKAR;	/* Отказ св. БВ6-ИКАР */
+	unsigned UV_QuantityPPI;			/* Количество ППИ */
+	unsigned UV_QuantityPPL;			/* Количество ППЛ */
+	unsigned UV_QuantityPPR;			/* Количество ППР */
+	unsigned char UV_RBR;				/* РБР */
+	unsigned char UV_Ready_to_Record;	/* Готов к записи */
+	unsigned char UV_Record;			/* Идет запись */
+	unsigned char UV_Ruchnoi;			/* Ручной */
+	unsigned char UV_Sbros_DO_LTC;		/* Сброс ДО/ЛТЦ */
+	unsigned UV_Sost_P_BV[84];
 } TIKAR_BACK_SUM;
 
 // Массивы прямых энергетических сигналов (из БЦВМ в СУО) ----------------------
@@ -486,7 +532,7 @@ typedef struct TIKAR_CTRL_SUM
 	char Zah_PRR_12TP;					// Захват ПРР 12ТП				
 	unsigned n_1_vyb_TP_PRR;			// № 1-ой выбранной ТП для ПРР	
 	unsigned n_2_vyb_TP_PRR;			// № 2-ой выбранной ТП для ПРР	
-	unsigned n_3_vyb_TP_PRR;			// № 3-ой выбранной ТП для ПРР	
+	unsigned n_3_vyb_TP_PRR;			// № 3-й выбранной ТП для ПРР	
 	unsigned n_4_vyb_TP_PRR;			// № 4-ой выбранной ТП для ПРР	
 
 	unsigned char Smen_GSN_1;			// Смена ГСН-1
@@ -570,7 +616,7 @@ typedef struct TIKAR_CTRL_SUM
 	unsigned char PRR_2_po_2_ts;	  // ПРР по 2 по 2 ц
 	unsigned N_1_Vbr_TP_PRR;          // номер 1-ой выбранной ТР для ПРР
 	unsigned N_2_Vbr_TP_PRR;          // номер 2-ой выбранной ТР для ПРР
-	unsigned N_3_Vbr_TP_PRR;          // номер 3-ой выбранной ТР для ПРР
+	unsigned N_3_Vbr_TP_PRR;          // номер 3-й выбранной ТР для ПРР
 	unsigned N_4_Vbr_TP_PRR;          // номер 4-ой выбранной ТР для ПРР
 	unsigned char AKO_V;              // АКО-В
 
