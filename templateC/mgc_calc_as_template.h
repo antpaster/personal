@@ -17,7 +17,7 @@
 #ifndef MGC_CALC_AS_TEMPLATE_H
 #define MGC_CALC_AS_TEMPLATE_H
 
-#ifdef T
+//#ifdef T
 #include <stdlib.h>
 
 #include "templates.h"
@@ -29,23 +29,32 @@ typedef enum EmgcTypes {
     SPEED_TO_CONNECTED_CS,
 
     HORIZONTED_TO_NORMAL_CS,
-    NORMAL_TO_CONNECTED_CS,
+    NORMAL_TO_HORIZONTED_CS,
 
     HORIZONTED_TO_CONNECTED_CS,
     CONNECTED_TO_HORIZONTED_CS,
+
+    NORMAL_TO_CONNECTED_CS,
+    CONNECTED_TO_NORMAL_CS,
 
     TRAJECTORY_TO_CONNECTED_CS,
     CONNECTED_TO_TRAJECTORY_CS,
 
     SPEED_TO_CONNECTED_CS,
-    CONNECTED_TO_SPEED_CS
+    CONNECTED_TO_SPEED_CS,
+
+    CONNECTED_TO_BEAM_Z_UP_Y_LEFT_CS,
+    BEAM_Z_UP_Y_LEFT_TO_CONNECTED_CS,
+
+    CONNECTED_TO_BEAM_Y_LEFT_Z_UP_CS,
+    BEAM_Y_LEFT_Z_UP_TO_CONNECTED_CS
 } TmgcTypes;
 
 int TEMPLATE( mgc_calc, T) ( T*, const T*, const TmgcTypes);
 
 #endif
 
-#endif
+//#endif
 
 #endif // MGC_CALC_AS_TEMPLATE_H
 

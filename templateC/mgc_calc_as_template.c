@@ -26,23 +26,123 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
 
     if( res && angles) {
         switch( mt) {
-        case CONNECTED_TO_SPEED_CS:
-            break;
+        case CONNECTED_TO_SPEED_CS: {
+            double attackSin = sin( *angles);
+            double attackCos = cos( *angles);
+            double slideSin = sin( *( angles + 1));
+            double slideCos = cos( *( angles + 1));
 
-        case SPEED_TO_CONNECTED_CS:
-            break;
+            double *currAddr = res;
+            *currAddr = attackCos * slideCos;
+            currAddr++;
+            *currAddr = -attackSin * slideCos;
+            currAddr++;
+            *currAddr = slideSin;
 
-        case HORIZONTED_TO_NORMAL_CS:
-            break;
+            currAddr++;
+            *currAddr = attackSin;
+            currAddr++;
+            *currAddr = attackCos;
+            currAddr++;
+            *currAddr = 0.0;
 
-        case NORMAL_TO_CONNECTED_CS:
-            break;
+            currAddr++;
+            *currAddr = -attackCos * slideSin;
+            currAddr++;
+            *currAddr = attackSin * slideSin;
+            currAddr++;
+            *currAddr = slideCos;
 
-        case HORIZONTED_TO_CONNECTED_CS:
-            break;
+            return 0;
+        }
 
-        case CONNECTED_TO_HORIZONTED_CS:
-        {
+        case SPEED_TO_CONNECTED_CS: {
+            double attackSin = sin( *angles);
+            double attackCos = cos( *angles);
+            double slideSin = sin( *( angles + 1));
+            double slideCos = cos( *( angles + 1));
+
+            double *currAddr = res;
+            *currAddr = attackCos * slideCos;
+            currAddr++;
+            *currAddr = attackSin;
+            currAddr++;
+            *currAddr = -attackCos * slideSin;
+
+            currAddr++;
+            *currAddr = -attackSin * slideCos;
+            currAddr++;
+            *currAddr = attackCos;
+            currAddr++;
+            *currAddr = attackSin * slideSin;
+
+            currAddr++;
+            *currAddr = slideSin;
+            currAddr++;
+            *currAddr = 0.0;
+            currAddr++;
+            *currAddr = slideCos;
+
+            return 0;
+        }
+
+        case HORIZONTED_TO_NORMAL_CS: {
+            double courseSin = sin( *angles);
+            double courseCos = cos( *angles);
+
+            double *currAddr = res;
+            *currAddr = courseCos;
+            currAddr++;
+            *currAddr = 0.0;
+            currAddr++;
+            *currAddr = -courseSin;
+
+            currAddr++;
+            *currAddr = 0.0;
+            currAddr++;
+            *currAddr = 1.0;
+            currAddr++;
+            *currAddr = 0.0;
+
+            currAddr++;
+            *currAddr = courseSin;
+            currAddr++;
+            *currAddr = 0.0;
+            currAddr++;
+            *currAddr = courseCos;
+
+            return 0;
+        }
+
+        case NORMAL_TO_CONNECTED_CS: {
+            double courseSin = sin( *angles);
+            double courseCos = cos( *angles);
+
+            double *currAddr = res;
+            *currAddr = courseCos;
+            currAddr++;
+            *currAddr = 0.0;
+            currAddr++;
+            *currAddr = courseSin;
+
+            currAddr++;
+            *currAddr = 0.0;
+            currAddr++;
+            *currAddr = 1.0;
+            currAddr++;
+            *currAddr = 0.0;
+
+            currAddr++;
+            *currAddr = -courseSin;
+            currAddr++;
+            *currAddr = 0.0;
+            currAddr++;
+            *currAddr = courseCos;
+
+            return 0;
+        }
+
+        case HORIZONTED_TO_CONNECTED_CS: {
             double pitchSin = sin( *angles);
             double pitchCos = cos( *angles);
             double rollSin = sin( *( angles + 1));
@@ -50,38 +150,249 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
 
             double *currAddr = res;
             *currAddr = pitchCos;
-            currAddr = res + 1;
+            currAddr++;
+            *currAddr = pitchSin;
+            currAddr++;
+            *currAddr = 0.0;
+
+            currAddr++;
             *currAddr = -pitchSin * rollCos;
-            currAddr = res + 2;
+            currAddr++;
+            *currAddr = pitchCos * rollCos;
+            currAddr++;
+            *currAddr = rollSin;
+
+            currAddr++;
+            *currAddr = pitchSin * rollSin;
+            currAddr++;
+            *currAddr = -pitchCos * rollSin;
+            currAddr++;
+            *currAddr = rollCos;
+
+            return 0;
+        }
+
+        case CONNECTED_TO_HORIZONTED_CS: {
+            double pitchSin = sin( *angles);
+            double pitchCos = cos( *angles);
+            double rollSin = sin( *( angles + 1));
+            double rollCos = cos( *( angles + 1));
+
+            double *currAddr = res;
+            *currAddr = pitchCos;
+            currAddr++;
+            *currAddr = -pitchSin * rollCos;
+            currAddr++;
             *currAddr = pitchSin * rollSin;
 
-            currAddr = res + 3;
+            currAddr++;
             *currAddr = pitchSin;
-            currAddr = res + 4;
+            currAddr++;
             *currAddr = pitchCos * rollCos;
-            currAddr = res + 5;
+            currAddr++;
             *currAddr = -pitchCos * rollSin;
 
-            currAddr = res + 6;
+            currAddr++;
             *currAddr = 0.0;
-            currAddr = res + 7;
+            currAddr++;
             *currAddr = rollSin;
-            currAddr = res + 8;
+            currAddr++;
             *currAddr = rollCos;
+
+            return 0;
         }
-            break;
 
-        case TRAJECTORY_TO_CONNECTED_CS:
-            break;
+        case NORMAL_TO_CONNECTED_CS: {
+            double pitchSin = sin( *angles);
+            double pitchCos = cos( *angles);
+            double courseSin = sin( *( angles + 1));
+            double courseCos = cos( *( angles + 1));
+            double rollSin = sin( *( angles + 2));
+            double rollCos = cos( *( angles + 2));
 
-        case CONNECTED_TO_TRAJECTORY_CS:
-            break;
+            double *currAddr = res;
+            *currAddr = courseCos * pitchCos;
+            currAddr++;
+            *currAddr = pitchSin;
+            currAddr++;
+            *currAddr = courseSin * pitchCos;
 
-        case SPEED_TO_CONNECTED_CS:
-            break;
+            currAddr++;
+            *currAddr = -courseCos * pitchSin * rollCos - courseSin * rollSin;
+            currAddr++;
+            *currAddr = pitchCos * rollCos;
+            currAddr++;
+            *currAddr = -courseSin * pitchSin * rollCos + courseCos * rollSin;
 
-        case CONNECTED_TO_SPEED_CS:
-            break;
+            currAddr++;
+            *currAddr = courseCos * pitchSin * rollSin - courseSin * rollCos;
+            currAddr++;
+            *currAddr = -pitchCos * rollSin;
+            currAddr++;
+            *currAddr = courseSin * pitchSin * rollSin + courseCos * rollCos;
+
+            return 0;
+        }
+
+        case CONNECTED_TO_NORMAL_CS: {
+            double pitchSin = sin( *angles);
+            double pitchCos = cos( *angles);
+            double courseSin = sin( *( angles + 1));
+            double courseCos = cos( *( angles + 1));
+            double rollSin = sin( *( angles + 2));
+            double rollCos = cos( *( angles + 2));
+
+            double *currAddr = res;
+            *currAddr = courseCos * pitchCos;
+            currAddr++;
+            *currAddr = -courseCos * pitchSin * rollCos - courseSin * rollSin;
+            currAddr++;
+            *currAddr = courseCos * pitchSin * rollSin - courseSin * rollCos;
+
+            currAddr++;
+            *currAddr = pitchSin;
+            currAddr++;
+            *currAddr = pitchCos * rollCos;
+            currAddr++;
+            *currAddr = -pitchCos * rollSin;
+
+            currAddr++;
+            *currAddr = courseSin * pitchCos;
+            currAddr++;
+            *currAddr = -courseSin * pitchSin * rollCos + courseCos * rollSin;
+            currAddr++;
+            *currAddr = courseSin * pitchSin * rollSin + courseCos * rollCos;
+
+            return 0;
+        }
+
+        case TRAJECTORY_TO_CONNECTED_CS: {
+            return 0;
+        }
+
+        case CONNECTED_TO_TRAJECTORY_CS: {
+            return 0;
+        }
+
+        case CONNECTED_TO_BEAM_Z_UP_Y_LEFT_CS: {
+            double phiYsin = sin( *angles);
+            double phiYcos = cos( *angles);
+            double phiZsin = sin( *( angles + 1));
+            double phiZcos = cos( *( angles + 1));
+
+            double *currAddr = res;
+            *currAddr = phiZcos * phiYcos;
+            currAddr++;
+            *currAddr = phiZsin * phiYcos;
+            currAddr++;
+            *currAddr = -phiYsin;
+
+            currAddr++;
+            *currAddr = -phiZsin;
+            currAddr++;
+            *currAddr = phiZcos;
+            currAddr++;
+            *currAddr = 0.0;
+
+            currAddr++;
+            *currAddr = phiZcos * phiYsin;
+            currAddr++;
+            *currAddr = phiZsin * phiYsin;
+            currAddr++;
+            *currAddr = phiYcos;
+
+            return 0;
+        }
+
+        case BEAM_Z_UP_Y_LEFT_TO_CONNECTED_CS: {
+            double phiYsin = sin( *angles);
+            double phiYcos = cos( *angles);
+            double phiZsin = sin( *( angles + 1));
+            double phiZcos = cos( *( angles + 1));
+
+            double *currAddr = res;
+            *currAddr = phiZcos * phiYcos;
+            currAddr++;
+            *currAddr = -phiZsin;
+            currAddr++;
+            *currAddr = phiZcos * phiYsin;
+
+            currAddr++;
+            *currAddr = phiZsin * phiYcos;
+            currAddr++;
+            *currAddr = phiZcos;
+            currAddr++;
+            *currAddr = phiZsin * phiYsin;
+
+            currAddr++;
+            *currAddr = -phiYsin;
+            currAddr++;
+            *currAddr = 0.0;
+            currAddr++;
+            *currAddr = phiYcos;
+
+            return 0;
+        }
+
+        case CONNECTED_TO_BEAM_Y_LEFT_Z_UP_CS: {
+            double phiYsin = sin( *angles);
+            double phiYcos = cos( *angles);
+            double phiZsin = sin( *( angles + 1));
+            double phiZcos = cos( *( angles + 1));
+
+            double *currAddr = res;
+            *currAddr = phiYcos * phiZcos;
+            currAddr++;
+            *currAddr = phiZsin;
+            currAddr++;
+            *currAddr = -phiYsin * phiZcos;
+
+            currAddr++;
+            *currAddr = -phiYcos * phiZsin;
+            currAddr++;
+            *currAddr = phiZcos;
+            currAddr++;
+            *currAddr = phiYsin * phiZsin;
+
+            currAddr++;
+            *currAddr = phiYsin;
+            currAddr++;
+            *currAddr = 0.0;
+            currAddr++;
+            *currAddr = phiYcos;
+
+            return 0;
+        }
+
+        case BEAM_Y_LEFT_Z_UP_TO_CONNECTED_CS: {
+            double phiYsin = sin( *angles);
+            double phiYcos = cos( *angles);
+            double phiZsin = sin( *( angles + 1));
+            double phiZcos = cos( *( angles + 1));
+
+            double *currAddr = res;
+            *currAddr = phiYcos * phiZcos;
+            currAddr++;
+            *currAddr = -phiYcos * phiZsin;
+            currAddr++;
+            *currAddr = phiYsin;
+
+            currAddr++;
+            *currAddr = phiZsin;
+            currAddr++;
+            *currAddr = phiZcos;
+            currAddr++;
+            *currAddr = 0.0;
+
+            currAddr++;
+            *currAddr = -phiYsin * phiZcos;
+            currAddr++;
+            *currAddr = phiYsin * phiZsin;
+            currAddr++;
+            *currAddr = phiYcos;
+
+            return 0;
+        }
 
         default:
             return 1;
