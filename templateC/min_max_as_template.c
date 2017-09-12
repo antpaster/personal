@@ -24,17 +24,23 @@
 
 #ifdef TEMPLATE_LIB
 
-T TEMPLATE( min_max, T)( T *a, size_t size, uint8_t maxFlag) {
-    int i;
-    T res = *a;
+int TEMPLATE( min_max, T)( T *result, const T *a, const size_t size, const uint8_t maxFlag) {
+    if( result && a) {
+        int i;
+        T tempRes = *a;
 
-    for( i = 1; i < size; ++i) {
-        if( ( ( maxFlag) ? ( res < *( a + i)) : ( res > *( a + i)))) {
-            res = *( a + i);
+        for( i = 1; i < size; ++i) {
+            if( ( ( maxFlag) ? ( tempRes < *( a + i)) : ( tempRes > *( a + i)))) {
+                tempRes = *( a + i);
+            }
         }
+
+        *result = tempRes;
+
+        return 0;
     }
 
-    return res;
+    return 1;
 }
 
 #endif

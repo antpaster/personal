@@ -3,7 +3,7 @@
 #include "templates.h"
 
 int main( ) {
-    int ai[ 3] = { 0, 2, 3};
+    int ai[ 3] = { 0, 4, 3};
     int bi[ 3] = { 0, 5, 6};
     int iRes[ 3];
 
@@ -11,13 +11,16 @@ int main( ) {
     float bf[ 3] = { 1.0, 2.5, 3.5};
     float fRes[ 3];
 
-    int iMin = TEMPLATE( min_max, int)( bi, 3, 0);
+    int iMin = 5;
+    TEMPLATE( min_max, int)( &iMin, bi, 3, 0);
     printf( "Min int = %d\n\n", iMin);
 
     double dA[ 3] = { 2.0, -1.0, 6.5};
-    double dMax = TEMPLATE( min_max, double)( dA, 3, 1);
+    double dMax = 0.0;
+    TEMPLATE( min_max, double)( &dMax, dA, 3, 1);
     printf( "Max double = %f\n\n", dMax);
 
+//    double dAcopy[ 3] = { 2.0, -1.0, 6.5};
     TEMPLATE( insert_sort, double)( dA, 3, 1);
     int i;
     for( i = 0; i < 3; ++i) {
@@ -62,11 +65,17 @@ int main( ) {
 
     printf( "\nDivision of two double variables: %f\n", dRes);
 
-
+//    float bfCopy[ 3] = { 1.0, 2.5, 3.5};
     TEMPLATE( insert_sort, float)( bf, 3, 0);
     printf( "\n");
     for( i = 0; i < 3; ++i) {
         printf( "bf[ %d] = %d\n", i, bf[ i]);
+    }
+
+    TEMPLATE( insert_sort, int)( ai, 3, 0);
+    printf( "\n");
+    for( i = 0; i < 3; ++i) {
+        printf( "ai[ %d] = %d\n", i, *( ai + i));
     }
 
     return 0;

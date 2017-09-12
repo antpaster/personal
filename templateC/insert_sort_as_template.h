@@ -25,8 +25,8 @@
 
 #ifdef TEMPLATE_LIB
 
-//int TEMPLATE( insert_sort, T)( T*, T*, size_t, uint8_t);
-int TEMPLATE( insert_sort, T)( T*, size_t, uint8_t);
+int TEMPLATE( insert_sort, T)( T*, const size_t, const uint8_t);
+
 #endif
 
 #endif

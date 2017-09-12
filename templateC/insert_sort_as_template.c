@@ -22,52 +22,64 @@
 
 #ifdef TEMPLATE_LIB
 
-//int TEMPLATE( insert_sort, T) ( T *res, T *a, size_t size, uint8_t ascendingFlag) {
-int TEMPLATE( insert_sort, T) ( T *res, size_t size, uint8_t ascendingFlag) {
-    int result = 1;
-
-    if( res/* && a*/) {
+int TEMPLATE( insert_sort, T) ( T *result, const size_t size,
+    const uint8_t ascendingFlag) {
+    if( result) {
+        T temp;
         int i, j;
 
-//        memmove( res, a, size * sizeof( T));
-
 //        T *currAddr;
-//        T temp;
 //        for( i = 0; i < size; ++i) {
-//            temp = *res;
+//            temp = *( result + i);
 
 //            for( j = i - 1; j >= 0
-////                && ( ( ascendingFlag) ? ( temp > *( res + j)) : ( temp < *( res + j))); j--) {
-//                 && ( temp > *( res + j)); j--) {
-//                currAddr = res + j + 1;
-//                *currAddr = *( res + j);
-
-//                --res;
+//                && ( ( ascendingFlag) ? ( temp < *( result + j)) : ( temp > *( result + j))); --j) {
+////                 && ( temp > *( result + j)); --j) {
+//                currAddr = result + j + 1;
+//                currAddr = result + j;
 //            }
 
-//            currAddr = res + j + 1;
+//            currAddr = result + j + 1;
 //            *currAddr = temp;
-
-//            ++res;
 //        }
 
-        T temp;
+
+//        T *currAddr;
+//        for( i = 0; i < size; ++i) {
+//            temp = *result;
+
+//            result += ( i - 1 >= 0) ? i - 1 : 0;
+//            for( j = i - 1; j >= 0
+//                && ( ( ascendingFlag) ? ( temp < *result) : ( temp > *result)); --j) {
+////                 && ( temp > *result); --j) {
+//                currAddr = result + 1;
+//                currAddr = result;
+
+//                --result;
+//            }
+
+//            currAddr = result + j + 1;
+//            *currAddr = temp;
+
+//            ++result;
+//        }
+
+
         for( i = 0; i < size; ++i) {
-            temp = res[ i];
+            temp = result[ i];
 
             for( j = i - 1; j >= 0
-//                && ( ( ascendingFlag) ? ( temp > res[ j]) : ( temp < res[ j])); j--) {
-                && ( temp > res[ j]); --j) {
-                res[ j + 1] = res[ j];
+                && ( ( ascendingFlag) ? ( temp < result[ j]) : ( temp > result[ j])); --j) {
+                result[ j + 1] = result[ j];
             }
 
-            temp = res[ j + 1];
+            result[ j + 1] = temp;
         }
 
-        result = 0;
+        return 0;
     }
 
-    return result;
+    return 1;
 }
 
 #endif

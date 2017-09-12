@@ -25,7 +25,7 @@
 
 #ifdef TEMPLATE_LIB
 
-T TEMPLATE( min_max, T) ( T*, size_t, uint8_t);
+int TEMPLATE( min_max, T)( T*, const T*, const size_t, const uint8_t);
 
 #endif
 

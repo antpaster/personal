@@ -114,7 +114,7 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
             return 0;
         }
 
-        case NORMAL_TO_CONNECTED_CS: {
+        case NORMAL_TO_HORIZONTED_CS: {
             T courseSin = sin( *angles);
             T courseCos = cos( *angles);
 
