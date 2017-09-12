@@ -16,7 +16,8 @@ SOURCES += main.c \
     min_max_as_template.c \
     all_possible_insert_sorts.c \
     insert_sort_as_template.c \
-    mgc_calc_as_template.c
+    mgc_calc_as_template.c \
+    all_possible_mgc_calcs.c
 
 HEADERS += \
     all_possible_sums.h \
@@ -32,5 +33,6 @@ HEADERS += \
     min_max_as_template.h \
     all_possible_insert_sorts.h \
     insert_sort_as_template.h \
-    mgc_calc_as_template.h
+    mgc_calc_as_template.h \
+    all_possible_mgc_calcs.h
 

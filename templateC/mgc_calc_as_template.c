@@ -14,7 +14,7 @@
  ** Расширенный комментарий к файлу
  */
 
-//#ifdef T
+#ifdef T
 #include <stdlib.h>
 #include <math.h>
 
@@ -27,12 +27,12 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
     if( res && angles) {
         switch( mt) {
         case CONNECTED_TO_SPEED_CS: {
-            double attackSin = sin( *angles);
-            double attackCos = cos( *angles);
-            double slideSin = sin( *( angles + 1));
-            double slideCos = cos( *( angles + 1));
+            T attackSin = sin( *angles);
+            T attackCos = cos( *angles);
+            T slideSin = sin( *( angles + 1));
+            T slideCos = cos( *( angles + 1));
 
-            double *currAddr = res;
+            T *currAddr = res;
             *currAddr = attackCos * slideCos;
             currAddr++;
             *currAddr = -attackSin * slideCos;
@@ -57,12 +57,12 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
         }
 
         case SPEED_TO_CONNECTED_CS: {
-            double attackSin = sin( *angles);
-            double attackCos = cos( *angles);
-            double slideSin = sin( *( angles + 1));
-            double slideCos = cos( *( angles + 1));
+            T attackSin = sin( *angles);
+            T attackCos = cos( *angles);
+            T slideSin = sin( *( angles + 1));
+            T slideCos = cos( *( angles + 1));
 
-            double *currAddr = res;
+            T *currAddr = res;
             *currAddr = attackCos * slideCos;
             currAddr++;
             *currAddr = attackSin;
@@ -87,10 +87,10 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
         }
 
         case HORIZONTED_TO_NORMAL_CS: {
-            double courseSin = sin( *angles);
-            double courseCos = cos( *angles);
+            T courseSin = sin( *angles);
+            T courseCos = cos( *angles);
 
-            double *currAddr = res;
+            T *currAddr = res;
             *currAddr = courseCos;
             currAddr++;
             *currAddr = 0.0;
@@ -115,10 +115,10 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
         }
 
         case NORMAL_TO_CONNECTED_CS: {
-            double courseSin = sin( *angles);
-            double courseCos = cos( *angles);
+            T courseSin = sin( *angles);
+            T courseCos = cos( *angles);
 
-            double *currAddr = res;
+            T *currAddr = res;
             *currAddr = courseCos;
             currAddr++;
             *currAddr = 0.0;
@@ -143,12 +143,12 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
         }
 
         case HORIZONTED_TO_CONNECTED_CS: {
-            double pitchSin = sin( *angles);
-            double pitchCos = cos( *angles);
-            double rollSin = sin( *( angles + 1));
-            double rollCos = cos( *( angles + 1));
+            T pitchSin = sin( *angles);
+            T pitchCos = cos( *angles);
+            T rollSin = sin( *( angles + 1));
+            T rollCos = cos( *( angles + 1));
 
-            double *currAddr = res;
+            T *currAddr = res;
             *currAddr = pitchCos;
             currAddr++;
             *currAddr = pitchSin;
@@ -173,12 +173,12 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
         }
 
         case CONNECTED_TO_HORIZONTED_CS: {
-            double pitchSin = sin( *angles);
-            double pitchCos = cos( *angles);
-            double rollSin = sin( *( angles + 1));
-            double rollCos = cos( *( angles + 1));
+            T pitchSin = sin( *angles);
+            T pitchCos = cos( *angles);
+            T rollSin = sin( *( angles + 1));
+            T rollCos = cos( *( angles + 1));
 
-            double *currAddr = res;
+            T *currAddr = res;
             *currAddr = pitchCos;
             currAddr++;
             *currAddr = -pitchSin * rollCos;
@@ -203,14 +203,14 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
         }
 
         case NORMAL_TO_CONNECTED_CS: {
-            double pitchSin = sin( *angles);
-            double pitchCos = cos( *angles);
-            double courseSin = sin( *( angles + 1));
-            double courseCos = cos( *( angles + 1));
-            double rollSin = sin( *( angles + 2));
-            double rollCos = cos( *( angles + 2));
+            T pitchSin = sin( *angles);
+            T pitchCos = cos( *angles);
+            T courseSin = sin( *( angles + 1));
+            T courseCos = cos( *( angles + 1));
+            T rollSin = sin( *( angles + 2));
+            T rollCos = cos( *( angles + 2));
 
-            double *currAddr = res;
+            T *currAddr = res;
             *currAddr = courseCos * pitchCos;
             currAddr++;
             *currAddr = pitchSin;
@@ -235,14 +235,14 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
         }
 
         case CONNECTED_TO_NORMAL_CS: {
-            double pitchSin = sin( *angles);
-            double pitchCos = cos( *angles);
-            double courseSin = sin( *( angles + 1));
-            double courseCos = cos( *( angles + 1));
-            double rollSin = sin( *( angles + 2));
-            double rollCos = cos( *( angles + 2));
+            T pitchSin = sin( *angles);
+            T pitchCos = cos( *angles);
+            T courseSin = sin( *( angles + 1));
+            T courseCos = cos( *( angles + 1));
+            T rollSin = sin( *( angles + 2));
+            T rollCos = cos( *( angles + 2));
 
-            double *currAddr = res;
+            T *currAddr = res;
             *currAddr = courseCos * pitchCos;
             currAddr++;
             *currAddr = -courseCos * pitchSin * rollCos - courseSin * rollSin;
@@ -275,12 +275,12 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
         }
 
         case CONNECTED_TO_BEAM_Z_UP_Y_LEFT_CS: {
-            double phiYsin = sin( *angles);
-            double phiYcos = cos( *angles);
-            double phiZsin = sin( *( angles + 1));
-            double phiZcos = cos( *( angles + 1));
+            T phiYsin = sin( *angles);
+            T phiYcos = cos( *angles);
+            T phiZsin = sin( *( angles + 1));
+            T phiZcos = cos( *( angles + 1));
 
-            double *currAddr = res;
+            T *currAddr = res;
             *currAddr = phiZcos * phiYcos;
             currAddr++;
             *currAddr = phiZsin * phiYcos;
@@ -305,12 +305,12 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
         }
 
         case BEAM_Z_UP_Y_LEFT_TO_CONNECTED_CS: {
-            double phiYsin = sin( *angles);
-            double phiYcos = cos( *angles);
-            double phiZsin = sin( *( angles + 1));
-            double phiZcos = cos( *( angles + 1));
+            T phiYsin = sin( *angles);
+            T phiYcos = cos( *angles);
+            T phiZsin = sin( *( angles + 1));
+            T phiZcos = cos( *( angles + 1));
 
-            double *currAddr = res;
+            T *currAddr = res;
             *currAddr = phiZcos * phiYcos;
             currAddr++;
             *currAddr = -phiZsin;
@@ -335,12 +335,12 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
         }
 
         case CONNECTED_TO_BEAM_Y_LEFT_Z_UP_CS: {
-            double phiYsin = sin( *angles);
-            double phiYcos = cos( *angles);
-            double phiZsin = sin( *( angles + 1));
-            double phiZcos = cos( *( angles + 1));
+            T phiYsin = sin( *angles);
+            T phiYcos = cos( *angles);
+            T phiZsin = sin( *( angles + 1));
+            T phiZcos = cos( *( angles + 1));
 
-            double *currAddr = res;
+            T *currAddr = res;
             *currAddr = phiYcos * phiZcos;
             currAddr++;
             *currAddr = phiZsin;
@@ -365,12 +365,12 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
         }
 
         case BEAM_Y_LEFT_Z_UP_TO_CONNECTED_CS: {
-            double phiYsin = sin( *angles);
-            double phiYcos = cos( *angles);
-            double phiZsin = sin( *( angles + 1));
-            double phiZcos = cos( *( angles + 1));
+            T phiYsin = sin( *angles);
+            T phiYcos = cos( *angles);
+            T phiZsin = sin( *( angles + 1));
+            T phiZcos = cos( *( angles + 1));
 
-            double *currAddr = res;
+            T *currAddr = res;
             *currAddr = phiYcos * phiZcos;
             currAddr++;
             *currAddr = -phiYcos * phiZsin;
@@ -404,5 +404,5 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
 
 #endif
 
-//#endif
+#endif
 

@@ -1,10 +1,10 @@
 /********************************** ukbo42 *************************************
  ** ОРГАНИЗАЦИЯ:     ОАО "РПКБ"
- ** СОЗДАН:          30 августа 2017 г. APasternak
- ** ИЗМЕНЕН:         30 августа 2017 г. APasternak
+ ** СОЗДАН:          30.08.17 г. APasternak
+ ** ИЗМЕНЕН:         30.08.17 г. APasternak
  *******************************************************************************
  ** ПЕРЕЧЕНЬ ИЗМЕНЕНИЙ:
- ** 30 августа 2017 г. APasternak. Суть внесенных изменений
+ ** 30.08.17 г. APasternak. Суть внесенных изменений
  *******************************************************************************
  */
 /*!
@@ -30,6 +30,9 @@
 #include "all_possible_subtractions.h"
 #include "all_possible_multiplications.h"
 #include "all_possible_divisions.h"
+#include "all_possible_insert_sorts.h"
+#include "all_possible_min_max.h"
+#include "all_possible_mgc_calcs.h"
 
 #endif // TEMPLATES_H
 

@@ -1,45 +1,42 @@
 /********************************** ukbo42 *************************************
  ** ОРГАНИЗАЦИЯ:     ОАО "РПКБ"
- ** СОЗДАН:          30.08.17 г. APasternak
- ** ИЗМЕНЕН:         30.08.17 г. APasternak
+ ** СОЗДАН:          12.09.17 г. APasternak
+ ** ИЗМЕНЕН:         12.09.17 г. APasternak
  *******************************************************************************
  ** ПЕРЕЧЕНЬ ИЗМЕНЕНИЙ:
- ** 30.08.17 г. APasternak. Суть внесенных изменений
+ ** 12.09.17 г. APasternak. Суть внесенных изменений
  *******************************************************************************
  */
 /*!
- ** \file  all_possible_insert_sorts.c
+ ** \file  all_possible_mgc_calcs.h
  ** \brief Краткий комментарий к файлу
- **      Реализация допустимых типов для шаблона сортировки элементов массива
- **      простыми вставками
+ **      Описание допустимых типов для шаблона вычисления матрицы направляющих
+ ** косинусов
  ** Расширенный комментарий к файлу
  */
+
+#ifndef ALL_POSSIBLE_MGC_CALCS_H
+#define ALL_POSSIBLE_MGC_CALCS_H
 
 #include "templates.h"
 
 #ifdef TEMPLATE_LIB
-
-#include "all_possible_insert_sorts.h"
 
 #ifdef T
 #undef T
 #endif
 
 #define T float
-#include "insert_sort_as_template.c"
+#include "mgc_calc_as_template.h"
 
 #ifdef T
 #undef T
 #endif
 
 #define T double
-#include "insert_sort_as_template.c"
-
-#ifdef T
-#undef T
-#endif
-
-#define T int
-#include "insert_sort_as_template.c"
+#include "mgc_calc_as_template.h"
 
 #endif
+
+#endif // ALL_POSSIBLE_MGC_CALCS_H
+
