@@ -26,23 +26,23 @@ int main( ) {
     for( i = 0; i < 3; ++i) {
         printf( "ai[ %u] = %d\n", i, *( ai + i));
     }
-    printf( "2nd integer array\n");
+    printf( "\n2nd integer array\n");
     for( i = 0; i < 3; ++i) {
         printf( "bi[ %u] = %d\n", i, *( bi + i));
     }
-    printf( "1st float array\n");
+    printf( "\n1st float array\n");
     for( i = 0; i < 3; ++i) {
         printf( "af[ %u] = %f\n", i, *( af + i));
     }
-    printf( "2nd float array\n");
+    printf( "\n2nd float array\n");
     for( i = 0; i < 3; ++i) {
         printf( "bf[ %u] = %f\n", i, *( bf + i));
     }
-    printf( "1st double array\n");
+    printf( "\n1st double array\n");
     for( i = 0; i < 3; ++i) {
         printf( "dA[ %u] = %f\n", i, *( dA + i));
     }
-    printf( "2nd double array\n");
+    printf( "\n2nd double array\n");
     for( i = 0; i < 3; ++i) {
         printf( "dB[ %u] = %f\n", i, *( dB + i));
     }
@@ -152,16 +152,102 @@ int main( ) {
         printf( "dA[ %u] = %f\n", i, *( dA + i));
     }
 
-    /* MGC calc testing - ok */
     double unitMatr[ 3][ 3];
     double *currAddr;
+    double eulerAngles[ 3] = { M_PI / 6.0, M_PI / 12.0, 0.1 * M_PI};
+
+    /* MGC calc testing - CCS 2 SCS - ok */
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             currAddr = unitMatr + i * j;
             *currAddr = ( i == j) ? 1.0 : 0.0;
         }
     }
-    double eulerAngles[ 3] = { M_PI / 6.0, M_PI / 12.0, 0.1 * M_PI};
+    TEMPLATE( mgc_calc, double)( unitMatr, eulerAngles, CONNECTED_TO_SPEED_CS);
+    printf( "\nMGC calc testing - CCS 2 SCS\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+        }
+        printf( "\n");
+    }
+
+    /* MGC calc testing - SCS 2 CCS - ok */
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            *currAddr = ( i == j) ? 1.0 : 0.0;
+        }
+    }
+    TEMPLATE( mgc_calc, double)( unitMatr, eulerAngles, SPEED_TO_CONNECTED_CS);
+    printf( "\nMGC calc testing - SCS 2 CCS\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+        }
+        printf( "\n");
+    }
+
+    /* MGC calc testing - HCS 2 NCS - ok */
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            *currAddr = ( i == j) ? 1.0 : 0.0;
+        }
+    }
+    TEMPLATE( mgc_calc, double)( unitMatr, eulerAngles, HORIZONTED_TO_NORMAL_CS);
+    printf( "\nMGC calc testing - HCS 2 NCS\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+        }
+        printf( "\n");
+    }
+
+    /* MGC calc testing - NCS 2 HCS - ok */
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            *currAddr = ( i == j) ? 1.0 : 0.0;
+        }
+    }
+    TEMPLATE( mgc_calc, double)( unitMatr, eulerAngles, NORMAL_TO_HORIZONTED_CS);
+    printf( "\nMGC calc testing - NCS 2 HCS\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+        }
+        printf( "\n");
+    }
+
+    /* MGC calc testing - NCS 2 CCS - ok */
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            *currAddr = ( i == j) ? 1.0 : 0.0;
+        }
+    }
+    TEMPLATE( mgc_calc, double)( unitMatr, eulerAngles, NORMAL_TO_CONNECTED_CS);
+    printf( "\nMGC calc testing - NCS 2 CCS\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+        }
+        printf( "\n");
+    }
+
+    /* MGC calc testing - CCS 2 NCS - ok */
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            *currAddr = ( i == j) ? 1.0 : 0.0;
+        }
+    }
     TEMPLATE( mgc_calc, double)( unitMatr, eulerAngles, CONNECTED_TO_NORMAL_CS);
     printf( "\nMGC calc testing - CCS 2 NCS\n");
     for( i = 0; i < 3; ++i) {
@@ -172,14 +258,100 @@ int main( ) {
         printf( "\n");
     }
 
+    /* MGC calc testing - TCS 2 CCS - todo */
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             currAddr = unitMatr + i * j;
             *currAddr = ( i == j) ? 1.0 : 0.0;
         }
     }
-    TEMPLATE( mgc_calc, double)( unitMatr, eulerAngles, NORMAL_TO_CONNECTED_CS);
-    printf( "\nMGC calc testing - NCS 2 CCS\n");
+    TEMPLATE( mgc_calc, double)( unitMatr, eulerAngles, TRAJECTORY_TO_CONNECTED_CS);
+    printf( "\nMGC calc testing - TCS 2 CCS\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+        }
+        printf( "\n");
+    }
+
+    /* MGC calc testing - CCS 2 TCS - todo */
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            *currAddr = ( i == j) ? 1.0 : 0.0;
+        }
+    }
+    TEMPLATE( mgc_calc, double)( unitMatr, eulerAngles, CONNECTED_TO_TRAJECTORY_CS);
+    printf( "\nMGC calc testing - CCS 2 TCS\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+        }
+        printf( "\n");
+    }
+
+    /* MGC calc testing - CCS 2 BCSZY - ok */
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            *currAddr = ( i == j) ? 1.0 : 0.0;
+        }
+    }
+    TEMPLATE( mgc_calc, double)( unitMatr, eulerAngles, CONNECTED_TO_BEAM_Z_UP_Y_LEFT_CS);
+    printf( "\nMGC calc testing - CCS 2 BCSZY\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+        }
+        printf( "\n");
+    }
+
+    /* MGC calc testing - BCSZY 2 CCS - ok */
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            *currAddr = ( i == j) ? 1.0 : 0.0;
+        }
+    }
+    TEMPLATE( mgc_calc, double)( unitMatr, eulerAngles, BEAM_Z_UP_Y_LEFT_TO_CONNECTED_CS);
+    printf( "\nMGC calc testing - BCSZY 2 CCS\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+        }
+        printf( "\n");
+    }
+
+    /* MGC calc testing - CCS 2 BCSYZ - ok */
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            *currAddr = ( i == j) ? 1.0 : 0.0;
+        }
+    }
+    TEMPLATE( mgc_calc, double)( unitMatr, eulerAngles, CONNECTED_TO_BEAM_Y_LEFT_Z_UP_CS);
+    printf( "\nMGC calc testing - CCS 2 BCSYZ\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+        }
+        printf( "\n");
+    }
+
+    /* MGC calc testing - BCSYZ 2 CCS - ok */
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            currAddr = unitMatr + i * j;
+            *currAddr = ( i == j) ? 1.0 : 0.0;
+        }
+    }
+    TEMPLATE( mgc_calc, double)( unitMatr, eulerAngles, BEAM_Y_LEFT_Z_UP_TO_CONNECTED_CS);
+    printf( "\nMGC calc testing - BCSYZ 2 CCS\n");
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             currAddr = unitMatr + i * j;

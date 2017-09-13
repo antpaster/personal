@@ -18,10 +18,10 @@
 #define TEMPLATES_H
 
 #ifndef F_NULL
-#define F_NULL 1e-20 /* очень маленькое число для защиты от деления на 0 */
+#define F_NULL 1e-20 /*!< очень маленькое число для защиты от деления на 0 */
 #endif
 
-#define TEMPLATE_LIB /* триггер библиотеки */
+#define TEMPLATE_LIB /*!< триггер библиотеки */
 
 #define CAT( X, Y) X##_##Y
 #define TEMPLATE( X, Y) CAT( X, Y)
