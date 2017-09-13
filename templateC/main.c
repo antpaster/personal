@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include <math.h>
 
 #include "templates.h"
@@ -21,7 +23,7 @@ int main( ) {
 
     size_t i, j;
 
-    /* Echoprint of the default data */
+    /* Echoprint of the default data **************************************************************/
     printf( "Echoprint\n1st integer array\n");
     for( i = 0; i < 3; ++i) {
         printf( "ai[ %u] = %d\n", i, *( ai + i));
@@ -47,6 +49,8 @@ int main( ) {
         printf( "dB[ %u] = %f\n", i, *( dB + i));
     }
 
+
+    /* Min - max template testing *****************************************************************/
     /* Minimum value calc from the int array testing - ok */
     TEMPLATE( min_max, int)( &iMin, bi, 3, 0);
     printf( "\nMin int from bi = %d\n", iMin);
@@ -57,6 +61,8 @@ int main( ) {
     TEMPLATE( min_max, double)( &dMax, dA, 3, 1);
     printf( "\nMax double form dA = %f\n", dMax);
 
+
+    /* Sum template testing ***********************************************************************/
     /* Int array sum testing - ok */
     TEMPLATE( add, int)( iRes, ai, bi, 3);
     printf( "\nInt array sum testing\n");
@@ -76,6 +82,8 @@ int main( ) {
         printf( "dA[ %u] + dB[ %u] = %f\n", i, i, *( dRes + i));
     }
 
+
+    /* Subtraction template testing ***************************************************************/
     /* Int array subtraction testing - ok */
     TEMPLATE( subtract, int)( iRes, ai, bi, 3);
     printf( "\nInt array subtraction testing\n");
@@ -95,6 +103,8 @@ int main( ) {
         printf( "dA[ %u] - dB[ %u] = %f\n", i, i, *( dRes + i));
     }
 
+
+    /* Multiplication template testing ************************************************************/
     /* Int array multiplication testing - ok */
     TEMPLATE( multiply, int)( iRes, ai, bi, 3);
     printf( "\nInt array multiplication testing\n");
@@ -114,6 +124,8 @@ int main( ) {
         printf( "dA[ %u] * dB[ %u] = %f\n", i, i, *( dRes + i));
     }
 
+
+    /* Divivsion template testing *****************************************************************/
     /* Int array division testing - ok */
     TEMPLATE( divide, int)( iRes, ai, bi, 3);
     printf( "\nInt array division testing\n");
@@ -133,6 +145,8 @@ int main( ) {
         printf( "dA[ %u] / dB[ %u] = %f\n", i, i, *( dRes + i));
     }
 
+
+    /* Insert sort template testing ***************************************************************/
     /* Int array insert sort testing - ok */
     TEMPLATE( insert_sort, int)( ai, 3, 0);
     printf( "\nInt array insert sort testing\n");
@@ -152,6 +166,8 @@ int main( ) {
         printf( "dA[ %u] = %f\n", i, *( dA + i));
     }
 
+
+    /* MGC template testing ***********************************************************************/
     double unitMatr[ 3][ 3];
     double *currAddr;
     double eulerAngles[ 3] = { M_PI / 6.0, M_PI / 12.0, 0.1 * M_PI};
@@ -258,7 +274,7 @@ int main( ) {
         printf( "\n");
     }
 
-    /* MGC calc testing - TCS 2 CCS - todo */
+    /* MGC calc testing - TCS 2 CCS - ok */
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             currAddr = unitMatr + i * j;
@@ -275,7 +291,7 @@ int main( ) {
         printf( "\n");
     }
 
-    /* MGC calc testing - CCS 2 TCS - todo */
+    /* MGC calc testing - CCS 2 TCS - ok */
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             currAddr = unitMatr + i * j;
@@ -356,6 +372,37 @@ int main( ) {
         for( j = 0; j < 3; ++j) {
             currAddr = unitMatr + i * j;
             printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+        }
+        printf( "\n");
+    }
+
+
+    /* Matrix transposing testing *****************************************************************/
+    double dMatr[ 3][ 3] = {
+        {   1.0,  -2.0,   4.5},
+        {  -4.3,   0.0,   2.5},
+        { -11.0, -2.04, -2.45}
+    };
+
+//    srand( time( NULL));
+//    for( i = 0; i < 3; ++i) {
+//        for( j = 0; j < 3; ++j) {
+//            currAddr = dMatr + i * j;
+//            *currAddr = ( double)( rand( ) % 50);
+//        }
+//    }
+    printf( "\nDouble matrix before the transposing\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            printf( "dMatr[ %u][ %u] = %f ", i, j, dMatr[ i][ j]);
+        }
+        printf( "\n");
+    }
+    TEMPLATE( transpose, double)( ( double*)dMatr, 3, 3);
+    printf( "\nDouble matrix after the transposing\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            printf( "dMatr[ %u][ %u] = %f ", i, j, dMatr[ i][ j]);
         }
         printf( "\n");
     }

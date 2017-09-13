@@ -267,10 +267,62 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
         }
 
         case TRAJECTORY_TO_CONNECTED_CS: {
+            T trajSlopeSin = sin( *angles);
+            T trajSlopeCos = cos( *angles);
+            T wayAngleSin = sin( *( angles + 1));
+            T wayAngleCos = cos( *( angles + 1));
+
+            T *currAddr = res;
+            *currAddr = trajSlopeCos * wayAngleCos;
+            currAddr++;
+            *currAddr = -trajSlopeSin * wayAngleCos;
+            currAddr++;
+            *currAddr = wayAngleSin;
+
+            currAddr++;
+            *currAddr = trajSlopeSin;
+            currAddr++;
+            *currAddr = trajSlopeCos;
+            currAddr++;
+            *currAddr = 0.0;
+
+            currAddr++;
+            *currAddr = -trajSlopeCos * wayAngleSin;
+            currAddr++;
+            *currAddr = trajSlopeSin * wayAngleSin;
+            currAddr++;
+            *currAddr = wayAngleCos;
+
             return 0;
         }
 
         case CONNECTED_TO_TRAJECTORY_CS: {
+            T trajSlopeSin = sin( *angles);
+            T trajSlopeCos = cos( *angles);
+            T wayAngleSin = sin( *( angles + 1));
+            T wayAngleCos = cos( *( angles + 1));
+
+            T *currAddr = res;
+            *currAddr = trajSlopeCos * wayAngleCos;
+            currAddr++;
+            *currAddr = trajSlopeSin;
+            currAddr++;
+            *currAddr = -trajSlopeCos * wayAngleSin;
+
+            currAddr++;
+            *currAddr = -trajSlopeSin * wayAngleCos;
+            currAddr++;
+            *currAddr = trajSlopeCos;
+            currAddr++;
+            *currAddr = trajSlopeSin * wayAngleSin;
+
+            currAddr++;
+            *currAddr = wayAngleSin;
+            currAddr++;
+            *currAddr = 0.0;
+            currAddr++;
+            *currAddr = wayAngleCos;
+
             return 0;
         }
 
