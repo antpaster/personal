@@ -9,10 +9,10 @@
  */
 /*!
  ** \file  all_possible_min_max.c
- ** \brief Краткий комментарий к файлу
- **      Реализация допустимых типов для шаблона нахождения
- **      минимального / максимального элементов массива
- ** Расширенный комментарий к файлу
+ ** \author Anton Pasternak, antpaster@gmail.com
+ ** \version 1.0
+ ** \date 30.08.17
+ ** \brief All possible types for min / max elemants definition template realization
  */
 
 #include "templates.h"

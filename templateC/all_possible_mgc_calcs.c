@@ -9,10 +9,10 @@
  */
 /*!
  ** \file  all_possible_mgc_calcs.c
- ** \brief Краткий комментарий к файлу
- **      Реализация допустимых типов для шаблона вычисления матрицы направляющих
- ** косинусов
- ** Расширенный комментарий к файлу
+ ** \author Anton Pasternak, antpaster@gmail.com
+ ** \version 1.0
+ ** \date 12.09.17
+ ** \brief All possible types for MGC calculations template realization
  */
 
 #include "templates.h"

@@ -9,9 +9,10 @@
  */
 /*!
  ** \file  min_max_as_template.c
- ** \brief Краткий комментарий к файлу
- **      Реализация шаблона нахождения минимального / максимального элементов массива
- ** Расширенный комментарий к файлу
+ ** \author Anton Pasternak, antpaster@gmail.com
+ ** \version 1.0
+ ** \date 30.08.17
+ ** \brief Min / max array's element definition template realization
  */
 
 #ifdef T
@@ -24,13 +25,22 @@
 
 #ifdef TEMPLATE_LIB
 
+/*! Min / max array's element definition template
+ * \param[ out] result Result variable pointer
+ * \param[ in] a Array pointer
+ * \param[ in] size Array size
+ * \param[ in] maxFlag Variable that defines whether we find maximum element or not:
+ * 1 - max element, 0 - min element
+ ***************************************************************************************************
+ * \return 0 - ok, 1 - Null pointer to result or array
+ */
 int TEMPLATE( min_max, T)( T *result, const T *a, const size_t size, const uint8_t maxFlag) {
     if( result && a) {
-        int i;
+        size_t i;
         T tempRes = *a;
 
         for( i = 1; i < size; ++i) {
-            if( ( ( maxFlag) ? ( tempRes < *( a + i)) : ( tempRes > *( a + i)))) {
+            if( ( maxFlag) ? ( tempRes < *( a + i)) : ( tempRes > *( a + i))) {
                 tempRes = *( a + i);
             }
         }

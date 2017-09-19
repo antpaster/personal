@@ -9,9 +9,10 @@
  */
 /*!
  ** \file  subtraction_as_template.h
- ** \brief Краткий комментарий к файлу
- **      Описание шаблона вычитания
- ** Расширенный комментарий к файлу
+ ** \author Anton Pasternak, antpaster@gmail.com
+ ** \version 1.0
+ ** \date 30.08.17
+ ** \brief Subtraction template description
  */
 
 #ifndef SUBTRACTION_AS_TEMPLATE_H
@@ -24,7 +25,16 @@
 
 #ifdef TEMPLATE_LIB
 
-void TEMPLATE( subtract, T)( T*, T*, T*, size_t);
+/*! Subtraction template
+ * \param[ out] result Result array pointer
+ * \param[ in] a Subtrahend array pointer
+ * \param[ in] b Subtractor array pointer
+ * \param[ in] size Arrays' sizes
+ ***************************************************************************************************
+ * \return 0 - ok, 1 - Null pointer to result, a or b
+ */
+int TEMPLATE( subtract, T)( T*, const T*, const T*, const size_t);
+
 #endif
 
 #endif

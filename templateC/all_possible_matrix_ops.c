@@ -9,9 +9,10 @@
  */
 /*!
  ** \file  all_possible_matrix_ops.c
- ** \brief Краткий комментарий к файлу
- **      Реализация допустимых типов для шаблонов матричных операций
- ** Расширенный комментарий к файлу
+ ** \author Anton Pasternak, antpaster@gmail.com
+ ** \version 1.0
+ ** \date 13.09.17
+ ** \brief All possible types for matrix operations template realization
  */
 
 #include "templates.h"

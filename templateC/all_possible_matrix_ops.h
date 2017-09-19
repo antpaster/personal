@@ -8,10 +8,11 @@
  *******************************************************************************
  */
 /*!
- ** \file  all_possible_sums.h
- ** \brief Краткий комментарий к файлу
- **      Описание допустимых типов для шаблонов матричных операций
- ** Расширенный комментарий к файлу
+ ** \file  all_possible_matrix_ops.h
+ ** \author Anton Pasternak, antpaster@gmail.com
+ ** \version 1.0
+ ** \date 13.09.17
+ ** \brief All possible types for matrix operations template description
  */
 
 #ifndef ALL_POSSIBLE_MATRIX_OPS_H

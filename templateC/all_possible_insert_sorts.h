@@ -9,10 +9,10 @@
  */
 /*!
  ** \file  all_possible_insert_sorts.h
- ** \brief Краткий комментарий к файлу
- **      Описание допустимых типов для шаблона сортировки массива простыми
- **      вставками
- ** Расширенный комментарий к файлу
+ ** \author Anton Pasternak, antpaster@gmail.com
+ ** \version 1.0
+ ** \date 30.08.17
+ ** \brief All possible types for simple insert sorting template description
  */
 #ifndef ALL_POSSIBLE_INSERT_SORTS_H_
 #define ALL_POSSIBLE_INSERT_SORTS_H_

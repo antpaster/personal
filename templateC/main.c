@@ -378,19 +378,16 @@ int main( ) {
 
 
     /* Matrix transposing testing *****************************************************************/
-    double dMatr[ 3][ 3] = {
-        {   1.0,  -2.0,   4.5},
-        {  -4.3,   0.0,   2.5},
-        { -11.0, -2.04, -2.45}
-    };
+    /* Double matrix transposing testing - ok */
+    double dMatr[ 3][ 3];
 
-//    srand( time( NULL));
-//    for( i = 0; i < 3; ++i) {
-//        for( j = 0; j < 3; ++j) {
-//            currAddr = dMatr + i * j;
-//            *currAddr = ( double)( rand( ) % 50);
-//        }
-//    }
+    srand( time( NULL));
+
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            dMatr[ i][ j] = ( double)( rand( ) % 50);
+        }
+    }
     printf( "\nDouble matrix before the transposing\n");
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
@@ -403,6 +400,111 @@ int main( ) {
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             printf( "dMatr[ %u][ %u] = %f ", i, j, dMatr[ i][ j]);
+        }
+        printf( "\n");
+    }
+
+    /* Float matrix transposing testing - fail, todo */
+    float fMatr[ 3][ 3];
+
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            fMatr[ i][ j] = ( float)( rand( ) % 50);
+        }
+    }
+    printf( "\nFloat matrix before the transposing\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            printf( "fMatr[ %u][ %u] = %f ", i, j, fMatr[ i][ j]);
+        }
+        printf( "\n");
+    }
+    TEMPLATE( transpose, float)( ( float*)fMatr, 3, 3);
+    printf( "\nFloat matrix after the transposing\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            printf( "fMatr[ %u][ %u] = %f ", i, j, fMatr[ i][ j]);
+        }
+        printf( "\n");
+    }
+
+    /* Matrix multiplication testing **************************************************************/
+    /* Double matrix multiplication testing - ok */
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            dMatr[ i][ j] = ( double)( rand( ) % 5);
+        }
+    }
+    printf( "\nDouble matrix-multipicator 1\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            printf( "dMatr[ %u][ %u] = %f ", i, j, dMatr[ i][ j]);
+        }
+        printf( "\n");
+    }
+
+    double dMatrExtra[ 3][ 3];
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            dMatrExtra[ i][ j] = ( double)( rand( ) % 5);
+        }
+    }
+    printf( "\nDouble matrix-multipicator 2\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            printf( "dMatrExtra[ %u][ %u] = %f ", i, j, dMatrExtra[ i][ j]);
+        }
+        printf( "\n");
+    }
+
+    double dMatrResult[ 3][ 3];
+
+    TEMPLATE( matr_multiply, double)( ( double*)dMatrResult, ( double*)dMatr, ( double*)dMatrExtra,
+        3, 3, 3);
+    printf( "\nDouble matrix result of the multiplication\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            printf( "dMatrResult[ %u][ %u] = %f ", i, j, dMatrResult[ i][ j]);
+        }
+        printf( "\n");
+    }
+
+    /* Float matrix multiplication testing */
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            fMatr[ i][ j] = ( float)( rand( ) % 5);
+        }
+    }
+    printf( "\nFloat matrix-multipicator 1\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            printf( "fMatr[ %u][ %u] = %f ", i, j, fMatr[ i][ j]);
+        }
+        printf( "\n");
+    }
+
+    float fMatrExtra[ 3][ 3];
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            fMatrExtra[ i][ j] = ( float)( rand( ) % 5);
+        }
+    }
+    printf( "\nFloat matrix-multipicator 2\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            printf( "fMatrExtra[ %u][ %u] = %f ", i, j, fMatrExtra[ i][ j]);
+        }
+        printf( "\n");
+    }
+
+    float fMatrResult[ 3][ 3];
+
+    TEMPLATE( matr_multiply, float)( ( float*)fMatrResult, ( float*)fMatr, ( float*)fMatrExtra,
+        3, 3, 3);
+    printf( "\nFloat matrix result of the multiplication\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            printf( "fMatrResult[ %u][ %u] = %f ", i, j, fMatrResult[ i][ j]);
         }
         printf( "\n");
     }

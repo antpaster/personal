@@ -9,9 +9,10 @@
  */
 /*!
  ** \file  multiplication_as_template.c
- ** \brief Краткий комментарий к файлу
- **      Реализация шаблона умножения
- ** Расширенный комментарий к файлу
+ ** \author Anton Pasternak, antpaster@gmail.com
+ ** \version 1.0
+ ** \date 30.08.17
+ ** \brief Multiplication template realization
  */
 
 #ifdef T
@@ -21,13 +22,27 @@
 
 #ifdef TEMPLATE_LIB
 
-void TEMPLATE( multiply, T) ( T *res, T *a, T *b, size_t size) {
-    int i;
-    T *currAddr;
-    for( i = 0; i < size; ++i) {
-        currAddr = res + i;
-        *currAddr = *( a + i) * *( b + i);
+/*! Multiplication template
+ * \param[ out] result Result array pointer
+ * \param[ in] a 1st array-multiplicator pointer
+ * \param[ in] b 2nd array-multiplicator pointer
+ * \param[ in] size Size of the arrays
+ ***************************************************************************************************
+ * \return 0 - ok, 1 - Null pointer to result, a or b
+ */
+int TEMPLATE( multiply, T) ( T *result, const T *a, const T *b, const size_t size) {
+    if( result && a && b) {
+        size_t i;
+        T *currAddr;
+        for( i = 0; i < size; ++i) {
+            currAddr = result + i;
+            *currAddr = *( a + i) * *( b + i);
+        }
+
+        return 0;
     }
+
+    return 1;
 }
 
 #endif

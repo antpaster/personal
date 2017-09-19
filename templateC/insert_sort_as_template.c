@@ -9,9 +9,10 @@
  */
 /*!
  ** \file  insert_sort_as_template.c
- ** \brief Краткий комментарий к файлу
- **      Реализация шаблона сортировки массива простыми вставками
- ** Расширенный комментарий к файлу
+ ** \author Anton Pasternak, antpaster@gmail.com
+ ** \version 1.0
+ ** \date 30.08.17
+ ** \brief Simple insert sort template realization
  */
 
 #ifdef T
@@ -22,8 +23,14 @@
 
 #ifdef TEMPLATE_LIB
 
-int TEMPLATE( insert_sort, T) ( T *result, const size_t size,
-    const uint8_t ascendingFlag) {
+/*! Simple insert sort template
+ * \param[ in, out] result Array for sorting pointer
+ * \param[ in] size Array size
+ * \param[ in] ascendingFlag flag for sorting direction: 1 - ascending, 0 - descending
+ ***************************************************************************************************
+ * \return 0 - ok, 1 - null pointer to the array
+ */
+int TEMPLATE( insert_sort, T) ( T *result, const size_t size, const uint8_t ascendingFlag) {
     if( result) {
         T temp;
         int i, j;

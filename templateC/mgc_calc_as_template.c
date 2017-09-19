@@ -9,9 +9,10 @@
  */
 /*!
  ** \file  mgc_calc_as_template.c
- ** \brief Краткий комментарий к файлу
- **      Реализация шаблона вычисления матрицы направляющих косинусов
- ** Расширенный комментарий к файлу
+ ** \author Anton Pasternak, antpaster@gmail.com
+ ** \version 1.0
+ ** \date 08.09.17
+ ** \brief MGC calculations templates realization
  */
 
 #ifdef T
@@ -22,9 +23,16 @@
 
 #ifdef TEMPLATE_LIB
 
-int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
+/*! MGC calculations template
+ * \param[ out] result Result 3x3 matrix pointer
+ * \param[ in] angles Angles for transformation pointer
+ * \param[ in] mt type of the coordinate transformation
+ ***************************************************************************************************
+ * \return 0 - ok, 1 - Null pointer to result or angles
+ */
+int TEMPLATE( mgc_calc, T) ( T *result, const T *angles, const TmgcTypes mt) {
 
-    if( res && angles) {
+    if( result && angles) {
         switch( mt) {
         case CONNECTED_TO_SPEED_CS: {
             T attackSin = sin( *angles);
@@ -32,7 +40,7 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
             T slideSin = sin( *( angles + 1));
             T slideCos = cos( *( angles + 1));
 
-            T *currAddr = res;
+            T *currAddr = result;
             *currAddr = attackCos * slideCos;
             currAddr++;
             *currAddr = -attackSin * slideCos;
@@ -62,7 +70,7 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
             T slideSin = sin( *( angles + 1));
             T slideCos = cos( *( angles + 1));
 
-            T *currAddr = res;
+            T *currAddr = result;
             *currAddr = attackCos * slideCos;
             currAddr++;
             *currAddr = attackSin;
@@ -90,7 +98,7 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
             T courseSin = sin( *angles);
             T courseCos = cos( *angles);
 
-            T *currAddr = res;
+            T *currAddr = result;
             *currAddr = courseCos;
             currAddr++;
             *currAddr = 0.0;
@@ -118,7 +126,7 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
             T courseSin = sin( *angles);
             T courseCos = cos( *angles);
 
-            T *currAddr = res;
+            T *currAddr = result;
             *currAddr = courseCos;
             currAddr++;
             *currAddr = 0.0;
@@ -148,7 +156,7 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
             T rollSin = sin( *( angles + 1));
             T rollCos = cos( *( angles + 1));
 
-            T *currAddr = res;
+            T *currAddr = result;
             *currAddr = pitchCos;
             currAddr++;
             *currAddr = pitchSin;
@@ -178,7 +186,7 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
             T rollSin = sin( *( angles + 1));
             T rollCos = cos( *( angles + 1));
 
-            T *currAddr = res;
+            T *currAddr = result;
             *currAddr = pitchCos;
             currAddr++;
             *currAddr = -pitchSin * rollCos;
@@ -210,7 +218,7 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
             T rollSin = sin( *( angles + 2));
             T rollCos = cos( *( angles + 2));
 
-            T *currAddr = res;
+            T *currAddr = result;
             *currAddr = courseCos * pitchCos;
             currAddr++;
             *currAddr = pitchSin;
@@ -242,7 +250,7 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
             T rollSin = sin( *( angles + 2));
             T rollCos = cos( *( angles + 2));
 
-            T *currAddr = res;
+            T *currAddr = result;
             *currAddr = courseCos * pitchCos;
             currAddr++;
             *currAddr = -courseCos * pitchSin * rollCos - courseSin * rollSin;
@@ -272,7 +280,7 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
             T wayAngleSin = sin( *( angles + 1));
             T wayAngleCos = cos( *( angles + 1));
 
-            T *currAddr = res;
+            T *currAddr = result;
             *currAddr = trajSlopeCos * wayAngleCos;
             currAddr++;
             *currAddr = -trajSlopeSin * wayAngleCos;
@@ -302,7 +310,7 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
             T wayAngleSin = sin( *( angles + 1));
             T wayAngleCos = cos( *( angles + 1));
 
-            T *currAddr = res;
+            T *currAddr = result;
             *currAddr = trajSlopeCos * wayAngleCos;
             currAddr++;
             *currAddr = trajSlopeSin;
@@ -332,7 +340,7 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
             T phiZsin = sin( *( angles + 1));
             T phiZcos = cos( *( angles + 1));
 
-            T *currAddr = res;
+            T *currAddr = result;
             *currAddr = phiZcos * phiYcos;
             currAddr++;
             *currAddr = phiZsin * phiYcos;
@@ -362,7 +370,7 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
             T phiZsin = sin( *( angles + 1));
             T phiZcos = cos( *( angles + 1));
 
-            T *currAddr = res;
+            T *currAddr = result;
             *currAddr = phiZcos * phiYcos;
             currAddr++;
             *currAddr = -phiZsin;
@@ -392,7 +400,7 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
             T phiZsin = sin( *( angles + 1));
             T phiZcos = cos( *( angles + 1));
 
-            T *currAddr = res;
+            T *currAddr = result;
             *currAddr = phiYcos * phiZcos;
             currAddr++;
             *currAddr = phiZsin;
@@ -422,7 +430,7 @@ int TEMPLATE( mgc_calc, T) ( T *res, const T *angles, const TmgcTypes mt) {
             T phiZsin = sin( *( angles + 1));
             T phiZcos = cos( *( angles + 1));
 
-            T *currAddr = res;
+            T *currAddr = result;
             *currAddr = phiYcos * phiZcos;
             currAddr++;
             *currAddr = -phiYcos * phiZsin;

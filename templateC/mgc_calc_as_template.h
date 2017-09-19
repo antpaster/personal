@@ -9,9 +9,10 @@
  */
 /*!
  ** \file  mgc_calc_as_template.h
- ** \brief Краткий комментарий к файлу
- **      Определение шаблона вычисления матрицы направляющих косинусов
- ** Расширенный комментарий к файлу
+ ** \author Anton Pasternak, antpaster@gmail.com
+ ** \version 1.0
+ ** \date 08.09.17
+ ** \brief MGC calculations templates description
  */
 
 #ifndef MGC_CALC_AS_TEMPLATE_H
@@ -24,6 +25,9 @@
 
 #ifdef TEMPLATE_LIB
 
+/*! Types of coordinate transformations enumeration
+ ***************************************************************************************************
+ */
 typedef enum EmgcTypes {
     CONNECTED_TO_SPEED_CS = 0,
     SPEED_TO_CONNECTED_CS,
@@ -47,6 +51,13 @@ typedef enum EmgcTypes {
     BEAM_Y_LEFT_Z_UP_TO_CONNECTED_CS
 } TmgcTypes;
 
+/*! MGC calculations template
+ * \param[ out] result Result 3x3 matrix pointer
+ * \param[ in] angles Angles for transformation pointer
+ * \param[ in] mt type of the coordinate transformation
+ ***************************************************************************************************
+ * \return 0 - ok, 1 - Null pointer to result or angles
+ */
 int TEMPLATE( mgc_calc, T) ( T*, const T*, const TmgcTypes);
 
 #endif

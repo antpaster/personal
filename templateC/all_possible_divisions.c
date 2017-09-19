@@ -8,10 +8,11 @@
  *******************************************************************************
  */
 /*!
- ** \file  all_possible_divisions.c
- ** \brief Краткий комментарий к файлу
- **      Реализация допустимых типов для шаблона деления
- ** Расширенный комментарий к файлу
+ ** \file  all_possible_divisions.h
+ ** \author Anton Pasternak, antpaster@gmail.com
+ ** \version 1.0
+ ** \date 30.08.17
+ ** \brief All possible types for division template realization
  */
 
 #include "templates.h"

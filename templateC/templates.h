@@ -9,19 +9,20 @@
  */
 /*!
  ** \file  templates.h
- ** \brief Краткий комментарий к файлу
- **      Заголовочный мастер-файл библиотеки шаблонов
- ** Расширенный комментарий к файлу
+ ** \author Anton Pasternak, antpaster@gmail.com
+ ** \version 1.0
+ ** \date 30.08.17
+ ** \brief Header master file of the template library
  */
 
 #ifndef TEMPLATES_H
 #define TEMPLATES_H
 
 #ifndef F_NULL
-#define F_NULL 1e-20 /*!< очень маленькое число для защиты от деления на 0 */
+#define F_NULL 1e-20 /*!< very tiny float number for zero division protection */
 #endif
 
-#define TEMPLATE_LIB /*!< триггер библиотеки */
+#define TEMPLATE_LIB /*!< whole library trigger */
 
 #define CAT( X, Y) X##_##Y
 #define TEMPLATE( X, Y) CAT( X, Y)
@@ -33,6 +34,7 @@
 #include "all_possible_insert_sorts.h"
 #include "all_possible_min_max.h"
 #include "all_possible_mgc_calcs.h"
+#include "all_possible_matrix_ops.h"
 
 #endif // TEMPLATES_H
 

@@ -9,9 +9,10 @@
  */
 /*!
  ** \file  all_possible_sums.c
- ** \brief Краткий комментарий к файлу
- **      Реализация допустимых типов для шаблона суммирования
- ** Расширенный комментарий к файлу
+ ** \author Anton Pasternak, antpaster@gmail.com
+ ** \version 1.0
+ ** \date 30.08.17
+ ** \brief All possible types for sum template realization
  */
 
 #include "templates.h"

@@ -9,9 +9,10 @@
  */
 /*!
  ** \file  all_possible_multiplications.h
- ** \brief Краткий комментарий к файлу
- **      Описание допустимых типов для шаблона умножения
- ** Расширенный комментарий к файлу
+ ** \author Anton Pasternak, antpaster@gmail.com
+ ** \version 1.0
+ ** \date 30.08.17
+ ** \brief All possible types for multiplication template description
  */
 
 #ifndef ALL_POSSIBLE_MULTIPLICATIONS_H
