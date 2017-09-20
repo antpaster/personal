@@ -310,18 +310,6 @@ int TEMPLATE( matr_multiply, T)( T *result, const T *mult1, const T *mult2,
 
         return 0;
     }
-    /*double **rezult=new double *[r1];
-  for(int i=0;i<s2;i++)
-    rezult[i]=new double[s2];
-  for(int i=0;i<r1;i++)
-  {
-    for(int j=0;j<s2;j++)
-    {
-      rezult[i][j]=0;
-      for(int k=0;k<n;k++)
-        rezult[i][j]+=omas[i][k]*imas[k][j];
-    }
-  }*/
 
     return 1;
 }
@@ -367,20 +355,6 @@ int TEMPLATE( matrIjLess, T)( T *result, const T* sourceMatr, const size_t iRow,
     }
 
     return 1;
-
-    //    // Получение матрицы без i-й строки и j-го столбца
-    //    void GetMatr(int **mas, int **p, int i, int j, int m) {
-    //      int ki, kj, di, dj;
-    //      di = 0;
-    //      for (ki = 0; ki<m - 1; ki++) { // проверка индекса строки
-    //        if (ki == i) di = 1;
-    //        dj = 0;
-    //        for (kj = 0; kj<m - 1; kj++) { // проверка индекса столбца
-    //          if (kj == j) dj = 1;
-    //          p[ki][kj] = mas[ki + di][kj + dj];
-    //        }
-    //      }
-    //    }
 }
 
 /* Recursive matrix determinant calculation template
@@ -395,7 +369,7 @@ int TEMPLATE( determine, T)( T *result, const T *matrix, const size_t rowCount, 
         size_t i, j = 0, k = 1, n = rowCount - 1;
 
         /* Assist matrix - copy of the input one for the beginning */
-        T assistMatr[ rowCount][ rowCount];
+        T assistMatr[ rowCount * rowCount];
         T *currAddr;
         T *currAddrAssist;
         for( i = 0; i < rowCount * rowCount; ++i) {

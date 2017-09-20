@@ -509,5 +509,39 @@ int main( ) {
         printf( "\n");
     }
 
+
+    /* Matrux determinant calculation testing *****************************************************/
+    /* Double matrix determinant calculation testing */
+    dMatr[ 0][ 0] = 1.0;
+    dMatr[ 0][ 1] = 7.0;
+    dMatr[ 0][ 2] = 1.0;
+    dMatr[ 1][ 0] = 0.0;
+    dMatr[ 1][ 1] = -1.0;
+    dMatr[ 1][ 2] = 2.0;
+    dMatr[ 2][ 0] = -5.0;
+    dMatr[ 2][ 1] = 4.0;
+    dMatr[ 2][ 2] = 3.0;
+
+//    for( i = 0; i < 3; ++i) {
+//        for( j = 0; j < 3; ++j) {
+//            dMatr[ i][ j] = ( double)( rand( ) % 5);
+//        }
+//    }
+    printf( "\nDouble matrix for determinant calculation\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            printf( "dMatr[ %u][ %u] = %f ", i, j, dMatr[ i][ j]);
+        }
+        printf( "\n");
+    }
+
+    double detDmatr = 1.0;
+    TEMPLATE( determine, double)( &detDmatr, ( double*)dMatr, 3, 3);
+    printf( "\nDeterminant value: %f\n", detDmatr);
+
+
+    /* Matrix invertion testing *******************************************************************/
+    /* Double matrix invertion testing */
+
     return 0;
 }
