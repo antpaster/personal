@@ -404,7 +404,7 @@ int main( ) {
         printf( "\n");
     }
 
-    /* Float matrix transposing testing - fail, todo */
+    /* Float matrix transposing testing - ok */
     float fMatr[ 3][ 3];
 
     for( i = 0; i < 3; ++i) {
@@ -469,7 +469,7 @@ int main( ) {
         printf( "\n");
     }
 
-    /* Float matrix multiplication testing */
+    /* Float matrix multiplication testing - ok */
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             fMatr[ i][ j] = ( float)( rand( ) % 5);
