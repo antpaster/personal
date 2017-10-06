@@ -40,7 +40,7 @@ typedef struct SindexPair {
  * \param[ in] columnCount Matrix column count
  ***************************************************************************************************
  * \return 0 - ok, 1 - null input pointer */
-int TEMPLATE( transpose, T)( T*, const size_t, const size_t);
+int TEMPLATE( transpose, T)( T**, const size_t, const size_t);
 
 /*! Matrix inversion template
  * \param[ out] result Pointer to the inverted matrix
@@ -49,7 +49,7 @@ int TEMPLATE( transpose, T)( T*, const size_t, const size_t);
  * \param[ in] columnCount Matrix column count
  ***************************************************************************************************
  * \return 0 - ok, 1 - null input pointer, 2 - inverse matrix does not exist */
-int TEMPLATE( inverse, T)( T*, const T*, const size_t);
+int TEMPLATE( inverse, T)( T**, const T**, const size_t);
 
 /*! Matrix multiplication template
  * \param[ out] result Pointer to the multiplication result matrix
@@ -60,7 +60,8 @@ int TEMPLATE( inverse, T)( T*, const T*, const size_t);
  * \param[ in] mult2columnCount 2nd matrix-multiplier column count
  ***************************************************************************************************
  * \return 0 - ok, 1 - null input or output pointer */
-int TEMPLATE( matr_multiply, T)( T*, const T*, const T*, const size_t, const size_t, const size_t);
+int TEMPLATE( matr_multiply, T)( T**, const T**, const T**, const size_t, const size_t
+    const size_t);
 
 /* Recursive matrix determinant calculation template
  * \param[ out] result Pointer to the variable which holds the determinant value
@@ -69,7 +70,7 @@ int TEMPLATE( matr_multiply, T)( T*, const T*, const T*, const size_t, const siz
  * \param[ in] order Matrix order
  ***************************************************************************************************
  * \return: 0 - ok, 1 - null input pointer, 2 - bad matrix order */
-int TEMPLATE( determine, T)( T*, const T*, const size_t, const int);
+int TEMPLATE( determine, T)( T*, const T**, const size_t, const int);
 
 #endif
 

@@ -23,7 +23,7 @@ int main( ) {
 
     size_t i, j;
 
-    /* Echoprint of the default data **************************************************************/
+    /*! Echoprint of the default data *************************************************************/
     printf( "Echoprint\n1st integer array\n");
     for( i = 0; i < 3; ++i) {
         printf( "ai[ %u] = %d\n", i, *( ai + i));
@@ -50,7 +50,7 @@ int main( ) {
     }
 
 
-    /* Min - max template testing *****************************************************************/
+    /*! Min - max template testing ****************************************************************/
     /* Minimum value calc from the int array testing - ok */
     TEMPLATE( min_max, int)( &iMin, bi, 3, 0);
     printf( "\nMin int from bi = %d\n", iMin);
@@ -62,7 +62,7 @@ int main( ) {
     printf( "\nMax double form dA = %f\n", dMax);
 
 
-    /* Sum template testing ***********************************************************************/
+    /*! Sum template testing **********************************************************************/
     /* Int array sum testing - ok */
     TEMPLATE( add, int)( iRes, ai, bi, 3);
     printf( "\nInt array sum testing\n");
@@ -83,7 +83,7 @@ int main( ) {
     }
 
 
-    /* Subtraction template testing ***************************************************************/
+    /*! Subtraction template testing **************************************************************/
     /* Int array subtraction testing - ok */
     TEMPLATE( subtract, int)( iRes, ai, bi, 3);
     printf( "\nInt array subtraction testing\n");
@@ -104,7 +104,7 @@ int main( ) {
     }
 
 
-    /* Multiplication template testing ************************************************************/
+    /*! Multiplication template testing ***********************************************************/
     /* Int array multiplication testing - ok */
     TEMPLATE( multiply, int)( iRes, ai, bi, 3);
     printf( "\nInt array multiplication testing\n");
@@ -125,7 +125,7 @@ int main( ) {
     }
 
 
-    /* Divivsion template testing *****************************************************************/
+    /*! Divivsion template testing ****************************************************************/
     /* Int array division testing - ok */
     TEMPLATE( divide, int)( iRes, ai, bi, 3);
     printf( "\nInt array division testing\n");
@@ -167,7 +167,7 @@ int main( ) {
     }
 
 
-    /* MGC template testing ***********************************************************************/
+    /*! MGC template testing **********************************************************************/
     double unitMatr[ 3][ 3];
     double *currAddr;
     double eulerAngles[ 3] = { M_PI / 6.0, M_PI / 12.0, 0.1 * M_PI};
@@ -184,7 +184,7 @@ int main( ) {
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             currAddr = unitMatr + i * j;
-            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+            printf( "%f ", i, j, /**currAddr*/unitMatr[ i][ j]);
         }
         printf( "\n");
     }
@@ -201,7 +201,7 @@ int main( ) {
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             currAddr = unitMatr + i * j;
-            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+            printf( "%f ", i, j, /**currAddr*/unitMatr[ i][ j]);
         }
         printf( "\n");
     }
@@ -218,7 +218,7 @@ int main( ) {
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             currAddr = unitMatr + i * j;
-            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+            printf( "%f ", i, j, /**currAddr*/unitMatr[ i][ j]);
         }
         printf( "\n");
     }
@@ -235,7 +235,7 @@ int main( ) {
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             currAddr = unitMatr + i * j;
-            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+            printf( "%f ", i, j, /**currAddr*/unitMatr[ i][ j]);
         }
         printf( "\n");
     }
@@ -252,7 +252,7 @@ int main( ) {
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             currAddr = unitMatr + i * j;
-            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+            printf( "%f ", i, j, /**currAddr*/unitMatr[ i][ j]);
         }
         printf( "\n");
     }
@@ -269,7 +269,7 @@ int main( ) {
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             currAddr = unitMatr + i * j;
-            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+            printf( "%f ", i, j, /**currAddr*/unitMatr[ i][ j]);
         }
         printf( "\n");
     }
@@ -286,7 +286,7 @@ int main( ) {
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             currAddr = unitMatr + i * j;
-            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+            printf( "%f ", i, j, /**currAddr*/unitMatr[ i][ j]);
         }
         printf( "\n");
     }
@@ -303,7 +303,7 @@ int main( ) {
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             currAddr = unitMatr + i * j;
-            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+            printf( "%f ", i, j, /**currAddr*/unitMatr[ i][ j]);
         }
         printf( "\n");
     }
@@ -320,7 +320,7 @@ int main( ) {
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             currAddr = unitMatr + i * j;
-            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+            printf( "%f ", i, j, /**currAddr*/unitMatr[ i][ j]);
         }
         printf( "\n");
     }
@@ -337,7 +337,7 @@ int main( ) {
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             currAddr = unitMatr + i * j;
-            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+            printf( "%f ", i, j, /**currAddr*/unitMatr[ i][ j]);
         }
         printf( "\n");
     }
@@ -354,7 +354,7 @@ int main( ) {
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             currAddr = unitMatr + i * j;
-            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+            printf( "%f ", i, j, /**currAddr*/unitMatr[ i][ j]);
         }
         printf( "\n");
     }
@@ -371,13 +371,13 @@ int main( ) {
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
             currAddr = unitMatr + i * j;
-            printf( "mgc[ %u][ %u] = %f ", i, j, *currAddr);
+            printf( "%f ", i, j, /**currAddr*/unitMatr[ i][ j]);
         }
         printf( "\n");
     }
 
 
-    /* Matrix transposing testing *****************************************************************/
+    /*! Matrix transposing testing ****************************************************************/
     /* Double matrix transposing testing - ok */
     double dMatr[ 3][ 3];
 
@@ -391,15 +391,15 @@ int main( ) {
     printf( "\nDouble matrix before the transposing\n");
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
-            printf( "dMatr[ %u][ %u] = %f ", i, j, dMatr[ i][ j]);
+            printf( "%f ", i, j, dMatr[ i][ j]);
         }
         printf( "\n");
     }
-    TEMPLATE( transpose, double)( ( double*)dMatr, 3, 3);
+    TEMPLATE( transpose, double)( dMatr, 3, 3);
     printf( "\nDouble matrix after the transposing\n");
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
-            printf( "dMatr[ %u][ %u] = %f ", i, j, dMatr[ i][ j]);
+            printf( "%f ", i, j, dMatr[ i][ j]);
         }
         printf( "\n");
     }
@@ -415,20 +415,20 @@ int main( ) {
     printf( "\nFloat matrix before the transposing\n");
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
-            printf( "fMatr[ %u][ %u] = %f ", i, j, fMatr[ i][ j]);
+            printf( "%f ", i, j, fMatr[ i][ j]);
         }
         printf( "\n");
     }
-    TEMPLATE( transpose, float)( ( float*)fMatr, 3, 3);
+    TEMPLATE( transpose, float)( fMatr, 3, 3);
     printf( "\nFloat matrix after the transposing\n");
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
-            printf( "fMatr[ %u][ %u] = %f ", i, j, fMatr[ i][ j]);
+            printf( "%f ", i, j, fMatr[ i][ j]);
         }
         printf( "\n");
     }
 
-    /* Matrix multiplication testing **************************************************************/
+    /*! Matrix multiplication testing *************************************************************/
     /* Double matrix multiplication testing - ok */
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
@@ -438,7 +438,7 @@ int main( ) {
     printf( "\nDouble matrix-multipicator 1\n");
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
-            printf( "dMatr[ %u][ %u] = %f ", i, j, dMatr[ i][ j]);
+            printf( "%f ", i, j, dMatr[ i][ j]);
         }
         printf( "\n");
     }
@@ -452,19 +452,18 @@ int main( ) {
     printf( "\nDouble matrix-multipicator 2\n");
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
-            printf( "dMatrExtra[ %u][ %u] = %f ", i, j, dMatrExtra[ i][ j]);
+            printf( "%f ", i, j, dMatrExtra[ i][ j]);
         }
         printf( "\n");
     }
 
     double dMatrResult[ 3][ 3];
 
-    TEMPLATE( matr_multiply, double)( ( double*)dMatrResult, ( double*)dMatr, ( double*)dMatrExtra,
-        3, 3, 3);
+    TEMPLATE( matr_multiply, double)( dMatrResult, dMatr, dMatrExtra, 3, 3, 3);
     printf( "\nDouble matrix result of the multiplication\n");
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
-            printf( "dMatrResult[ %u][ %u] = %f ", i, j, dMatrResult[ i][ j]);
+            printf( "%f ", i, j, dMatrResult[ i][ j]);
         }
         printf( "\n");
     }
@@ -478,7 +477,7 @@ int main( ) {
     printf( "\nFloat matrix-multipicator 1\n");
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
-            printf( "fMatr[ %u][ %u] = %f ", i, j, fMatr[ i][ j]);
+            printf( "%f ", i, j, fMatr[ i][ j]);
         }
         printf( "\n");
     }
@@ -492,26 +491,25 @@ int main( ) {
     printf( "\nFloat matrix-multipicator 2\n");
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
-            printf( "fMatrExtra[ %u][ %u] = %f ", i, j, fMatrExtra[ i][ j]);
+            printf( "%f ", i, j, fMatrExtra[ i][ j]);
         }
         printf( "\n");
     }
 
     float fMatrResult[ 3][ 3];
 
-    TEMPLATE( matr_multiply, float)( ( float*)fMatrResult, ( float*)fMatr, ( float*)fMatrExtra,
-        3, 3, 3);
+//    TEMPLATE( matr_multiply, float)( fMatrResult, fMatr, fMatrExtra, 3, 3, 3);
     printf( "\nFloat matrix result of the multiplication\n");
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
-            printf( "fMatrResult[ %u][ %u] = %f ", i, j, fMatrResult[ i][ j]);
+            printf( "%f ", i, j, fMatrResult[ i][ j]);
         }
         printf( "\n");
     }
 
 
-    /* Matrux determinant calculation testing *****************************************************/
-    /* Double matrix determinant calculation testing */
+    /*! Matrux determinant calculation testing ****************************************************/
+    /* Double matrix determinant calculation testing - fail */
     dMatr[ 0][ 0] = 1.0;
     dMatr[ 0][ 1] = 7.0;
     dMatr[ 0][ 2] = 1.0;
@@ -522,6 +520,16 @@ int main( ) {
     dMatr[ 2][ 1] = 4.0;
     dMatr[ 2][ 2] = 3.0;
 
+//    dMatr[ 0][ 0] = 1.0;
+//    dMatr[ 0][ 1] = 0.0;
+//    dMatr[ 0][ 2] = 0.0;
+//    dMatr[ 1][ 0] = 0.0;
+//    dMatr[ 1][ 1] = 1.0;
+//    dMatr[ 1][ 2] = 0.0;
+//    dMatr[ 2][ 0] = 0.0;
+//    dMatr[ 2][ 1] = 0.0;
+//    dMatr[ 2][ 2] = 1.0;
+
 //    for( i = 0; i < 3; ++i) {
 //        for( j = 0; j < 3; ++j) {
 //            dMatr[ i][ j] = ( double)( rand( ) % 5);
@@ -530,18 +538,111 @@ int main( ) {
     printf( "\nDouble matrix for determinant calculation\n");
     for( i = 0; i < 3; ++i) {
         for( j = 0; j < 3; ++j) {
-            printf( "dMatr[ %u][ %u] = %f ", i, j, dMatr[ i][ j]);
+            printf( "%f ", i, j, dMatr[ i][ j]);
         }
         printf( "\n");
     }
 
-    double detDmatr = 1.0;
-    TEMPLATE( determine, double)( &detDmatr, ( double*)dMatr, 3, 3);
+    double detDmatr;
+    TEMPLATE( determine, double)( &detDmatr, dMatr, 3, 3);
     printf( "\nDeterminant value: %f\n", detDmatr);
 
+    /* Float matrix determinant calculation testing - fail */
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            fMatr[ i][ j] = ( float)( rand( ) % 5);
+        }
+    }
 
-    /* Matrix invertion testing *******************************************************************/
-    /* Double matrix invertion testing */
+    printf( "\nFloat matrix for determinant calculation\nSource matrix\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            printf( "%f ", i, j, fMatr[ i][ j]);
+        }
+        printf( "\n");
+    }
+
+    float detFmatr;
+    TEMPLATE( determine, float)( &detFmatr, fMatr, 3, 3);
+    printf( "\nDeterminant value: %f\n", detFmatr);
+
+    /*! Matrix invertion testing ******************************************************************/
+    /* Double matrix invertion testing - ok */
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            dMatr[ i][ j] = ( double)( rand( ) % 5);
+        }
+    }
+
+//    dMatr[ 0][ 0] = 1.0;
+//    dMatr[ 0][ 1] = 7.0;
+//    dMatr[ 0][ 2] = 1.0;
+//    dMatr[ 1][ 0] = 0.0;
+//    dMatr[ 1][ 1] = -1.0;
+//    dMatr[ 1][ 2] = 2.0;
+//    dMatr[ 2][ 0] = -5.0;
+//    dMatr[ 2][ 1] = 4.0;
+//    dMatr[ 2][ 2] = 3.0;
+
+    printf( "\nDouble matrix for invertion\nStraight matrix\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            printf( "%f ", i, j, dMatr[ i][ j]);
+        }
+        printf( "\n");
+    }
+
+    TEMPLATE( inverse, double)( dMatrResult, dMatr, 3);
+    printf( "\nDouble matrix result of the invertion\nInverted matrix\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            printf( "%f ", i, j, dMatrResult[ i][ j]);
+        }
+        printf( "\n");
+    }
+
+    TEMPLATE( matr_multiply, double)( dMatrExtra, dMatr, dMatrResult, 3, 3, 3);
+    printf( "\nResult of the multiplication of straight and inverted matrixes\nSupposed unit "
+        "matrix\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            printf( "%f ", i, j, dMatrExtra[ i][ j]);
+        }
+        printf( "\n");
+    }
+
+    /* Float matrix invertion testing - fail */
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            fMatr[ i][ j] = ( float)( rand( ) % 5);
+        }
+    }
+    printf( "\nFloat matrix for invertion\nStraight matrix\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            printf( "%f ", i, j, fMatr[ i][ j]);
+        }
+        printf( "\n");
+    }
+
+    TEMPLATE( inverse, float)( fMatrResult, fMatr, 3);
+    printf( "\nFloat matrix result of the invertion\nInverted matrix\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            printf( "%f ", i, j, fMatrResult[ i][ j]);
+        }
+        printf( "\n");
+    }
+
+//    TEMPLATE( matr_multiply, float)( fMatrExtra, fMatr, fMatrResult, 3, 3, 3);
+    printf( "\nResult of the multiplication of straight and inverted matrixes\nSupposed unit "
+        "matrix\n");
+    for( i = 0; i < 3; ++i) {
+        for( j = 0; j < 3; ++j) {
+            printf( "%f ", i, j, fMatrExtra[ i][ j]);
+        }
+        printf( "\n");
+    }
 
     return 0;
 }

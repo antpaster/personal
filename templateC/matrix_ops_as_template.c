@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "templates.h"
 
@@ -30,15 +31,17 @@
  * \param[ in] columnCount Matrix column count
  ***************************************************************************************************
  * \return 0 - ok, 1 - null input pointer */
-int TEMPLATE( transpose, T)( T *matrix, const size_t rowCount, const size_t columnCount) {
+int TEMPLATE( transpose, T)( T **matrix, const size_t rowCount, const size_t columnCount) {
     if( matrix) {
         T temp;
-        T *currAddr;
         T *currAddrExtra;
 
         size_t i, j = 0, k;
 
         const size_t pairArraySize = rowCount * columnCount;
+
+        T matrixLocal[ rowCount][ columnCount];
+        memmove( matrixLocal, matrix, rowCount * columnCount * sizeof( T));
 
         /* Index repeating flags array */
         uint8_t repeatFlagArray[ pairArraySize];
@@ -57,7 +60,7 @@ int TEMPLATE( transpose, T)( T *matrix, const size_t rowCount, const size_t colu
             currIndexPairAddr->iColumn = i % rowCount;
         }
 
-        for( i = 0; i < rowCount + columnCount; ++i) {
+        for( i = 0; i < rowCount * columnCount; ++i) {
             currIndexPairAddr = pairArray + j;
 
             /* Assigning new index pair */
@@ -83,13 +86,23 @@ int TEMPLATE( transpose, T)( T *matrix, const size_t rowCount, const size_t colu
                 if( !( *currRepeatFlag)) {
 
                     /* Swap the T array variables */
-                    currAddr = matrix + currIndexPairAddr->iRow;
-                    temp = *currAddr;
+                    temp = matrixLocal[ currIndexPairAddr->iRow / rowCount][ currIndexPairAddr->iRow
+                        % rowCount];
 
-                    currAddrExtra = matrix + currIndexPairAddr->iColumn;
-                    *currAddr = *currAddrExtra;
+                    matrixLocal[ currIndexPairAddr->iRow / rowCount][ currIndexPairAddr->iRow
+                        % rowCount] = matrixLocal[ currIndexPairAddr->iColumn / rowCount]
+                        [ currIndexPairAddr->iColumn % rowCount];
 
-                    *currAddrExtra = temp;
+                    matrixLocal[ currIndexPairAddr->iColumn / rowCount][ currIndexPairAddr->iColumn
+                        % rowCount] = temp;
+
+//                    currAddr = matrix + currIndexPairAddr->iRow;
+//                    temp = *currAddr;
+
+//                    currAddrExtra = matrix + currIndexPairAddr->iColumn;
+//                    *currAddr = *currAddrExtra;
+
+//                    *currAddrExtra = temp;
                 }
             }
 
@@ -109,44 +122,53 @@ int TEMPLATE( transpose, T)( T *matrix, const size_t rowCount, const size_t colu
  * \param[ in] columnCount Matrix column count
  ***************************************************************************************************
  * \return 0 - ok, 1 - null input pointer, 2 - inverse matrix does not exist */
-int TEMPLATE( inverse, T)( T *result, const T *matrix, const size_t rowCount) {
+int TEMPLATE( inverse, T)( T **result, const T **matrix, const size_t rowCount) {
 
     if( matrix) {
-        uint8_t flag = 1;
-        T t;
-        T chas;
-        T temp;
-        T bufMatr[ 2 * rowCount];
-        T *currBufAddr;
-        T *currAddr;
-        T *currAddrExtra;
+        uint8_t flag = 1; /* The flag of the inverse matrix existance */
+        T diagDenom;
+        T denom;
+        T workMatrRowBuf[ 2 * rowCount];
 
         int i, j, k, p;
 
-        /* Local copy of the input matrix */
-        T workMatrix[ 2 * rowCount * rowCount];
-        for( i = 0; i < 2 * rowCount * rowCount; ++i) {
-            currAddr = workMatrix + i;
-            *currAddr = *( matrix + i);
+        /* Assist matrix, firstly a copy of the input matrix */
+        T assistMatr[ rowCount][ rowCount];
+        memmove( assistMatr, matrix, rowCount * rowCount * sizeof( T));
+
+        /* Working matrix: input matrix and the unit one connected to the input from the right */
+        T workMatrix[ rowCount][ 2 * rowCount];
+        for( i = 0; i < rowCount * rowCount; ++i) {
+            workMatrix[ i / rowCount ][ i % rowCount]
+                = assistMatr[ i / rowCount][ i % rowCount];
         }
 
+        /* Making the unit matrix from the assist one */
+        for( i = 0; i < rowCount * rowCount; ++i) {
+            assistMatr[ i / rowCount][ i % rowCount] = ( i % 4) ? 0.0 : 1.0;
+        }
+
+        /* The right side of the working matrix now is the unit matrix. During the calcilation
+         * there will be formed the inverse matrix*/
+        for( i = 0; i < rowCount * rowCount; ++i) {
+            workMatrix[ i / rowCount][ rowCount + i % rowCount]
+                = assistMatr[ i / rowCount][ i % rowCount];
+        }
+
+        /* Checking whether there were zeroes on the main diagonal and swapping the strings in case
+         * of yes */
         for( i = 0; i < rowCount; ++i) {
-            if( ( 0 == *( workMatrix + i * rowCount + i)) && ( rowCount - 1 != i)) {
+            if( ( 0 == workMatrix[ i][ i]) && ( rowCount - 1 != i)) {
                 flag = 0;
 
                 for( j = i + 1; j < rowCount; ++j) {
 
-                    if( 0 != *( workMatrix + j * rowCount + i)) {
+                    if( 0 != workMatrix[ j][ i]) {
 
                         for( k = 0; k < 2 * rowCount; ++k) {
-                            currBufAddr = bufMatr + k;
-                            currAddr = workMatrix + j * rowCount + k;
-                            *currBufAddr = *currAddr;
-
-                            currAddrExtra = workMatrix + i * rowCount + k;
-                            *currAddr = *currAddrExtra;
-
-                            *currAddrExtra = *currBufAddr;
+                            workMatrRowBuf[ k] = workMatrix[ j][ k];
+                            workMatrix[ j][ k] = workMatrix[ i][ k];
+                            workMatrix[ i][ k] = workMatrRowBuf[ k];
                         }
                         flag = 1;
                         break;
@@ -159,54 +181,41 @@ int TEMPLATE( inverse, T)( T *result, const T *matrix, const size_t rowCount) {
         }
 
         if( flag) {
-            /* Gauss-Jordan method straight way */
+            /* Gauss-Jordan method straight way, result is upper triangle matrix */
             for( i = 0; i < rowCount; ++i) {
-                t = *( workMatrix + i * rowCount + i);
+                diagDenom = workMatrix[ i][ i];
 
-                for( j = i; j < 2 * rowCount + 1; ++j) {
-                    currAddr = workMatrix + i * rowCount + j;
-                    *currAddr /= ( fabs( t) > F_NULL) ? t : F_NULL;
+                for( j = i; j < 2 * rowCount; ++j) {
+                    workMatrix[ i][ j] /= diagDenom;
                 }
 
                 for( k = i + 1; k < rowCount; ++k) {
-                    chas = *( workMatrix + k * rowCount + i);
+                    denom = workMatrix[ k][ i];
 
-                    for( p = i; p < 2 * rowCount + 1; ++p) {
-                        currAddr = workMatrix + k * rowCount + p;
-                        currAddrExtra = workMatrix + i * rowCount + p;
-                        *currAddr -= ( *currAddrExtra) * chas;
+                    for( p = i; p < 2 * rowCount; ++p) {
+                        workMatrix[ k][ p] -= workMatrix[ i][ p] * denom;
                     }
                 }
             }
 
-            /* Gauss-Jordan method backward way */
+            /* Gauss-Jordan method backward way, result is complete inverted matrix */
             for( i = rowCount - 2; i >= 0; --i) {
                 for( k = i; k >= 0; --k) {
-                    currAddr = workMatrix + k * rowCount + i + 1;
-                    chas = *currAddr;
+                    denom = workMatrix[ k][ i + 1];
 
-                    for( j = 0; j < 2 * rowCount + 1; ++j) {
-                        currAddr = workMatrix + k * rowCount + j;
-                        *currAddr -= *( workMatrix + ( i + 1) * rowCount + j) * chas;
+                    for( j = 0; j < 2 * rowCount; ++j) {
+                        workMatrix[ k][ j] -= workMatrix[ i + 1][ j] * denom;
                     }
                 }
             }
 
-            for( i = 0; i < rowCount; ++i) {
-                for( j = 0; j < rowCount; ++j) {
-                    currAddr = result + i * rowCount + j;
-                    *currAddr = *( workMatrix + i * rowCount + j + rowCount + 1);
-                }
+            /* Output result matrix assigning */
+            for( i = 0; i < rowCount * rowCount; ++i) {
+                assistMatr[ i / rowCount][ i % rowCount]
+                    = workMatrix[ i / rowCount][ rowCount + i % rowCount];
             }
 
-            /*double **imatr=new double *[n];//Îáðàòíàÿ ìàòðèöà
-    for(int i=0;i<n;i++)
-    {
-      imatr[i]=new double[n];
-      for(int j=0;j<n;j++)
-        imatr[i][j]=matr[i][j+n+1];
-    }*/
-
+            memmove( result, assistMatr, rowCount * rowCount * sizeof( T));
         }
         else {
             printf( "\nInverse matrix cannot be calculated!");
@@ -215,67 +224,6 @@ int TEMPLATE( inverse, T)( T *result, const T *matrix, const size_t rowCount) {
 
         return 0;
     }
-
-    /*double t,chas;
-  int flag=1;
-  double *buf=new double[2*n];//Ñòðîêà-áóôåð ïðè ïåðåñòàíîâêå
-  for(int i=0;i<n;i++)
-  {
-    if ((mas[i][i]==0)&&(i!=n-1))//Ïðîâåðêà íà ñóùåñòâîâàíèå îáðàòíîé ìàòðèöû
-    {
-      flag=0;
-      for(int j=i+1;j<n;j++)
-      {
-        if (mas[j][i]!=0)
-        {
-          for(int k=0;k<2*n;k++)//Ïåðåñòàíîâêà ñòðîê
-          {
-            buf[k]=mas[j][k];
-            mas[j][k]=mas[i][k];
-            mas[i][k]=buf[k];
-          }
-          flag=1;
-          break;
-        }
-        else
-          flag=0;
-      }
-    }
-  }
-  if (flag)//Ïðÿìîé õîä
-  {
-    for(int i=0;i<n;i++)//i - èíäåêñ ñòîëáöà (ñòðîêè) èñêëþ÷àåìîé ïåðåìåííîé
-    {
-      t=mas[i][i];
-      for(int j=i;j<2*n+1;j++)//j - èíäåêñ ñòîëáöà
-        mas[i][j]/=t;
-      for(int k=i+1;k<n;k++)//öèêë-èñêëþ÷åíèå i-òîé ïåðåìåííîé èç íèæåëåæàùèõ ñòðîê, k - èíäåêñ ñòðîêè
-      {
-        chas=mas[k][i];
-        for(int p=i;p<2*n+1;p++)
-          mas[k][p]-=mas[i][p]*chas;
-      }
-    }
-    cout<<"\nÌàòðèöà, ïðåîáðàçîâàííàÿ ïðÿìûì õîäîì:"<<endl<<endl;
-    out(mas,n,2*n+1);
-    cout<<"--------------------------------------------------------------------------------";
-    //Îáðàòíûé õîä
-    for(int i=n-2;i>=0;i--)//i - èíäåêñ ñòîëáöà èñêëþ÷àåìîé ïåðåìåííîé
-      for(int k=i;k>=0;k--)//k - èíäåêñ ñòðîê-èñêëþ÷åíèé
-      {
-        chas=mas[k][i+1];
-        for(int j=0;j<2*n+1;j++)//j - èíäåêñ ñòîëáöîâ â ãåíåðèðóåìîé îáðàòíîé ìàòðèöå
-          mas[k][j]-=mas[i+1][j]*chas;
-      }
-    cout<<"\nÌàòðèöà, ïðåîáðàçîâàííàÿ îáðàòíûì õîäîì:"<<endl<<endl;
-    out(mas,n,2*n+1);
-    cout<<"--------------------------------------------------------------------------------";
-    }
-    else
-    {
-      cout<<"Ìàòðèöà âûðîæäåííàÿ, îáðàòíîé íå ñóùåñòâóåò!"<<endl<<endl;
-      det=0;//Îïðåäåëèòåëü âûðîæäåííîñòè ìàòðèöû
-    }*/
 
     return 1;
 }
@@ -289,24 +237,34 @@ int TEMPLATE( inverse, T)( T *result, const T *matrix, const size_t rowCount) {
  * \param[ in] mult2columnCount 2nd matrix-multiplier column count
  ***************************************************************************************************
  * \return 0 - ok, 1 - null input or output pointer */
-int TEMPLATE( matr_multiply, T)( T *result, const T *mult1, const T *mult2,
+int TEMPLATE( matr_multiply, T)( T **result, const T **mult1, const T **mult2,
     const size_t mult1rowCount, const size_t commonSize, const size_t mult2columnCount) {
 
     if( result && mult1 && mult2) {
-        int i, j, k;
-        T *currAddr;
-        
+        size_t i, j, k;
+
+        /* Dealing with two-dimensional matrices and index-based operations */
+        T resultLocal[ commonSize][ commonSize];
+        memset( resultLocal, 0, commonSize * commonSize * sizeof( T));
+
+        T mult1local[ mult1rowCount][ commonSize];
+        memmove( mult1local, mult1, mult1rowCount * commonSize * sizeof( T));
+
+        T mult2local[ commonSize][ mult2columnCount];
+        memmove( mult2local, mult2, commonSize * mult2columnCount * sizeof( T));
+
         for( i = 0; i < mult1rowCount; ++i) {
             for( j = 0; j < mult2columnCount; ++j) {
-                currAddr = result + i * mult1rowCount + j;
-                *currAddr = 0;
+                resultLocal[ i][ j] = 0;
 
                 for( k = 0; k < commonSize; ++k) {
-                    *currAddr += *( mult1 + i * mult1rowCount + k)
-                            * ( *( mult2 + k * commonSize + j));
+                    resultLocal[ i][ j] += mult1local[ i][ k] * mult2local[ k][ j];
                 }
             }
         }
+
+        /* Output result matrix assigning */
+        memmove( result, resultLocal, commonSize * commonSize * sizeof( T));
 
         return 0;
     }
@@ -314,21 +272,27 @@ int TEMPLATE( matr_multiply, T)( T *result, const T *mult1, const T *mult2,
     return 1;
 }
 
-/*! Matrix without iRow row and iColumn column gaining, auxiliary to the matrix inversion function
+/*! Matrix without iRow row and iColumn column gaining, auxiliary to the matrix determinant
+ * calculation function
  * \param[ out] result Pointer to the result matrix
  * \param[ in] sourceMatr Pointer to the source matrix
  * \param[ in] iRow Row for deleting index
  * \param[ in] iColumn Column for deleting index
- * \param[ in] rowCount Row (column) count
+ * \param[ in] rowCount Row (column) count of the sourceMatr
  ***************************************************************************************************
  * \return 0 - ok, 1 - null input or output pointer */
-int TEMPLATE( matrIjLess, T)( T *result, const T* sourceMatr, const size_t iRow,
+int TEMPLATE( matrIjLess, T)( T **result, const T** sourceMatr, const size_t iRow,
     const size_t iColumn, const size_t rowCount) {
 
     if( result && sourceMatr) {
-        size_t ki, kj, di = 0, dj;
-        T *currResultAddr;
-        T *currSourceMatrAddr;
+        size_t ki, kj, di = 0, dj = 0;
+
+        /* Dealing with two-dimensional matrices and index-based operations */
+        T sourceMatrLocal[ rowCount][ rowCount];
+        memmove( sourceMatrLocal, sourceMatr, rowCount * rowCount * sizeof( T));
+
+        T resultLocal[ rowCount - 1][ rowCount - 1];
+        memset( resultLocal, 0, ( rowCount - 1) * ( rowCount - 1) * sizeof( T));
 
         for( ki = 0; ki < rowCount - 1; ++ki) {
             if( ki == iRow) {
@@ -343,13 +307,13 @@ int TEMPLATE( matrIjLess, T)( T *result, const T* sourceMatr, const size_t iRow,
                     /* Column index checking */
                     dj = 1;
                 }
-                
-                currResultAddr = result + ki * rowCount + kj;
-                currSourceMatrAddr = sourceMatr + ( ki + di) * rowCount + kj + dj;
-                *currResultAddr = *currSourceMatrAddr;
-                //            result[ ki][ kj] = sourceMatr[ ki + di][ kj + dj];
+
+                resultLocal[ ki][ kj] = sourceMatrLocal[ ki + di][ kj + dj];
             }
         }
+
+        /* Output result matrix assigning */
+        memmove( result, resultLocal, ( rowCount - 1) * ( rowCount - 1) * sizeof( T));
 
         return 0;
     }
@@ -357,43 +321,45 @@ int TEMPLATE( matrIjLess, T)( T *result, const T* sourceMatr, const size_t iRow,
     return 1;
 }
 
-/* Recursive matrix determinant calculation template
+/*! Recursive matrix determinant calculation template
  * \param[ out] result Pointer to the variable which holds the determinant value
  * \param[ in] matrix Pointer to the matrix
  * \param[ in] rowCount Matrix row count
  * \param[ in] order Matrix order
  ***************************************************************************************************
  * \return: 0 - ok, 1 - null input pointer, 2 - bad matrix order */
-int TEMPLATE( determine, T)( T *result, const T *matrix, const size_t rowCount, const int order) {
+int TEMPLATE( determine, T)( T *result, const T **matrix, const size_t rowCount, const int order) {
     if( matrix) {
-        size_t i, j = 0, k = 1, n = rowCount - 1;
+        int i, k = 1, nextOrder = rowCount - 1;
+        size_t currRowCount = rowCount;
 
-        /* Assist matrix - copy of the input one for the beginning */
-        T assistMatr[ rowCount * rowCount];
-        T *currAddr;
-        T *currAddrAssist;
-        for( i = 0; i < rowCount * rowCount; ++i) {
-            currAddr = matrix + i;
-            currAddrAssist = assistMatr + i;
-            *currAddrAssist = *currAddr;
-        }
+        /* Dealing with two-dimensional matrices and index-based operations */
+        T assistMatr[ rowCount][ rowCount];
+        memmove( assistMatr, matrix, rowCount * rowCount * sizeof( T));
+
+        T auxiliaryDet;
 
         if( order < 1) {
             printf( "\nDeterminant is uncalculable! Order is %d", order);
             return 2;
         }
         else if( 1 == order) {
-            *result = *matrix;
+            *result = assistMatr[ 0][ 0];
         }
         else if( 2 == order) {
-            *result = *matrix * ( *( matrix + rowCount + 1))
-                - ( *( matrix + rowCount)) * ( *( matrix + 1));
+            *result = assistMatr[ 0][ 0] * assistMatr[ 1][ 1]
+                - assistMatr[ 0][ 1] * assistMatr[ 1][ 0];
         }
         else {
+            T workingMatr[ nextOrder][ nextOrder];
+            memset( workingMatr, 0, nextOrder * nextOrder * sizeof( T));
+
             for( i = 0; i < order; ++i) {
-                TEMPLATE( matrIjLess, T)( matrix, assistMatr, i, 0, order);
-                *result += k * ( *( matrix + i * rowCount))
-                    * TEMPLATE( determine, T)( assistMatr, assistMatr, rowCount, n);
+                /* Column cycle */
+                TEMPLATE( matrIjLess, T)( workingMatr, assistMatr, 0, i, order);
+                TEMPLATE( determine, T)( &auxiliaryDet, workingMatr, nextOrder, nextOrder);
+                *result += k * assistMatr[ 0][ i] * auxiliaryDet;
+
                 k = -k;
             }
         }
@@ -402,61 +368,6 @@ int TEMPLATE( determine, T)( T *result, const T *matrix, const size_t rowCount, 
     }
 
     return 1;
-
-    /*// Рекурсивное вычисление определителя
-    int Determinant(int **mas, int m) {
-      int i, j, d, k, n;
-      int **p;
-      p = new int*[m];
-      for (i = 0; i<m; i++)
-        p[i] = new int[m];
-      j = 0; d = 0;
-      k = 1; //(-1) в степени i
-      n = m - 1;
-      if (m<1) cout << "Определитель вычислить невозможно!";
-      if (m == 1) {
-        d = mas[0][0];
-        return(d);
-      }
-      if (m == 2) {
-        d = mas[0][0] * mas[1][1] - (mas[1][0] * mas[0][1]);
-        return(d);
-      }
-      if (m>2) {
-        for (i = 0; i<m; i++) {
-          GetMatr(mas, p, i, 0, m);
-          cout << mas[i][j] << endl;
-          PrintMatr(p, n);
-          d = d + k * mas[i][0] * Determinant(p, n);
-          k = -k;
-        }
-      }
-      return(d);
-    }
-    // Основная функция
-    int main() {
-      int m, i, j, d;
-      int **mas;
-      system("chcp 1251");
-      system("cls");
-      cout << "Введите размерность квадратной матрицы: ";
-      cin >> m;
-      mas = new int*[m];
-      for (i = 0; i<m; i++) {
-        mas[i] = new int[m];
-        for (j = 0; j<m; j++) {
-          cout << "mas[" << i << "][" << j << "]= ";
-          cin >> mas[i][j];
-        }
-      }
-      PrintMatr(mas, m);
-      d = Determinant(mas, m);
-      cout << "Определитель матрицы равен " << d;
-      cin.get(); cin.get();
-      return 0;
-    }
-
-    return 1;*/
 }
 
 #endif
