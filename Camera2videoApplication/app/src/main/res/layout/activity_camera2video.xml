@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="16dp"
-    android:paddingTop="16dp"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
     android:gravity="center"
     tools:context="com.example.apasternak.camera2videoapplication.Camera2videoActivity">
 
@@ -15,24 +11,42 @@
         <!--android:layout_width="wrap_content"-->
         <!--android:layout_height="wrap_content">-->
         <!--android:orientation="horizontal"-->
-    <ImageButton
-        android:id="@+id/cameraImageButton"
-        android:layout_marginTop="200dp"
-        android:layout_marginRight="90dp"
+
+    <TextureView
+        android:id="@+id/textureView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"/>
+
+    <ImageButton
+        android:id="@+id/cameraImageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
         android:contentDescription="@string/camera_button"
-        android:src="@mipmap/ic_launcher_round" />
+        android:src="@mipmap/ic_launcher_round"
+        android:layout_alignTop="@+id/videoOnlineImageButton"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="39dp"
+        android:layout_marginStart="39dp"/>
 
     <ImageButton
         android:id="@+id/videoOnlineImageButton"
-        android:layout_marginTop="200dp"
-        android:layout_marginLeft="90dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
         android:contentDescription="@string/video_button"
-        android:src="@mipmap/ic_launcher" />
+        android:src="@mipmap/ic_launcher"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="37dp"
+        android:layout_marginEnd="37dp"
+        android:layout_marginBottom="36dp"/>
 
     <!--</LinearLayout>-->
 
-</LinearLayout>
+</RelativeLayout>
