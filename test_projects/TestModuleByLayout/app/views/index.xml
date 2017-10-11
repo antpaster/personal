@@ -5,6 +5,7 @@
             onOrientationChanged="streamingModule_orientationChangedHandler"
             onStreamStarted="streamingModule_streamStartedHandler"
             onStreamStopped="streamingModule_streamStoppedHandler"
+            onErrorAuth="streamingModule_errorAuthHandler"
             onErrorCamera="streamingModule_errorCameraHandler"
             onErrorServer="streamingModule_errorServerHandler"
             onErrorNetwork="streamingModule_errorNetworkHandler" />

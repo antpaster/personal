@@ -10,11 +10,17 @@ MAKE_SYSTEM_STR(EVENT_TYPE_ORIENTATION_CHANGED, @"orientationChanged");
 MAKE_SYSTEM_STR(EVENT_TYPE_STREAM_STARTED, @"streamStarted");
 MAKE_SYSTEM_STR(EVENT_TYPE_STREAM_STOPPED, @"streamStopped");
 
+MAKE_SYSTEM_STR(EVENT_TYPE_ERROR_AUTH, @"errorAuth");
 MAKE_SYSTEM_STR(EVENT_TYPE_ERROR_CAMERA, @"errorCamera");
 MAKE_SYSTEM_STR(EVENT_TYPE_ERROR_SERVER, @"errorServer");
 MAKE_SYSTEM_STR(EVENT_TYPE_ERROR_NETWORK, @"errorNetwork");
 
 #pragma mark API exposed to Javascript
+
+- (void)setAuthData:(id)args
+{
+  NSLog(@"setAuthData");
+}
 
 - (void)setURL:(id)args
 {
@@ -39,7 +45,7 @@ MAKE_SYSTEM_STR(EVENT_TYPE_ERROR_NETWORK, @"errorNetwork");
 - (NSArray *)getCameras:(id)args
 {
   NSArray *cameras = [NSArray array];
-    
+
   return cameras;
 }
 
