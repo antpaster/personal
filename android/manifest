@@ -1,0 +1,18 @@
+#
+# this is your module manifest and used by Titanium
+# during compilation, packaging, distribution, etc.
+#
+version: 1.0.0
+apiversion: 3
+architectures: armeabi-v7a x86
+description: CCTVStreamingModule
+author: Your Name
+license: Specify your license
+copyright: Copyright (c) 2017 by Your Company
+
+# these should not be edited
+name: CCTVStreamingModule
+moduleid: ru.netris.streaming
+guid: 730302be-6b6c-4796-94e9-d5cb76717b39
+platform: android
+minsdk: 6.2.2.NETRIS-r1
