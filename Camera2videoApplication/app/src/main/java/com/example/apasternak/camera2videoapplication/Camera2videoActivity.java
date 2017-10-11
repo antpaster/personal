@@ -1,27 +1,37 @@
 package com.example.apasternak.camera2videoapplication;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.support.annotation.IntDef;
-import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class Camera2videoActivity extends AppCompatActivity {
+
+    private static final int REQUEST_CAMERA_PERMISSION_RESULT = 0;
 
     /// Texture view for background
     private TextureView mTextureView;
@@ -30,6 +40,7 @@ public class Camera2videoActivity extends AppCompatActivity {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
             setupCamera(width, height);
+            connectCamera();
         }
 
         @Override
@@ -55,6 +66,8 @@ public class Camera2videoActivity extends AppCompatActivity {
         @Override
         public void onOpened(CameraDevice camera) {
             mCameraDevice = camera;
+            Toast.makeText(getApplicationContext(), "Camera connection established!",
+                Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -76,6 +89,8 @@ public class Camera2videoActivity extends AppCompatActivity {
 
     private String mCameraId;
 
+    private Size mPreviewSize;
+
     /// Orientations array
     private static SparseIntArray ORIENTATIONS = new SparseIntArray();
     static {
@@ -83,6 +98,15 @@ public class Camera2videoActivity extends AppCompatActivity {
         ORIENTATIONS.append(Surface.ROTATION_90, 90);
         ORIENTATIONS.append(Surface.ROTATION_180, 180);
         ORIENTATIONS.append(Surface.ROTATION_270, 270);
+    }
+
+    private static class CompareSizeByArea implements Comparator<Size> {
+
+        @Override
+        public int compare(Size o1, Size o2) {
+            return Long.signum((long) o1.getWidth() * o1.getHeight()
+                / (long) o2.getWidth() * o2.getHeight());
+        }
     }
 
     @Override
@@ -101,8 +125,22 @@ public class Camera2videoActivity extends AppCompatActivity {
 
         if (mTextureView.isAvailable()) {
             setupCamera(mTextureView.getWidth(), mTextureView.getHeight());
+            connectCamera();
         } else {
             mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+        int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == REQUEST_CAMERA_PERMISSION_RESULT) {
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(getApplicationContext(),
+                    "Application will not run without camera services", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -140,6 +178,9 @@ public class Camera2videoActivity extends AppCompatActivity {
                     continue;
                 }
 
+                StreamConfigurationMap map = cameraCharacteristics.get(
+                    CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+
                 int deviceOrientation = getWindowManager().getDefaultDisplay().getRotation();
                 int totalRotation = sensorToDeviceRotation(cameraCharacteristics,
                     deviceOrientation);
@@ -152,8 +193,36 @@ public class Camera2videoActivity extends AppCompatActivity {
                     rotatedHeight = width;
                 }
 
+                mPreviewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class),
+                    rotatedWidth, rotatedHeight);
+
                 mCameraId = cameraId;
                 return;
+            }
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void connectCamera() {
+        CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
+                    == PackageManager.PERMISSION_GRANTED) {
+                    cameraManager.openCamera(mCameraId, mCameraDeviceStateCallback,
+                        mBackgroundHandler);
+                } else {
+                    if (shouldShowRequestPermissionRationale(android.Manifest.permission.CAMERA)) {
+                        Toast.makeText(this, "Video app requires access to camera",
+                            Toast.LENGTH_SHORT).show();
+                    }
+                    requestPermissions(new String[] {Manifest.permission.CAMERA},
+                        REQUEST_CAMERA_PERMISSION_RESULT);
+                }
+
+            } else {
+                cameraManager.openCamera(mCameraId, mCameraDeviceStateCallback, mBackgroundHandler);
             }
         } catch (CameraAccessException e) {
             e.printStackTrace();
@@ -190,5 +259,21 @@ public class Camera2videoActivity extends AppCompatActivity {
         deviceOrientation = ORIENTATIONS.get(deviceOrientation);
 
         return (sensorOrientation + deviceOrientation + 360) % 360;
+    }
+
+    private static Size chooseOptimalSize(Size[] choices, int width, int height) {
+        List<Size> bigEnough = new ArrayList<>();
+        for (Size option : choices) {
+            if ((option.getHeight() == option.getWidth() * height / width)
+                && (option.getWidth() >= width) && (option.getHeight() >= height)) {
+                bigEnough.add(option);
+            }
+        }
+
+        if (bigEnough.size() > 0) {
+            return Collections.min(bigEnough, new CompareSizeByArea());
+        } else {
+            return choices[0];
+        }
     }
 }
