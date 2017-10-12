@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -72,7 +73,7 @@ public class QuizActivity extends AppCompatActivity {
         mCheatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Start cheat activity
+                /// Start cheat activity
                 boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
                 Intent intent = CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
                 startActivityForResult(intent, REQUEST_CODE_CHEAT);
@@ -115,6 +116,8 @@ public class QuizActivity extends AppCompatActivity {
             }
         }
 
-        Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
+        Toast toast = new Toast(getApplicationContext());
+        toast.setGravity(Gravity.TOP, 0, 0);
+        toast.makeText(getApplicationContext(), messageResId, Toast.LENGTH_SHORT).show();
     }
 }
