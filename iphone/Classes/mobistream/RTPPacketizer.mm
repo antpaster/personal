@@ -279,7 +279,6 @@ enum ServerState
 //    tonet_long(packet + 4, rtp);
 //    tonet_long(packet + 8, _ssrc);
     
-    
     packet[0] = 0x80;   // v= 2
     if (bMarker){
         packet[1] = 96 | 0x80;
