@@ -14,6 +14,7 @@ public class QuizActivity extends AppCompatActivity {
 
     private Button mTrueButton;
     private Button mFalseButton;
+    private Button mPrevButton;
     private Button mNextButton;
     private Button mCheatButton;
     private TextView mQuestionTextView;
@@ -41,6 +42,13 @@ public class QuizActivity extends AppCompatActivity {
         setContentView(R.layout.activity_quiz);
 
         mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
+        // Going to the next question by tapping the question itself
+        mQuestionTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                nextQuestion();
+            }
+        });
 
         // Widgets' references gaining
         mTrueButton = (Button) findViewById(R.id.true_button);
@@ -59,13 +67,21 @@ public class QuizActivity extends AppCompatActivity {
             }
         });
 
+        // Previous question
+        mPrevButton = (Button) findViewById(R.id.prev_button);
+        mPrevButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                prevQuestion();
+            }
+        });
+
+        // Next question
         mNextButton = (Button) findViewById(R.id.next_button);
         mNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
-                mIsCheater = false;
-                updateQuestion();
+                nextQuestion();
             }
         });
 
@@ -73,7 +89,7 @@ public class QuizActivity extends AppCompatActivity {
         mCheatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /// Start cheat activity
+                // Start cheat activity
                 boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
                 Intent intent = CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
                 startActivityForResult(intent, REQUEST_CODE_CHEAT);
@@ -119,5 +135,18 @@ public class QuizActivity extends AppCompatActivity {
         Toast toast = new Toast(getApplicationContext());
         toast.setGravity(Gravity.TOP, 0, 0);
         toast.makeText(getApplicationContext(), messageResId, Toast.LENGTH_SHORT).show();
+    }
+
+    private void prevQuestion() {
+        mCurrentIndex = (((mCurrentIndex != 0) ? mCurrentIndex : mQuestionBank.length) - 1)
+            % mQuestionBank.length;
+        mIsCheater = false;
+        updateQuestion();
+    }
+
+    private void nextQuestion() {
+        mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
+        mIsCheater = false;
+        updateQuestion();
     }
 }
