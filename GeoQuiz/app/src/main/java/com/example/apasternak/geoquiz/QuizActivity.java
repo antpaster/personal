@@ -100,6 +100,7 @@ public class QuizActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Start cheat activity
                 boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+
                 Intent intent = CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
                 startActivityForResult(intent, REQUEST_CODE_CHEAT);
             }
@@ -160,6 +161,9 @@ public class QuizActivity extends AppCompatActivity {
 
 
     private void updateQuestion() {
+        // For printing stacktrace in the Android Monitor
+        Log.d(TAG, "Updating question text", new Exception());
+
         int question = mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
 
@@ -192,7 +196,7 @@ public class QuizActivity extends AppCompatActivity {
         }
 
         Toast toast = new Toast(getApplicationContext());
-        toast.setGravity(Gravity.TOP | Gravity.LEFT, 0, 0);
+        toast.setGravity(Gravity.TOP | Gravity.START, 0, 0);
         toast.makeText(getApplicationContext(), messageResId, Toast.LENGTH_SHORT).show();
 
         mTrueButton.setEnabled(false);
