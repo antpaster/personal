@@ -17,6 +17,9 @@ public class QuizActivity extends AppCompatActivity {
     public static final String KEY_INDEX = "index";
     public static final int REQUEST_CODE_CHEAT = 0;
 
+    private int mRightAnswersCount = 0;
+    private int mWrongAnswersCount = 0;
+
     private Button mTrueButton;
     private Button mFalseButton;
     private Button mPrevButton;
@@ -162,6 +165,14 @@ public class QuizActivity extends AppCompatActivity {
 
         mTrueButton.setEnabled(true);
         mFalseButton.setEnabled(true);
+
+        if ((mRightAnswersCount + mWrongAnswersCount) == mQuestionBank.length) {
+            Toast.makeText(getApplicationContext(), "The right answers percentage is "
+                + (double) (100 * mRightAnswersCount / mQuestionBank.length),
+                Toast.LENGTH_LONG).show();
+
+            mRightAnswersCount = mWrongAnswersCount = 0;
+        }
     }
 
     private void checkAnswer(boolean userPressedTrue) {
@@ -173,8 +184,10 @@ public class QuizActivity extends AppCompatActivity {
         } else {
             if (userPressedTrue == answerIsTrue) {
                 messageResId = R.string.correct_toast;
+                mRightAnswersCount++;
             } else {
                 messageResId = R.string.incorrect_toast;
+                mWrongAnswersCount++;
             }
         }
 
