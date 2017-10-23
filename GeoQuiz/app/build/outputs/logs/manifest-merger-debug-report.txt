@@ -1,0 +1,91 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:2:1-22:12
+	package
+		ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:3:5-45
+		INJECTED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml
+		INJECTED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml
+	android:versionName
+		INJECTED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml
+		INJECTED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:2:11-69
+	android:versionCode
+		INJECTED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml
+		INJECTED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml
+application
+ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:5:5-20:19
+MERGED from [com.android.support:appcompat-v7:26.0.0-alpha1] /home/apasternak/.android/build-cache/65dae3183825d585e2b6c8c22524ff6031ebd710/output/AndroidManifest.xml:29:5-20
+MERGED from [com.android.support:support-v4:26.0.0-alpha1] /home/apasternak/.android/build-cache/6f9a13acf5bbec000f2f5f0839303398ff1d619b/output/AndroidManifest.xml:29:5-20
+MERGED from [com.android.support:support-media-compat:26.0.0-alpha1] /home/apasternak/.android/build-cache/4ba3d066df6f8060b63c8d89969f2cf597c27afb/output/AndroidManifest.xml:29:5-20
+MERGED from [com.android.support:support-fragment:26.0.0-alpha1] /home/apasternak/.android/build-cache/9d9312ac6c2d4e168902ff6d8d77e92543cb2f4e/output/AndroidManifest.xml:29:5-20
+MERGED from [com.android.support:support-core-ui:26.0.0-alpha1] /home/apasternak/.android/build-cache/f0e2d55d9e277e3e3bc9cfd8fa579dd855e06cf6/output/AndroidManifest.xml:29:5-20
+MERGED from [com.android.support:support-core-utils:26.0.0-alpha1] /home/apasternak/.android/build-cache/331b78a0112f403d47ae6e512af922a1f9fe067c/output/AndroidManifest.xml:29:5-20
+MERGED from [com.android.support:animated-vector-drawable:26.0.0-alpha1] /home/apasternak/.android/build-cache/a902b83fc7d38623b0c7e1e5e2d3571abf43165f/output/AndroidManifest.xml:26:5-20
+MERGED from [com.android.support:support-vector-drawable:26.0.0-alpha1] /home/apasternak/.android/build-cache/5866c68a6c671abbd12d595153f5908f5d7e2475/output/AndroidManifest.xml:26:5-20
+MERGED from [com.android.support:support-compat:26.0.0-alpha1] /home/apasternak/.android/build-cache/9771a09d5f977213f8b62f3ab79bda4b77edaa6a/output/AndroidManifest.xml:29:5-20
+MERGED from [com.android.support.constraint:constraint-layout:1.0.2] /home/apasternak/.android/build-cache/de40393b1a321bd390f7f5d799bcece0b2532118/output/AndroidManifest.xml:9:5-20
+	android:label
+		ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:8:9-41
+	android:supportsRtl
+		ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:10:9-35
+	android:roundIcon
+		ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:9:9-54
+	android:allowBackup
+		ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:6:9-35
+	android:icon
+		ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:7:9-43
+	android:theme
+		ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:11:9-40
+activity#com.example.apasternak.geoquiz.QuizActivity
+ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:12:9-18:20
+	android:name
+		ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:12:19-47
+intent-filter#android.intent.action.MAIN+android.intent.category.LAUNCHER
+ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:13:13-17:29
+action#android.intent.action.MAIN
+ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:14:17-69
+	android:name
+		ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:14:25-66
+category#android.intent.category.LAUNCHER
+ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:16:17-77
+	android:name
+		ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:16:27-74
+activity#com.example.apasternak.geoquiz.CheatActivity
+ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:19:9-60
+	android:name
+		ADDED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml:19:19-48
+uses-sdk
+INJECTED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
+MERGED from [com.android.support:appcompat-v7:26.0.0-alpha1] /home/apasternak/.android/build-cache/65dae3183825d585e2b6c8c22524ff6031ebd710/output/AndroidManifest.xml:21:5-23:78
+MERGED from [com.android.support:support-v4:26.0.0-alpha1] /home/apasternak/.android/build-cache/6f9a13acf5bbec000f2f5f0839303398ff1d619b/output/AndroidManifest.xml:21:5-23:54
+MERGED from [com.android.support:support-media-compat:26.0.0-alpha1] /home/apasternak/.android/build-cache/4ba3d066df6f8060b63c8d89969f2cf597c27afb/output/AndroidManifest.xml:21:5-23:63
+MERGED from [com.android.support:support-fragment:26.0.0-alpha1] /home/apasternak/.android/build-cache/9d9312ac6c2d4e168902ff6d8d77e92543cb2f4e/output/AndroidManifest.xml:21:5-23:60
+MERGED from [com.android.support:support-core-ui:26.0.0-alpha1] /home/apasternak/.android/build-cache/f0e2d55d9e277e3e3bc9cfd8fa579dd855e06cf6/output/AndroidManifest.xml:21:5-23:58
+MERGED from [com.android.support:support-core-utils:26.0.0-alpha1] /home/apasternak/.android/build-cache/331b78a0112f403d47ae6e512af922a1f9fe067c/output/AndroidManifest.xml:21:5-23:61
+MERGED from [com.android.support:animated-vector-drawable:26.0.0-alpha1] /home/apasternak/.android/build-cache/a902b83fc7d38623b0c7e1e5e2d3571abf43165f/output/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-vector-drawable:26.0.0-alpha1] /home/apasternak/.android/build-cache/5866c68a6c671abbd12d595153f5908f5d7e2475/output/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-compat:26.0.0-alpha1] /home/apasternak/.android/build-cache/9771a09d5f977213f8b62f3ab79bda4b77edaa6a/output/AndroidManifest.xml:21:5-23:58
+MERGED from [com.android.support.constraint:constraint-layout:1.0.2] /home/apasternak/.android/build-cache/de40393b1a321bd390f7f5d799bcece0b2532118/output/AndroidManifest.xml:5:5-7:41
+	tools:overrideLibrary
+		ADDED from [com.android.support:appcompat-v7:26.0.0-alpha1] /home/apasternak/.android/build-cache/65dae3183825d585e2b6c8c22524ff6031ebd710/output/AndroidManifest.xml:23:9-75
+	android:targetSdkVersion
+		INJECTED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml
+		INJECTED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml
+		INJECTED from /home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/AndroidManifest.xml
+meta-data#android.support.VERSION
+ADDED from [com.android.support:appcompat-v7:26.0.0-alpha1] /home/apasternak/.android/build-cache/65dae3183825d585e2b6c8c22524ff6031ebd710/output/AndroidManifest.xml:25:5-27:41
+MERGED from [com.android.support:support-v4:26.0.0-alpha1] /home/apasternak/.android/build-cache/6f9a13acf5bbec000f2f5f0839303398ff1d619b/output/AndroidManifest.xml:25:5-27:41
+MERGED from [com.android.support:support-media-compat:26.0.0-alpha1] /home/apasternak/.android/build-cache/4ba3d066df6f8060b63c8d89969f2cf597c27afb/output/AndroidManifest.xml:25:5-27:41
+MERGED from [com.android.support:support-fragment:26.0.0-alpha1] /home/apasternak/.android/build-cache/9d9312ac6c2d4e168902ff6d8d77e92543cb2f4e/output/AndroidManifest.xml:25:5-27:41
+MERGED from [com.android.support:support-core-ui:26.0.0-alpha1] /home/apasternak/.android/build-cache/f0e2d55d9e277e3e3bc9cfd8fa579dd855e06cf6/output/AndroidManifest.xml:25:5-27:41
+MERGED from [com.android.support:support-core-utils:26.0.0-alpha1] /home/apasternak/.android/build-cache/331b78a0112f403d47ae6e512af922a1f9fe067c/output/AndroidManifest.xml:25:5-27:41
+MERGED from [com.android.support:animated-vector-drawable:26.0.0-alpha1] /home/apasternak/.android/build-cache/a902b83fc7d38623b0c7e1e5e2d3571abf43165f/output/AndroidManifest.xml:22:5-24:41
+MERGED from [com.android.support:support-vector-drawable:26.0.0-alpha1] /home/apasternak/.android/build-cache/5866c68a6c671abbd12d595153f5908f5d7e2475/output/AndroidManifest.xml:22:5-24:41
+MERGED from [com.android.support:support-compat:26.0.0-alpha1] /home/apasternak/.android/build-cache/9771a09d5f977213f8b62f3ab79bda4b77edaa6a/output/AndroidManifest.xml:25:5-27:41
+	android:value
+		ADDED from [com.android.support:appcompat-v7:26.0.0-alpha1] /home/apasternak/.android/build-cache/65dae3183825d585e2b6c8c22524ff6031ebd710/output/AndroidManifest.xml:27:9-38
+	android:name
+		ADDED from [com.android.support:appcompat-v7:26.0.0-alpha1] /home/apasternak/.android/build-cache/65dae3183825d585e2b6c8c22524ff6031ebd710/output/AndroidManifest.xml:26:9-47

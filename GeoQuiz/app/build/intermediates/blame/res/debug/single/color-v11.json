@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "/home/apasternak/AndroidStudioProjects/GeoQuiz/app/build/intermediates/res/merged/debug/color-v11/abc_background_cache_hint_selector_material_light.xml",
+        "source": "/home/apasternak/.android/build-cache/65dae3183825d585e2b6c8c22524ff6031ebd710/output/res/color-v11/abc_background_cache_hint_selector_material_light.xml"
+    },
+    {
+        "merged": "/home/apasternak/AndroidStudioProjects/GeoQuiz/app/build/intermediates/res/merged/debug/color-v11/abc_background_cache_hint_selector_material_dark.xml",
+        "source": "/home/apasternak/.android/build-cache/65dae3183825d585e2b6c8c22524ff6031ebd710/output/res/color-v11/abc_background_cache_hint_selector_material_dark.xml"
+    }
+]

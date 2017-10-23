@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "/home/apasternak/AndroidStudioProjects/GeoQuiz/app/build/intermediates/res/merged/debug/drawable-mdpi/arrow_left.png",
+        "source": "/home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/res/drawable-mdpi/arrow_left.png"
+    },
+    {
+        "merged": "/home/apasternak/AndroidStudioProjects/GeoQuiz/app/build/intermediates/res/merged/debug/drawable-mdpi/arrow_right.png",
+        "source": "/home/apasternak/AndroidStudioProjects/GeoQuiz/app/src/main/res/drawable-mdpi/arrow_right.png"
+    }
+]
