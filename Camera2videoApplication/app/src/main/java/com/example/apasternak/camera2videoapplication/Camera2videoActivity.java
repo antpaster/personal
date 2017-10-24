@@ -10,6 +10,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaRecorder;
 import android.os.Build;
@@ -48,6 +49,41 @@ public class Camera2videoActivity extends AppCompatActivity {
 
     /// Texture view for background
     private TextureView mTextureView;
+
+    /// Camera device definition
+    private CameraDevice mCameraDevice;
+
+    /// Background thread and its handler definition
+    private HandlerThread mBackgroundHandlerThread;
+    private Handler mBackgroundHandler;
+
+    private String mCameraId;
+
+    private Size mPreviewSize;
+
+    private Size mVideoSize;
+
+    private MediaRecorder mMediaRecorder;
+
+    private int mTotalRotation;
+
+    private CaptureRequest.Builder mCaptureRequestBuilder;
+
+    private ImageButton mRecordImageButton;
+    private boolean mIsRecording = false;
+
+    private File mVideoFolder;
+    private String mVideoFileName;
+
+    /// Orientations array
+    private static SparseIntArray ORIENTATIONS = new SparseIntArray();
+    static {
+        ORIENTATIONS.append(Surface.ROTATION_0, 0);
+        ORIENTATIONS.append(Surface.ROTATION_90, 90);
+        ORIENTATIONS.append(Surface.ROTATION_180, 180);
+        ORIENTATIONS.append(Surface.ROTATION_270, 270);
+    }
+
     private TextureView.SurfaceTextureListener mSurfaceTextureListener
         = new TextureView.SurfaceTextureListener() {
         @Override
@@ -72,8 +108,6 @@ public class Camera2videoActivity extends AppCompatActivity {
         }
     };
 
-    /// Camera device definition
-    private CameraDevice mCameraDevice;
     private CameraDevice.StateCallback mCameraDeviceStateCallback
         = new CameraDevice.StateCallback() {
         @Override
@@ -108,37 +142,6 @@ public class Camera2videoActivity extends AppCompatActivity {
         }
     };
 
-    /// Background thread and its handler definition
-    private HandlerThread mBackgroundHandlerThread;
-    private Handler mBackgroundHandler;
-
-    private String mCameraId;
-
-    private Size mPreviewSize;
-
-    private Size mVideoSize;
-
-    private MediaRecorder mMediaRecorder;
-
-    private int mTotalRotation;
-
-    private CaptureRequest.Builder mCaptureRequestBuilder;
-
-    private ImageButton mRecordImageButton;
-    private boolean mIsRecording = false;
-
-    private File mVideoFolder;
-    private String mVideoFileName;
-
-    /// Orientations array
-    private static SparseIntArray ORIENTATIONS = new SparseIntArray();
-    static {
-        ORIENTATIONS.append(Surface.ROTATION_0, 0);
-        ORIENTATIONS.append(Surface.ROTATION_90, 90);
-        ORIENTATIONS.append(Surface.ROTATION_180, 180);
-        ORIENTATIONS.append(Surface.ROTATION_270, 270);
-    }
-
     private static class CompareSizeByArea implements Comparator<Size> {
 
         @Override
@@ -165,7 +168,7 @@ public class Camera2videoActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (mIsRecording) {
                     mIsRecording = false;
-                    mRecordImageButton.setImageResource(R.mipmap.ic_videocam_black_36dp);
+                    mRecordImageButton.setImageResource(R.mipmap.ic_videocam);
                     mMediaRecorder.stop();
                     mMediaRecorder.reset();
                     startPreview();
@@ -204,7 +207,7 @@ public class Camera2videoActivity extends AppCompatActivity {
         if (requestCode == REQUEST_WRITE_EXTERNAL_STORAGE_PERMISSION_RESULT) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 mIsRecording = true;
-                mRecordImageButton.setImageResource(R.mipmap.ic_videocam_off_black_36dp);
+                mRecordImageButton.setImageResource(R.mipmap.ic_videocam_off);
 
                 try {
                     createVideoFileName();
@@ -352,8 +355,22 @@ public class Camera2videoActivity extends AppCompatActivity {
 
         try {
             mCaptureRequestBuilder
-                = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+                = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             mCaptureRequestBuilder.addTarget(previewSurface);
+
+            final CameraCaptureSession.CaptureCallback mCaptureListener
+                    = new CameraCaptureSession.CaptureCallback() {
+
+                @Override
+                public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request,
+                    TotalCaptureResult result) {
+
+                    super.onCaptureCompleted(session, request, result);
+//                    Toast.makeText(getApplicationContext(), "Saved:" + file,
+//                            Toast.LENGTH_SHORT).show();
+//                    createCameraPreview();
+                }
+            };
 
             /// Capturing camera image
             mCameraDevice.createCaptureSession(Arrays.asList(previewSurface),
@@ -361,7 +378,8 @@ public class Camera2videoActivity extends AppCompatActivity {
                 @Override
                 public void onConfigured(@NonNull CameraCaptureSession session) {
                     try {
-                        session.setRepeatingRequest(mCaptureRequestBuilder.build(), null,
+                        session.setRepeatingRequest(mCaptureRequestBuilder.build(), mCaptureListener,
+//                        session.setRepeatingRequest(mCaptureRequestBuilder.build(), null,
                             mBackgroundHandler);
                     } catch (CameraAccessException e) {
                         e.printStackTrace();
@@ -451,7 +469,7 @@ public class Camera2videoActivity extends AppCompatActivity {
             if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 mIsRecording = true;
-                mRecordImageButton.setImageResource(R.mipmap.ic_videocam_off_black_36dp);
+                mRecordImageButton.setImageResource(R.mipmap.ic_videocam_off);
 
                 try {
                     createVideoFileName();
@@ -473,7 +491,7 @@ public class Camera2videoActivity extends AppCompatActivity {
             }
         } else {
             mIsRecording = true;
-            mRecordImageButton.setImageResource(R.mipmap.ic_videocam_off_black_36dp);
+            mRecordImageButton.setImageResource(R.mipmap.ic_videocam_off);
 
             try {
                 createVideoFileName();

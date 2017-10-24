@@ -110,10 +110,6 @@ public class TextOnPhotoActivity extends AppCompatActivity {
         }
     }
 
-//    private Drawable convertImagePathToDrawable(String imagePath) {
-//        return Drawable.createFromPath(imagePath);
-//    }
-
     private void displayTextBox(){
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         LayoutInflater inflater = this.getLayoutInflater();
@@ -144,7 +140,7 @@ public class TextOnPhotoActivity extends AppCompatActivity {
     }
 
     private Bitmap ProcessingBitmap(String captionString) {
-        Bitmap bm1 = null;
+        Bitmap bm1;
         Bitmap newBitmap = null;
 
         try {
@@ -185,27 +181,28 @@ public class TextOnPhotoActivity extends AppCompatActivity {
     }
 
     private void storeImage(Bitmap mBitmap, String path) {
-        OutputStream fOut = null;
-        File file = new File(path);
         try {
-            fOut = new FileOutputStream(file);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        mBitmap.compress(Bitmap.CompressFormat.JPEG, 85, fOut);
-        try {
-            fOut.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            fOut.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            MediaStore.Images.Media.insertImage(getContentResolver(), file.getAbsolutePath(),
-                file.getName(), file.getName());
+            File file = new File(path);
+
+            OutputStream fOut = new FileOutputStream(file);
+
+            mBitmap.compress(Bitmap.CompressFormat.JPEG, 85, fOut);
+            try {
+                fOut.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                fOut.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                MediaStore.Images.Media.insertImage(getContentResolver(), file.getAbsolutePath(),
+                    file.getName(), file.getName());
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
