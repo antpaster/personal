@@ -65,6 +65,9 @@
 		4D83C5981F9F6D7600B575B4 /* GpsServerConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EEF1F8FAABD0092F04A /* GpsServerConnection.m */; };
 		4D83C5991F9F6D7600B575B4 /* GeoLocationDelegate.h in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EF01F8FAABD0092F04A /* GeoLocationDelegate.h */; };
 		4D83C59A1F9F6D7600B575B4 /* GeoLocationServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EF11F8FAABD0092F04A /* GeoLocationServer.m */; };
+		4D83C59C1F9F71C500B575B4 /* ServerSettingsEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C59B1F9F71C500B575B4 /* ServerSettingsEntity.swift */; };
+		4D83C59E1F9F723B00B575B4 /* EchdError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C59D1F9F723B00B575B4 /* EchdError.swift */; };
+		4D83C5A01F9F72A100B575B4 /* SettingsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C59F1F9F72A000B575B4 /* SettingsService.swift */; };
 		AA747D9F0F9514B9006C5449 /* RuNetrisStreaming_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = AA747D9E0F9514B9006C5449 /* RuNetrisStreaming_Prefix.pch */; };
 		AACBBE4A0F95108600F1A2B1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AACBBE490F95108600F1A2B1 /* Foundation.framework */; };
 		C9797D351F8CCCAB00C0EA00 /* RuNetrisStreamingViewProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = C9797D311F8CCCAA00C0EA00 /* RuNetrisStreamingViewProxy.h */; };
@@ -128,6 +131,9 @@
 		4D073EF01F8FAABD0092F04A /* GeoLocationDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeoLocationDelegate.h; sourceTree = "<group>"; };
 		4D073EF11F8FAABD0092F04A /* GeoLocationServer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GeoLocationServer.m; sourceTree = "<group>"; };
 		4D83C5731F9F6CEB00B575B4 /* VideoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VideoService.swift; path = Classes/mobistream/VideoService.swift; sourceTree = "<group>"; };
+		4D83C59B1F9F71C500B575B4 /* ServerSettingsEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerSettingsEntity.swift; path = Classes/mobistream/ServerSettingsEntity.swift; sourceTree = "<group>"; };
+		4D83C59D1F9F723B00B575B4 /* EchdError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EchdError.swift; path = Classes/mobistream/EchdError.swift; sourceTree = "<group>"; };
+		4D83C59F1F9F72A000B575B4 /* SettingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingsService.swift; path = Classes/mobistream/SettingsService.swift; sourceTree = "<group>"; };
 		AA747D9E0F9514B9006C5449 /* RuNetrisStreaming_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RuNetrisStreaming_Prefix.pch; sourceTree = SOURCE_ROOT; };
 		AACBBE490F95108600F1A2B1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		C9797D311F8CCCAA00C0EA00 /* RuNetrisStreamingViewProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuNetrisStreamingViewProxy.h; path = Classes/RuNetrisStreamingViewProxy.h; sourceTree = "<group>"; };
@@ -204,9 +210,12 @@
 		4D073ECA1F8FAA8D0092F04A /* mobistream */ = {
 			isa = PBXGroup;
 			children = (
+				4D83C59D1F9F723B00B575B4 /* EchdError.swift */,
 				4D83C5731F9F6CEB00B575B4 /* VideoService.swift */,
 				4D073ECD1F8FAAAC0092F04A /* AACEncoder.h */,
+				4D83C59F1F9F72A000B575B4 /* SettingsService.swift */,
 				4D073EDA1F8FAAAE0092F04A /* AACEncoder.m */,
+				4D83C59B1F9F71C500B575B4 /* ServerSettingsEntity.swift */,
 				4D073ED01F8FAAAD0092F04A /* ApplicationErrors.h */,
 				4D073EDE1F8FAAAF0092F04A /* ApplicationErrors.m */,
 				4D073EE41F8FAAB00092F04A /* AudioEncoder.swift */,
@@ -366,8 +375,10 @@
 				4D83C5851F9F6D7600B575B4 /* RTPPacketizer.h in Sources */,
 				4D83C5861F9F6D7600B575B4 /* RTPPacketizer.mm in Sources */,
 				4D83C5871F9F6D7600B575B4 /* RTPPacketizer2.h in Sources */,
+				4D83C5A01F9F72A100B575B4 /* SettingsService.swift in Sources */,
 				4D83C5881F9F6D7600B575B4 /* RTPPacketizer2.mm in Sources */,
 				4D83C5891F9F6D7600B575B4 /* ServerSettings.swift in Sources */,
+				4D83C59C1F9F71C500B575B4 /* ServerSettingsEntity.swift in Sources */,
 				4D83C58A1F9F6D7600B575B4 /* SimpleConnection.h in Sources */,
 				4D83C58B1F9F6D7600B575B4 /* SimpleConnection.mm in Sources */,
 				4D83C58C1F9F6D7600B575B4 /* SimpleConnectionDelegate.h in Sources */,
@@ -387,6 +398,7 @@
 				4D83C59A1F9F6D7600B575B4 /* GeoLocationServer.m in Sources */,
 				C9797D381F8CCCAB00C0EA00 /* RuNetrisStreamingView.m in Sources */,
 				C9797D361F8CCCAB00C0EA00 /* RuNetrisStreamingViewProxy.m in Sources */,
+				4D83C59E1F9F723B00B575B4 /* EchdError.swift in Sources */,
 				24DD6CFA1134B3F500162E58 /* RuNetrisStreamingModule.m in Sources */,
 				24DE9E1211C5FE74003F90F6 /* RuNetrisStreamingModuleAssets.m in Sources */,
 			);
