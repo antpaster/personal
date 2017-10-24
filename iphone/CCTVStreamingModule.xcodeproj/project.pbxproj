@@ -68,6 +68,18 @@
 		4D83C59C1F9F71C500B575B4 /* ServerSettingsEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C59B1F9F71C500B575B4 /* ServerSettingsEntity.swift */; };
 		4D83C59E1F9F723B00B575B4 /* EchdError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C59D1F9F723B00B575B4 /* EchdError.swift */; };
 		4D83C5A01F9F72A100B575B4 /* SettingsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C59F1F9F72A000B575B4 /* SettingsService.swift */; };
+		4D83C5A81F9F75A400B575B4 /* FrameEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5A11F9F75A200B575B4 /* FrameEntity.swift */; };
+		4D83C5A91F9F75A400B575B4 /* FrameUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5A21F9F75A200B575B4 /* FrameUploader.swift */; };
+		4D83C5AA1F9F75A400B575B4 /* FrameQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5A31F9F75A300B575B4 /* FrameQueue.swift */; };
+		4D83C5AB1F9F75A400B575B4 /* FrameManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5A41F9F75A300B575B4 /* FrameManager.swift */; };
+		4D83C5AC1F9F75A400B575B4 /* UploadOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5A51F9F75A300B575B4 /* UploadOperation.swift */; };
+		4D83C5AD1F9F75A400B575B4 /* UploadOperationQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5A61F9F75A300B575B4 /* UploadOperationQueue.swift */; };
+		4D83C5AE1F9F75A400B575B4 /* SocketConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5A71F9F75A400B575B4 /* SocketConnection.swift */; };
+		4D83C5B41F9F75D800B575B4 /* StorageFrameItemTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5AF1F9F75D600B575B4 /* StorageFrameItemTransport.swift */; };
+		4D83C5B51F9F75D800B575B4 /* StorageSessionTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5B01F9F75D600B575B4 /* StorageSessionTransport.swift */; };
+		4D83C5B61F9F75D800B575B4 /* FrameStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5B11F9F75D700B575B4 /* FrameStorage.swift */; };
+		4D83C5B71F9F75D800B575B4 /* StorageRTPSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5B21F9F75D700B575B4 /* StorageRTPSession.swift */; };
+		4D83C5B81F9F75D800B575B4 /* StorageFrameItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5B31F9F75D700B575B4 /* StorageFrameItem.swift */; };
 		AA747D9F0F9514B9006C5449 /* RuNetrisStreaming_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = AA747D9E0F9514B9006C5449 /* RuNetrisStreaming_Prefix.pch */; };
 		AACBBE4A0F95108600F1A2B1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AACBBE490F95108600F1A2B1 /* Foundation.framework */; };
 		C9797D351F8CCCAB00C0EA00 /* RuNetrisStreamingViewProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = C9797D311F8CCCAA00C0EA00 /* RuNetrisStreamingViewProxy.h */; };
@@ -134,6 +146,18 @@
 		4D83C59B1F9F71C500B575B4 /* ServerSettingsEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerSettingsEntity.swift; path = Classes/mobistream/ServerSettingsEntity.swift; sourceTree = "<group>"; };
 		4D83C59D1F9F723B00B575B4 /* EchdError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EchdError.swift; path = Classes/mobistream/EchdError.swift; sourceTree = "<group>"; };
 		4D83C59F1F9F72A000B575B4 /* SettingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingsService.swift; path = Classes/mobistream/SettingsService.swift; sourceTree = "<group>"; };
+		4D83C5A11F9F75A200B575B4 /* FrameEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FrameEntity.swift; path = Classes/mobistream/FrameEntity.swift; sourceTree = "<group>"; };
+		4D83C5A21F9F75A200B575B4 /* FrameUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FrameUploader.swift; path = Classes/mobistream/FrameUploader.swift; sourceTree = "<group>"; };
+		4D83C5A31F9F75A300B575B4 /* FrameQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FrameQueue.swift; path = Classes/mobistream/FrameQueue.swift; sourceTree = "<group>"; };
+		4D83C5A41F9F75A300B575B4 /* FrameManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FrameManager.swift; path = Classes/mobistream/FrameManager.swift; sourceTree = "<group>"; };
+		4D83C5A51F9F75A300B575B4 /* UploadOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UploadOperation.swift; path = Classes/mobistream/UploadOperation.swift; sourceTree = "<group>"; };
+		4D83C5A61F9F75A300B575B4 /* UploadOperationQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UploadOperationQueue.swift; path = Classes/mobistream/UploadOperationQueue.swift; sourceTree = "<group>"; };
+		4D83C5A71F9F75A400B575B4 /* SocketConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SocketConnection.swift; path = Classes/mobistream/SocketConnection.swift; sourceTree = "<group>"; };
+		4D83C5AF1F9F75D600B575B4 /* StorageFrameItemTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StorageFrameItemTransport.swift; path = Classes/mobistream/StorageFrameItemTransport.swift; sourceTree = "<group>"; };
+		4D83C5B01F9F75D600B575B4 /* StorageSessionTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StorageSessionTransport.swift; path = Classes/mobistream/StorageSessionTransport.swift; sourceTree = "<group>"; };
+		4D83C5B11F9F75D700B575B4 /* FrameStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FrameStorage.swift; path = Classes/mobistream/FrameStorage.swift; sourceTree = "<group>"; };
+		4D83C5B21F9F75D700B575B4 /* StorageRTPSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StorageRTPSession.swift; path = Classes/mobistream/StorageRTPSession.swift; sourceTree = "<group>"; };
+		4D83C5B31F9F75D700B575B4 /* StorageFrameItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StorageFrameItem.swift; path = Classes/mobistream/StorageFrameItem.swift; sourceTree = "<group>"; };
 		AA747D9E0F9514B9006C5449 /* RuNetrisStreaming_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RuNetrisStreaming_Prefix.pch; sourceTree = SOURCE_ROOT; };
 		AACBBE490F95108600F1A2B1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		C9797D311F8CCCAA00C0EA00 /* RuNetrisStreamingViewProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuNetrisStreamingViewProxy.h; path = Classes/RuNetrisStreamingViewProxy.h; sourceTree = "<group>"; };
@@ -225,6 +249,18 @@
 				4D073EE51F8FAAB00092F04A /* InterleavedPacketizer.m */,
 				4D073ECF1F8FAAAC0092F04A /* MobiCamera.swift */,
 				4D073ED11F8FAAAD0092F04A /* Mobistreamer-Bridging-Header.h */,
+				4D83C5A11F9F75A200B575B4 /* FrameEntity.swift */,
+				4D83C5A41F9F75A300B575B4 /* FrameManager.swift */,
+				4D83C5A31F9F75A300B575B4 /* FrameQueue.swift */,
+				4D83C5B11F9F75D700B575B4 /* FrameStorage.swift */,
+				4D83C5B31F9F75D700B575B4 /* StorageFrameItem.swift */,
+				4D83C5AF1F9F75D600B575B4 /* StorageFrameItemTransport.swift */,
+				4D83C5B21F9F75D700B575B4 /* StorageRTPSession.swift */,
+				4D83C5B01F9F75D600B575B4 /* StorageSessionTransport.swift */,
+				4D83C5A21F9F75A200B575B4 /* FrameUploader.swift */,
+				4D83C5A71F9F75A400B575B4 /* SocketConnection.swift */,
+				4D83C5A51F9F75A300B575B4 /* UploadOperation.swift */,
+				4D83C5A61F9F75A300B575B4 /* UploadOperationQueue.swift */,
 				4D073ED31F8FAAAD0092F04A /* MobistreamManager.swift */,
 				4D073EDD1F8FAAAF0092F04A /* NALUnit.cpp */,
 				4D073ED21F8FAAAD0092F04A /* NALUnit.h */,
@@ -355,25 +391,30 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4D83C5AD1F9F75A400B575B4 /* UploadOperationQueue.swift in Sources */,
 				4D83C5741F9F6D7500B575B4 /* VideoService.swift in Sources */,
 				4D83C5751F9F6D7500B575B4 /* AACEncoder.h in Sources */,
 				4D83C5761F9F6D7600B575B4 /* AACEncoder.m in Sources */,
 				4D83C5771F9F6D7600B575B4 /* ApplicationErrors.h in Sources */,
 				4D83C5781F9F6D7600B575B4 /* ApplicationErrors.m in Sources */,
 				4D83C5791F9F6D7600B575B4 /* AudioEncoder.swift in Sources */,
+				4D83C5B51F9F75D800B575B4 /* StorageSessionTransport.swift in Sources */,
 				4D83C57A1F9F6D7600B575B4 /* ConnectionDelegate.h in Sources */,
 				4D83C57B1F9F6D7600B575B4 /* ConnectionManager.swift in Sources */,
 				4D83C57C1F9F6D7600B575B4 /* InterleavedPacketizer.h in Sources */,
 				4D83C57D1F9F6D7600B575B4 /* InterleavedPacketizer.m in Sources */,
+				4D83C5B81F9F75D800B575B4 /* StorageFrameItem.swift in Sources */,
 				4D83C57E1F9F6D7600B575B4 /* MobiCamera.swift in Sources */,
 				4D83C57F1F9F6D7600B575B4 /* Mobistreamer-Bridging-Header.h in Sources */,
 				4D83C5801F9F6D7600B575B4 /* MobistreamManager.swift in Sources */,
+				4D83C5B41F9F75D800B575B4 /* StorageFrameItemTransport.swift in Sources */,
 				4D83C5811F9F6D7600B575B4 /* NALUnit.cpp in Sources */,
 				4D83C5821F9F6D7600B575B4 /* NALUnit.h in Sources */,
 				4D83C5831F9F6D7600B575B4 /* NetworkUtil.h in Sources */,
 				4D83C5841F9F6D7600B575B4 /* NetworkUtil.m in Sources */,
 				4D83C5851F9F6D7600B575B4 /* RTPPacketizer.h in Sources */,
 				4D83C5861F9F6D7600B575B4 /* RTPPacketizer.mm in Sources */,
+				4D83C5AC1F9F75A400B575B4 /* UploadOperation.swift in Sources */,
 				4D83C5871F9F6D7600B575B4 /* RTPPacketizer2.h in Sources */,
 				4D83C5A01F9F72A100B575B4 /* SettingsService.swift in Sources */,
 				4D83C5881F9F6D7600B575B4 /* RTPPacketizer2.mm in Sources */,
@@ -388,16 +429,23 @@
 				4D83C5901F9F6D7600B575B4 /* VideoConnection.mm in Sources */,
 				4D83C5911F9F6D7600B575B4 /* VideoEncoder.swift in Sources */,
 				4D83C5921F9F6D7600B575B4 /* CCTVStreamingModule-Bridging-Header.h in Sources */,
+				4D83C5B61F9F75D800B575B4 /* FrameStorage.swift in Sources */,
 				4D83C5931F9F6D7600B575B4 /* GeoLocation.h in Sources */,
 				4D83C5941F9F6D7600B575B4 /* GpsServerConnection.h in Sources */,
 				4D83C5951F9F6D7600B575B4 /* LocationServer.swift in Sources */,
 				4D83C5961F9F6D7600B575B4 /* GeoLocationServer.h in Sources */,
+				4D83C5A91F9F75A400B575B4 /* FrameUploader.swift in Sources */,
+				4D83C5AE1F9F75A400B575B4 /* SocketConnection.swift in Sources */,
 				4D83C5971F9F6D7600B575B4 /* GeoLocation.m in Sources */,
 				4D83C5981F9F6D7600B575B4 /* GpsServerConnection.m in Sources */,
+				4D83C5A81F9F75A400B575B4 /* FrameEntity.swift in Sources */,
 				4D83C5991F9F6D7600B575B4 /* GeoLocationDelegate.h in Sources */,
 				4D83C59A1F9F6D7600B575B4 /* GeoLocationServer.m in Sources */,
 				C9797D381F8CCCAB00C0EA00 /* RuNetrisStreamingView.m in Sources */,
 				C9797D361F8CCCAB00C0EA00 /* RuNetrisStreamingViewProxy.m in Sources */,
+				4D83C5AB1F9F75A400B575B4 /* FrameManager.swift in Sources */,
+				4D83C5AA1F9F75A400B575B4 /* FrameQueue.swift in Sources */,
+				4D83C5B71F9F75D800B575B4 /* StorageRTPSession.swift in Sources */,
 				4D83C59E1F9F723B00B575B4 /* EchdError.swift in Sources */,
 				24DD6CFA1134B3F500162E58 /* RuNetrisStreamingModule.m in Sources */,
 				24DE9E1211C5FE74003F90F6 /* RuNetrisStreamingModuleAssets.m in Sources */,
