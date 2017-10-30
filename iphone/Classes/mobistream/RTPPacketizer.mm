@@ -278,7 +278,6 @@ enum ServerState
 //    uint64_t rtp = (uint64_t)(pts);
 //    tonet_long(packet + 4, rtp);
 //    tonet_long(packet + 8, _ssrc);
-    
     packet[0] = 0x80;   // v= 2
     if (bMarker){
         packet[1] = 96 | 0x80;
@@ -307,7 +306,6 @@ enum ServerState
 
 - (void) writeAudioHeader:(uint8_t*) packet marker:(BOOL) bMarker time:(double) pts size:(int)size
 {
-    
     packet[0] = 0x80;   // v= 2
     if (bMarker){
         packet[1] = 97 | 0x80;
