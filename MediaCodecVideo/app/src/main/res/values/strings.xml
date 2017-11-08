@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">MediaCodec Video</string>
+    <string name="capture_button">CAPTURE VIDEO</string>
+</resources>
