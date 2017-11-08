@@ -312,6 +312,20 @@ public class Camera2videoActivity extends AppCompatActivity {
         }
     }
 
+    final CameraCaptureSession.CaptureCallback mCaptureListener
+            = new CameraCaptureSession.CaptureCallback() {
+
+        @Override
+        public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request,
+                                       TotalCaptureResult result) {
+
+            super.onCaptureCompleted(session, request, result);
+//                    Toast.makeText(getApplicationContext(), "Saved:" + file,
+//                            Toast.LENGTH_SHORT).show();
+//                    createCameraPreview();
+        }
+    };
+
     private void startRecord() {
         try {
             setupMediaRecorder();
@@ -332,7 +346,8 @@ public class Camera2videoActivity extends AppCompatActivity {
                     @Override
                     public void onConfigured(@NonNull CameraCaptureSession session) {
                         try {
-                            session.setRepeatingRequest(mCaptureRequestBuilder.build(), null, null);
+                            session.setRepeatingRequest(mCaptureRequestBuilder.build(),
+                                    mCaptureListener, mBackgroundHandler);
                         } catch (CameraAccessException e) {
                             e.printStackTrace();
                         }
@@ -357,20 +372,6 @@ public class Camera2videoActivity extends AppCompatActivity {
             mCaptureRequestBuilder
                 = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             mCaptureRequestBuilder.addTarget(previewSurface);
-
-            final CameraCaptureSession.CaptureCallback mCaptureListener
-                    = new CameraCaptureSession.CaptureCallback() {
-
-                @Override
-                public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request,
-                    TotalCaptureResult result) {
-
-                    super.onCaptureCompleted(session, request, result);
-//                    Toast.makeText(getApplicationContext(), "Saved:" + file,
-//                            Toast.LENGTH_SHORT).show();
-//                    createCameraPreview();
-                }
-            };
 
             /// Capturing camera image
             mCameraDevice.createCaptureSession(Arrays.asList(previewSurface),
