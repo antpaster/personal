@@ -221,22 +221,22 @@ public class VideoToServerActivity extends AppCompatActivity implements
 
             @Override
             public void onClick(View v) {
-            Intent videoCaptureIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-//            String timeStamp = new SimpleDateFormat("ddMMyyyy_HHmmss").format(new Date());
-//
-//            File videoFolder = new File(Environment.getExternalStorageDirectory(), "RecordedVideos");
-//            videoFolder.mkdirs();
-//
-//            File video = new File(videoFolder, "VID_" + timeStamp + ".mp4");
-//            Uri uriSavedVideo = Uri.fromFile(video);
-//
-//            videoCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedVideo);
+                Intent videoCaptureIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+    //            String timeStamp = new SimpleDateFormat("ddMMyyyy_HHmmss").format(new Date());
+    //
+    //            File videoFolder = new File(Environment.getExternalStorageDirectory(), "RecordedVideos");
+    //            videoFolder.mkdirs();
+    //
+    //            File video = new File(videoFolder, "VID_" + timeStamp + ".mp4");
+    //            Uri uriSavedVideo = Uri.fromFile(video);
+    //
+    //            videoCaptureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uriSavedVideo);
 
-            if (videoCaptureIntent.resolveActivity(getPackageManager()) != null) {
-//                videoCaptureIntent.
+                if (videoCaptureIntent.resolveActivity(getPackageManager()) != null) {
+    //                videoCaptureIntent.
 
-                startActivityForResult(videoCaptureIntent, REQUEST_VIDEO_CAPTURE);
-            }
+                    startActivityForResult(videoCaptureIntent, REQUEST_VIDEO_CAPTURE);
+                }
             }
         });
     }
