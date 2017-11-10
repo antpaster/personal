@@ -370,7 +370,7 @@ public class Camera2videoActivity extends AppCompatActivity {
 
         try {
             mCaptureRequestBuilder
-                = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+                = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             mCaptureRequestBuilder.addTarget(previewSurface);
 
             /// Capturing camera image
@@ -379,9 +379,10 @@ public class Camera2videoActivity extends AppCompatActivity {
                 @Override
                 public void onConfigured(@NonNull CameraCaptureSession session) {
                     try {
-                        session.setRepeatingRequest(mCaptureRequestBuilder.build(), mCaptureListener,
-//                        session.setRepeatingRequest(mCaptureRequestBuilder.build(), null,
-                            mBackgroundHandler);
+//                        session.setRepeatingRequest(mCaptureRequestBuilder.build(), mCaptureListener,
+//                            mBackgroundHandler);
+                        session.setRepeatingRequest(mCaptureRequestBuilder.build(), null,
+                                null);
                     } catch (CameraAccessException e) {
                         e.printStackTrace();
                     }
