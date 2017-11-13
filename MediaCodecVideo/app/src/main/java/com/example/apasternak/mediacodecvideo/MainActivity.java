@@ -34,9 +34,13 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.ImageReader;
 import android.media.MediaCodec;
 import android.net.Uri;
+import android.opengl.GLSurfaceView;
+import android.os.Build;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -48,6 +52,7 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.Toast;
 import android.widget.VideoView;
 
@@ -58,6 +63,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
 
 import static android.graphics.ImageFormat.JPEG;
 
@@ -84,6 +92,9 @@ public class MainActivity extends AppCompatActivity {
     String mCameraId;
     Size mPreviewSize;
     ImageReader mImageReader;
+    SurfaceTexture mSurfaceTexture;
+    GLSurfaceView mGLSurfaceView;
+    GLSurfaceView.Renderer mRenderer;
     CaptureRequest.Builder mPreviewRequestBuilder;
     CameraCaptureSession mCaptureSession;
 
@@ -102,6 +113,8 @@ public class MainActivity extends AppCompatActivity {
     VideoView mDisplayRecordedVideo;
     Uri mUri;
     String mPathToStoredVideo;
+
+    Chronometer mChronometer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,6 +143,9 @@ public class MainActivity extends AppCompatActivity {
                 Intent videoCaptureIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
 
                 if (videoCaptureIntent.resolveActivity(getPackageManager()) != null) {
+                    mChronometer.stop();
+                    mChronometer.setVisibility(View.INVISIBLE);
+
                     startActivityForResult(videoCaptureIntent, REQUEST_VIDEO_CAPTURE);
                 }
 
@@ -142,8 +158,31 @@ public class MainActivity extends AppCompatActivity {
 //                }
             }
         });
+
+        mChronometer = findViewById(R.id.chronometer);
+
+        mGLSurfaceView = new GLSurfaceView(this);
+        mRenderer = new GLSurfaceView.Renderer() {
+            @Override
+            public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+
+            }
+
+            @Override
+            public void onSurfaceChanged(GL10 gl, int width, int height) {
+
+            }
+
+            @Override
+            public void onDrawFrame(GL10 gl) {
+
+            }
+        };
+
+        setContentView(mGLSurfaceView);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_VIDEO_CAPTURE) {
@@ -153,6 +192,19 @@ public class MainActivity extends AppCompatActivity {
 //                    android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
                 mDisplayRecordedVideo.setVideoURI(mUri);
                 mDisplayRecordedVideo.start();
+
+                // Setting the recording time counter
+                mChronometer.setBase(SystemClock.elapsedRealtime());
+                mChronometer.setVisibility(View.VISIBLE);
+                mChronometer.start();
+
+                mSurfaceTexture = new SurfaceTexture(false);
+                mSurfaceTexture.setOnFrameAvailableListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                });
 
                 mPathToStoredVideo = getRealPathFromURIPath(mUri, MainActivity.this);
                 Log.d(TAG, "Recorded Video Path " + mPathToStoredVideo);
@@ -203,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-
+            openCamera();
         }
     };
 

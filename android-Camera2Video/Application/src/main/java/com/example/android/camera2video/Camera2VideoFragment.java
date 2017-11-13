@@ -38,10 +38,14 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaRecorder;
+import android.opengl.GLSurfaceView;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v13.app.FragmentCompat;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
@@ -53,6 +57,7 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.Toast;
 
 import java.io.File;
@@ -181,6 +186,19 @@ public class Camera2VideoFragment extends Fragment
      */
     private Semaphore mCameraOpenCloseLock = new Semaphore(1);
 
+    Chronometer mChronometer;
+
+    public GLSurfaceView getGLSurfaceView() {
+        return mGLSurfaceView;
+    }
+
+    public void setGLSurfaceView(GLSurfaceView GLSurfaceView) {
+        mGLSurfaceView = GLSurfaceView;
+    }
+
+    GLSurfaceView mGLSurfaceView;
+    GLSurfaceView.Renderer mRenderer;
+
     /**
      * {@link CameraDevice.StateCallback} is called when {@link CameraDevice} changes its status.
      */
@@ -219,9 +237,13 @@ public class Camera2VideoFragment extends Fragment
     private String mNextVideoAbsolutePath;
     private CaptureRequest.Builder mPreviewBuilder;
 
-    public static Camera2VideoFragment newInstance() {
-        return new Camera2VideoFragment();
+    public Camera2VideoFragment() {
+
     }
+
+//    public static Camera2VideoFragment newInstance() {
+//        return new Camera2VideoFragment();
+//    }
 
     /**
      * In this sample, we choose a video size with 3x4 aspect ratio. Also, we don't use sizes
@@ -280,10 +302,12 @@ public class Camera2VideoFragment extends Fragment
 
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
-        mTextureView = (AutoFitTextureView) view.findViewById(R.id.texture);
-        mButtonVideo = (Button) view.findViewById(R.id.video);
+        mTextureView = view.findViewById(R.id.texture);
+        mButtonVideo = view.findViewById(R.id.video);
         mButtonVideo.setOnClickListener(this);
         view.findViewById(R.id.info).setOnClickListener(this);
+
+        mChronometer = view.findViewById(R.id.chronometer);
     }
 
     @Override
@@ -309,6 +333,9 @@ public class Camera2VideoFragment extends Fragment
         switch (view.getId()) {
             case R.id.video: {
                 if (mIsRecordingVideo) {
+                    mChronometer.stop();
+                    mChronometer.setVisibility(View.INVISIBLE);
+
                     stopRecordingVideo();
                 } else {
                     startRecordingVideo();
@@ -636,10 +663,14 @@ public class Camera2VideoFragment extends Fragment
             // Once the session starts, we can update the UI and start recording
             mCameraDevice.createCaptureSession(surfaces, new CameraCaptureSession.StateCallback() {
 
+                @RequiresApi(api = Build.VERSION_CODES.O)
                 @Override
                 public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
                     mPreviewSession = cameraCaptureSession;
                     updatePreview();
+
+                    final SurfaceTexture surface = new SurfaceTexture(true);
+
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -647,8 +678,21 @@ public class Camera2VideoFragment extends Fragment
                             mButtonVideo.setText(R.string.stop);
                             mIsRecordingVideo = true;
 
+                            surface.setOnFrameAvailableListener(new
+                                    SurfaceTexture.OnFrameAvailableListener() {
+                                @Override
+                                public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+                                    mGLSurfaceView.requestRender();
+                                }
+                            });
+
                             // Start recording
                             mMediaRecorder.start();
+
+                            // Setting the recording time counter
+                            mChronometer.setBase(SystemClock.elapsedRealtime());
+                            mChronometer.setVisibility(View.VISIBLE);
+                            mChronometer.start();
                         }
                     });
                 }
