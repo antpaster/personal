@@ -1,0 +1,25 @@
+<Alloy>
+  <Window id="container">
+    <Module id="streamingModule" module="ru.netris.streaming"
+            class="streaming_module"
+            onOrientationChanged="streamingModule_orientationChangedHandler"
+            onStreamStarted="streamingModule_streamStartedHandler"
+            onStreamStopped="streamingModule_streamStoppedHandler"
+            onErrorAuth="streamingModule_errorAuthHandler"
+            onErrorCamera="streamingModule_errorCameraHandler"
+            onErrorServer="streamingModule_errorServerHandler"
+            onErrorNetwork="streamingModule_errorNetworkHandler" />
+            
+    <View class="control_panel">
+      <Button id="torchSwitcher" class="button"
+              titleid="torch_switcher_is_on"
+              onClick="torchSwitcher_clickHandler" />
+      <Button id="startButton" class="button"
+              titleid="start_button_start"
+              onClick="startButton_clickHandler" />
+      <Button id="cameraSwitcher" class="button"
+              titleid="camera_switcher_use_front"
+              onClick="cameraSwitcher_clickHandler" />
+    </View>
+  </Window>
+</Alloy>

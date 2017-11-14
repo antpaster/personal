@@ -17,6 +17,9 @@
 package com.example.android.camera2video;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.hardware.camera2.CameraManager;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 
@@ -32,6 +35,15 @@ public class CameraActivity extends Activity {
         mCamera2videoFragment.setGLSurfaceView(mGLSurfaceView);
 
         setContentView(mCamera2videoFragment.getGLSurfaceView());
+
+        // Setting up the camera manager
+        mCamera2videoFragment.setCameraManager(
+                (CameraManager) getSystemService(Context.CAMERA_SERVICE));
+
+        // Checking whether the device has a flash
+        mCamera2videoFragment.setTorchFlag(
+                getApplicationContext().getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_CAMERA_FLASH));
 
         setContentView(R.layout.activity_camera);
         if (null == savedInstanceState) {

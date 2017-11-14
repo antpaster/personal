@@ -1,0 +1,679 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 48;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		24416B8111C4CA220047AFDD /* Build & Test */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 24416B8A11C4CA520047AFDD /* Build configuration list for PBXAggregateTarget "Build & Test" */;
+			buildPhases = (
+				24416B8011C4CA220047AFDD /* ShellScript */,
+			);
+			dependencies = (
+				24416B8511C4CA280047AFDD /* PBXTargetDependency */,
+			);
+			name = "Build & Test";
+			productName = "Build & test";
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		24DD6CF91134B3F500162E58 /* RuNetrisStreamingModule.h in Headers */ = {isa = PBXBuildFile; fileRef = 24DD6CF71134B3F500162E58 /* RuNetrisStreamingModule.h */; };
+		24DD6CFA1134B3F500162E58 /* RuNetrisStreamingModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 24DD6CF81134B3F500162E58 /* RuNetrisStreamingModule.m */; };
+		24DE9E1111C5FE74003F90F6 /* RuNetrisStreamingModuleAssets.h in Headers */ = {isa = PBXBuildFile; fileRef = 24DE9E0F11C5FE74003F90F6 /* RuNetrisStreamingModuleAssets.h */; };
+		24DE9E1211C5FE74003F90F6 /* RuNetrisStreamingModuleAssets.m in Sources */ = {isa = PBXBuildFile; fileRef = 24DE9E1011C5FE74003F90F6 /* RuNetrisStreamingModuleAssets.m */; };
+		4D83C5741F9F6D7500B575B4 /* VideoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5731F9F6CEB00B575B4 /* VideoService.swift */; };
+		4D83C5751F9F6D7500B575B4 /* AACEncoder.h in Sources */ = {isa = PBXBuildFile; fileRef = 4D073ECD1F8FAAAC0092F04A /* AACEncoder.h */; };
+		4D83C5761F9F6D7600B575B4 /* AACEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EDA1F8FAAAE0092F04A /* AACEncoder.m */; };
+		4D83C5771F9F6D7600B575B4 /* ApplicationErrors.h in Sources */ = {isa = PBXBuildFile; fileRef = 4D073ED01F8FAAAD0092F04A /* ApplicationErrors.h */; };
+		4D83C5781F9F6D7600B575B4 /* ApplicationErrors.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EDE1F8FAAAF0092F04A /* ApplicationErrors.m */; };
+		4D83C5791F9F6D7600B575B4 /* AudioEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EE41F8FAAB00092F04A /* AudioEncoder.swift */; };
+		4D83C57A1F9F6D7600B575B4 /* ConnectionDelegate.h in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EE01F8FAAAF0092F04A /* ConnectionDelegate.h */; };
+		4D83C57B1F9F6D7600B575B4 /* ConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D073ED81F8FAAAE0092F04A /* ConnectionManager.swift */; };
+		4D83C57C1F9F6D7600B575B4 /* InterleavedPacketizer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EE31F8FAAB00092F04A /* InterleavedPacketizer.h */; };
+		4D83C57D1F9F6D7600B575B4 /* InterleavedPacketizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EE51F8FAAB00092F04A /* InterleavedPacketizer.m */; };
+		4D83C57E1F9F6D7600B575B4 /* MobiCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D073ECF1F8FAAAC0092F04A /* MobiCamera.swift */; };
+		4D83C57F1F9F6D7600B575B4 /* Mobistreamer-Bridging-Header.h in Sources */ = {isa = PBXBuildFile; fileRef = 4D073ED11F8FAAAD0092F04A /* Mobistreamer-Bridging-Header.h */; };
+		4D83C5801F9F6D7600B575B4 /* MobistreamManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D073ED31F8FAAAD0092F04A /* MobistreamManager.swift */; };
+		4D83C5811F9F6D7600B575B4 /* NALUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EDD1F8FAAAF0092F04A /* NALUnit.cpp */; };
+		4D83C5821F9F6D7600B575B4 /* NALUnit.h in Sources */ = {isa = PBXBuildFile; fileRef = 4D073ED21F8FAAAD0092F04A /* NALUnit.h */; };
+		4D83C5831F9F6D7600B575B4 /* NetworkUtil.h in Sources */ = {isa = PBXBuildFile; fileRef = 4D073ECC1F8FAAAC0092F04A /* NetworkUtil.h */; };
+		4D83C5841F9F6D7600B575B4 /* NetworkUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EE61F8FAAB00092F04A /* NetworkUtil.m */; };
+		4D83C5851F9F6D7600B575B4 /* RTPPacketizer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EE71F8FAAB10092F04A /* RTPPacketizer.h */; };
+		4D83C5861F9F6D7600B575B4 /* RTPPacketizer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4D073ECE1F8FAAAC0092F04A /* RTPPacketizer.mm */; };
+		4D83C5871F9F6D7600B575B4 /* RTPPacketizer2.h in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EDB1F8FAAAE0092F04A /* RTPPacketizer2.h */; };
+		4D83C5881F9F6D7600B575B4 /* RTPPacketizer2.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4D073ED61F8FAAAD0092F04A /* RTPPacketizer2.mm */; };
+		4D83C5891F9F6D7600B575B4 /* ServerSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EDF1F8FAAAF0092F04A /* ServerSettings.swift */; };
+		4D83C58A1F9F6D7600B575B4 /* SimpleConnection.h in Sources */ = {isa = PBXBuildFile; fileRef = 4D073ED71F8FAAAE0092F04A /* SimpleConnection.h */; };
+		4D83C58B1F9F6D7600B575B4 /* SimpleConnection.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4D073ED41F8FAAAD0092F04A /* SimpleConnection.mm */; };
+		4D83C58C1F9F6D7600B575B4 /* SimpleConnectionDelegate.h in Sources */ = {isa = PBXBuildFile; fileRef = 4D073ED91F8FAAAE0092F04A /* SimpleConnectionDelegate.h */; };
+		4D83C58D1F9F6D7600B575B4 /* StreamCameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D073ED51F8FAAAD0092F04A /* StreamCameraManager.swift */; };
+		4D83C58E1F9F6D7600B575B4 /* StreamConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EE11F8FAAAF0092F04A /* StreamConnection.swift */; };
+		4D83C58F1F9F6D7600B575B4 /* VideoConnection.h in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EE81F8FAAB10092F04A /* VideoConnection.h */; };
+		4D83C5901F9F6D7600B575B4 /* VideoConnection.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EDC1F8FAAAE0092F04A /* VideoConnection.mm */; };
+		4D83C5911F9F6D7600B575B4 /* VideoEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EE21F8FAAAF0092F04A /* VideoEncoder.swift */; };
+		4D83C5921F9F6D7600B575B4 /* CCTVStreamingModule-Bridging-Header.h in Sources */ = {isa = PBXBuildFile; fileRef = 4D073ECB1F8FAAAB0092F04A /* CCTVStreamingModule-Bridging-Header.h */; };
+		4D83C5931F9F6D7600B575B4 /* GeoLocation.h in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EEA1F8FAABD0092F04A /* GeoLocation.h */; };
+		4D83C5941F9F6D7600B575B4 /* GpsServerConnection.h in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EEB1F8FAABD0092F04A /* GpsServerConnection.h */; };
+		4D83C5951F9F6D7600B575B4 /* LocationServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EEC1F8FAABD0092F04A /* LocationServer.swift */; };
+		4D83C5961F9F6D7600B575B4 /* GeoLocationServer.h in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EED1F8FAABD0092F04A /* GeoLocationServer.h */; };
+		4D83C5971F9F6D7600B575B4 /* GeoLocation.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EEE1F8FAABD0092F04A /* GeoLocation.m */; };
+		4D83C5981F9F6D7600B575B4 /* GpsServerConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EEF1F8FAABD0092F04A /* GpsServerConnection.m */; };
+		4D83C5991F9F6D7600B575B4 /* GeoLocationDelegate.h in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EF01F8FAABD0092F04A /* GeoLocationDelegate.h */; };
+		4D83C59A1F9F6D7600B575B4 /* GeoLocationServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D073EF11F8FAABD0092F04A /* GeoLocationServer.m */; };
+		4D83C59C1F9F71C500B575B4 /* ServerSettingsEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C59B1F9F71C500B575B4 /* ServerSettingsEntity.swift */; };
+		4D83C59E1F9F723B00B575B4 /* EchdError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C59D1F9F723B00B575B4 /* EchdError.swift */; };
+		4D83C5A01F9F72A100B575B4 /* SettingsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C59F1F9F72A000B575B4 /* SettingsService.swift */; };
+		4D83C5A81F9F75A400B575B4 /* FrameEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5A11F9F75A200B575B4 /* FrameEntity.swift */; };
+		4D83C5A91F9F75A400B575B4 /* FrameUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5A21F9F75A200B575B4 /* FrameUploader.swift */; };
+		4D83C5AA1F9F75A400B575B4 /* FrameQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5A31F9F75A300B575B4 /* FrameQueue.swift */; };
+		4D83C5AB1F9F75A400B575B4 /* FrameManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5A41F9F75A300B575B4 /* FrameManager.swift */; };
+		4D83C5AC1F9F75A400B575B4 /* UploadOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5A51F9F75A300B575B4 /* UploadOperation.swift */; };
+		4D83C5AD1F9F75A400B575B4 /* UploadOperationQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5A61F9F75A300B575B4 /* UploadOperationQueue.swift */; };
+		4D83C5AE1F9F75A400B575B4 /* SocketConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5A71F9F75A400B575B4 /* SocketConnection.swift */; };
+		4D83C5B41F9F75D800B575B4 /* StorageFrameItemTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5AF1F9F75D600B575B4 /* StorageFrameItemTransport.swift */; };
+		4D83C5B51F9F75D800B575B4 /* StorageSessionTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5B01F9F75D600B575B4 /* StorageSessionTransport.swift */; };
+		4D83C5B61F9F75D800B575B4 /* FrameStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5B11F9F75D700B575B4 /* FrameStorage.swift */; };
+		4D83C5B71F9F75D800B575B4 /* StorageRTPSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5B21F9F75D700B575B4 /* StorageRTPSession.swift */; };
+		4D83C5B81F9F75D800B575B4 /* StorageFrameItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D83C5B31F9F75D700B575B4 /* StorageFrameItem.swift */; };
+		AA747D9F0F9514B9006C5449 /* RuNetrisStreaming_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = AA747D9E0F9514B9006C5449 /* RuNetrisStreaming_Prefix.pch */; };
+		AACBBE4A0F95108600F1A2B1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AACBBE490F95108600F1A2B1 /* Foundation.framework */; };
+		C9797D351F8CCCAB00C0EA00 /* RuNetrisStreamingViewProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = C9797D311F8CCCAA00C0EA00 /* RuNetrisStreamingViewProxy.h */; };
+		C9797D361F8CCCAB00C0EA00 /* RuNetrisStreamingViewProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = C9797D321F8CCCAA00C0EA00 /* RuNetrisStreamingViewProxy.m */; };
+		C9797D371F8CCCAB00C0EA00 /* RuNetrisStreamingView.h in Headers */ = {isa = PBXBuildFile; fileRef = C9797D331F8CCCAA00C0EA00 /* RuNetrisStreamingView.h */; };
+		C9797D381F8CCCAB00C0EA00 /* RuNetrisStreamingView.m in Sources */ = {isa = PBXBuildFile; fileRef = C9797D341F8CCCAB00C0EA00 /* RuNetrisStreamingView.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		24416B8411C4CA280047AFDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC07D0554694100DB518D;
+			remoteInfo = CCTVStreamingModule;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		24DD6CF71134B3F500162E58 /* RuNetrisStreamingModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuNetrisStreamingModule.h; path = Classes/RuNetrisStreamingModule.h; sourceTree = "<group>"; };
+		24DD6CF81134B3F500162E58 /* RuNetrisStreamingModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RuNetrisStreamingModule.m; path = Classes/RuNetrisStreamingModule.m; sourceTree = "<group>"; };
+		24DD6D1B1134B66800162E58 /* titanium.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = titanium.xcconfig; sourceTree = "<group>"; };
+		24DE9E0F11C5FE74003F90F6 /* RuNetrisStreamingModuleAssets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuNetrisStreamingModuleAssets.h; path = Classes/RuNetrisStreamingModuleAssets.h; sourceTree = "<group>"; };
+		24DE9E1011C5FE74003F90F6 /* RuNetrisStreamingModuleAssets.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RuNetrisStreamingModuleAssets.m; path = Classes/RuNetrisStreamingModuleAssets.m; sourceTree = "<group>"; };
+		4D073ECB1F8FAAAB0092F04A /* CCTVStreamingModule-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CCTVStreamingModule-Bridging-Header.h"; sourceTree = "<group>"; };
+		4D073ECC1F8FAAAC0092F04A /* NetworkUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NetworkUtil.h; path = Classes/mobistream/NetworkUtil.h; sourceTree = "<group>"; };
+		4D073ECD1F8FAAAC0092F04A /* AACEncoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AACEncoder.h; path = Classes/mobistream/AACEncoder.h; sourceTree = "<group>"; };
+		4D073ECE1F8FAAAC0092F04A /* RTPPacketizer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = RTPPacketizer.mm; path = Classes/mobistream/RTPPacketizer.mm; sourceTree = "<group>"; };
+		4D073ECF1F8FAAAC0092F04A /* MobiCamera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MobiCamera.swift; path = Classes/mobistream/MobiCamera.swift; sourceTree = "<group>"; };
+		4D073ED01F8FAAAD0092F04A /* ApplicationErrors.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ApplicationErrors.h; path = Classes/mobistream/ApplicationErrors.h; sourceTree = "<group>"; };
+		4D073ED11F8FAAAD0092F04A /* Mobistreamer-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Mobistreamer-Bridging-Header.h"; path = "Classes/mobistream/Mobistreamer-Bridging-Header.h"; sourceTree = "<group>"; };
+		4D073ED21F8FAAAD0092F04A /* NALUnit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NALUnit.h; path = Classes/mobistream/NALUnit.h; sourceTree = "<group>"; };
+		4D073ED31F8FAAAD0092F04A /* MobistreamManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MobistreamManager.swift; path = Classes/mobistream/MobistreamManager.swift; sourceTree = "<group>"; };
+		4D073ED41F8FAAAD0092F04A /* SimpleConnection.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SimpleConnection.mm; path = Classes/mobistream/SimpleConnection.mm; sourceTree = "<group>"; };
+		4D073ED51F8FAAAD0092F04A /* StreamCameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StreamCameraManager.swift; path = Classes/mobistream/StreamCameraManager.swift; sourceTree = "<group>"; };
+		4D073ED61F8FAAAD0092F04A /* RTPPacketizer2.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = RTPPacketizer2.mm; path = Classes/mobistream/RTPPacketizer2.mm; sourceTree = "<group>"; };
+		4D073ED71F8FAAAE0092F04A /* SimpleConnection.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SimpleConnection.h; path = Classes/mobistream/SimpleConnection.h; sourceTree = "<group>"; };
+		4D073ED81F8FAAAE0092F04A /* ConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ConnectionManager.swift; path = Classes/mobistream/ConnectionManager.swift; sourceTree = "<group>"; };
+		4D073ED91F8FAAAE0092F04A /* SimpleConnectionDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SimpleConnectionDelegate.h; path = Classes/mobistream/SimpleConnectionDelegate.h; sourceTree = "<group>"; };
+		4D073EDA1F8FAAAE0092F04A /* AACEncoder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = AACEncoder.m; path = Classes/mobistream/AACEncoder.m; sourceTree = "<group>"; };
+		4D073EDB1F8FAAAE0092F04A /* RTPPacketizer2.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RTPPacketizer2.h; path = Classes/mobistream/RTPPacketizer2.h; sourceTree = "<group>"; };
+		4D073EDC1F8FAAAE0092F04A /* VideoConnection.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = VideoConnection.mm; path = Classes/mobistream/VideoConnection.mm; sourceTree = "<group>"; };
+		4D073EDD1F8FAAAF0092F04A /* NALUnit.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = NALUnit.cpp; path = Classes/mobistream/NALUnit.cpp; sourceTree = "<group>"; };
+		4D073EDE1F8FAAAF0092F04A /* ApplicationErrors.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = ApplicationErrors.m; path = Classes/mobistream/ApplicationErrors.m; sourceTree = "<group>"; };
+		4D073EDF1F8FAAAF0092F04A /* ServerSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerSettings.swift; path = Classes/mobistream/ServerSettings.swift; sourceTree = "<group>"; };
+		4D073EE01F8FAAAF0092F04A /* ConnectionDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ConnectionDelegate.h; path = Classes/mobistream/ConnectionDelegate.h; sourceTree = "<group>"; };
+		4D073EE11F8FAAAF0092F04A /* StreamConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StreamConnection.swift; path = Classes/mobistream/StreamConnection.swift; sourceTree = "<group>"; };
+		4D073EE21F8FAAAF0092F04A /* VideoEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VideoEncoder.swift; path = Classes/mobistream/VideoEncoder.swift; sourceTree = "<group>"; };
+		4D073EE31F8FAAB00092F04A /* InterleavedPacketizer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = InterleavedPacketizer.h; path = Classes/mobistream/InterleavedPacketizer.h; sourceTree = "<group>"; };
+		4D073EE41F8FAAB00092F04A /* AudioEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AudioEncoder.swift; path = Classes/mobistream/AudioEncoder.swift; sourceTree = "<group>"; };
+		4D073EE51F8FAAB00092F04A /* InterleavedPacketizer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = InterleavedPacketizer.m; path = Classes/mobistream/InterleavedPacketizer.m; sourceTree = "<group>"; };
+		4D073EE61F8FAAB00092F04A /* NetworkUtil.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = NetworkUtil.m; path = Classes/mobistream/NetworkUtil.m; sourceTree = "<group>"; };
+		4D073EE71F8FAAB10092F04A /* RTPPacketizer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RTPPacketizer.h; path = Classes/mobistream/RTPPacketizer.h; sourceTree = "<group>"; };
+		4D073EE81F8FAAB10092F04A /* VideoConnection.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VideoConnection.h; path = Classes/mobistream/VideoConnection.h; sourceTree = "<group>"; };
+		4D073EEA1F8FAABD0092F04A /* GeoLocation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeoLocation.h; sourceTree = "<group>"; };
+		4D073EEB1F8FAABD0092F04A /* GpsServerConnection.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GpsServerConnection.h; sourceTree = "<group>"; };
+		4D073EEC1F8FAABD0092F04A /* LocationServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationServer.swift; sourceTree = "<group>"; };
+		4D073EED1F8FAABD0092F04A /* GeoLocationServer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeoLocationServer.h; sourceTree = "<group>"; };
+		4D073EEE1F8FAABD0092F04A /* GeoLocation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GeoLocation.m; sourceTree = "<group>"; };
+		4D073EEF1F8FAABD0092F04A /* GpsServerConnection.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GpsServerConnection.m; sourceTree = "<group>"; };
+		4D073EF01F8FAABD0092F04A /* GeoLocationDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeoLocationDelegate.h; sourceTree = "<group>"; };
+		4D073EF11F8FAABD0092F04A /* GeoLocationServer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GeoLocationServer.m; sourceTree = "<group>"; };
+		4D83C5731F9F6CEB00B575B4 /* VideoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VideoService.swift; path = Classes/mobistream/VideoService.swift; sourceTree = "<group>"; };
+		4D83C59B1F9F71C500B575B4 /* ServerSettingsEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ServerSettingsEntity.swift; path = Classes/mobistream/ServerSettingsEntity.swift; sourceTree = "<group>"; };
+		4D83C59D1F9F723B00B575B4 /* EchdError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EchdError.swift; path = Classes/mobistream/EchdError.swift; sourceTree = "<group>"; };
+		4D83C59F1F9F72A000B575B4 /* SettingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingsService.swift; path = Classes/mobistream/SettingsService.swift; sourceTree = "<group>"; };
+		4D83C5A11F9F75A200B575B4 /* FrameEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FrameEntity.swift; path = Classes/mobistream/FrameEntity.swift; sourceTree = "<group>"; };
+		4D83C5A21F9F75A200B575B4 /* FrameUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FrameUploader.swift; path = Classes/mobistream/FrameUploader.swift; sourceTree = "<group>"; };
+		4D83C5A31F9F75A300B575B4 /* FrameQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FrameQueue.swift; path = Classes/mobistream/FrameQueue.swift; sourceTree = "<group>"; };
+		4D83C5A41F9F75A300B575B4 /* FrameManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FrameManager.swift; path = Classes/mobistream/FrameManager.swift; sourceTree = "<group>"; };
+		4D83C5A51F9F75A300B575B4 /* UploadOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UploadOperation.swift; path = Classes/mobistream/UploadOperation.swift; sourceTree = "<group>"; };
+		4D83C5A61F9F75A300B575B4 /* UploadOperationQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UploadOperationQueue.swift; path = Classes/mobistream/UploadOperationQueue.swift; sourceTree = "<group>"; };
+		4D83C5A71F9F75A400B575B4 /* SocketConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SocketConnection.swift; path = Classes/mobistream/SocketConnection.swift; sourceTree = "<group>"; };
+		4D83C5AF1F9F75D600B575B4 /* StorageFrameItemTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StorageFrameItemTransport.swift; path = Classes/mobistream/StorageFrameItemTransport.swift; sourceTree = "<group>"; };
+		4D83C5B01F9F75D600B575B4 /* StorageSessionTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StorageSessionTransport.swift; path = Classes/mobistream/StorageSessionTransport.swift; sourceTree = "<group>"; };
+		4D83C5B11F9F75D700B575B4 /* FrameStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FrameStorage.swift; path = Classes/mobistream/FrameStorage.swift; sourceTree = "<group>"; };
+		4D83C5B21F9F75D700B575B4 /* StorageRTPSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StorageRTPSession.swift; path = Classes/mobistream/StorageRTPSession.swift; sourceTree = "<group>"; };
+		4D83C5B31F9F75D700B575B4 /* StorageFrameItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StorageFrameItem.swift; path = Classes/mobistream/StorageFrameItem.swift; sourceTree = "<group>"; };
+		AA747D9E0F9514B9006C5449 /* RuNetrisStreaming_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RuNetrisStreaming_Prefix.pch; sourceTree = SOURCE_ROOT; };
+		AACBBE490F95108600F1A2B1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		C9797D311F8CCCAA00C0EA00 /* RuNetrisStreamingViewProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuNetrisStreamingViewProxy.h; path = Classes/RuNetrisStreamingViewProxy.h; sourceTree = "<group>"; };
+		C9797D321F8CCCAA00C0EA00 /* RuNetrisStreamingViewProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RuNetrisStreamingViewProxy.m; path = Classes/RuNetrisStreamingViewProxy.m; sourceTree = "<group>"; };
+		C9797D331F8CCCAA00C0EA00 /* RuNetrisStreamingView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuNetrisStreamingView.h; path = Classes/RuNetrisStreamingView.h; sourceTree = "<group>"; };
+		C9797D341F8CCCAB00C0EA00 /* RuNetrisStreamingView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RuNetrisStreamingView.m; path = Classes/RuNetrisStreamingView.m; sourceTree = "<group>"; };
+		D2AAC07E0554694100DB518D /* libru.netris.streaming.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libru.netris.streaming.a; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D2AAC07C0554694100DB518D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AACBBE4A0F95108600F1A2B1 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		034768DFFF38A50411DB9C8B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D2AAC07E0554694100DB518D /* libru.netris.streaming.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		0867D691FE84028FC02AAC07 /* CCTVStreamingModule */ = {
+			isa = PBXGroup;
+			children = (
+				08FB77AEFE84172EC02AAC07 /* Classes */,
+				32C88DFF0371C24200C91783 /* Other Sources */,
+				0867D69AFE84028FC02AAC07 /* Frameworks */,
+				034768DFFF38A50411DB9C8B /* Products */,
+			);
+			name = CCTVStreamingModule;
+			sourceTree = "<group>";
+		};
+		0867D69AFE84028FC02AAC07 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				AACBBE490F95108600F1A2B1 /* Foundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		08FB77AEFE84172EC02AAC07 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				C9797D331F8CCCAA00C0EA00 /* RuNetrisStreamingView.h */,
+				C9797D341F8CCCAB00C0EA00 /* RuNetrisStreamingView.m */,
+				C9797D311F8CCCAA00C0EA00 /* RuNetrisStreamingViewProxy.h */,
+				C9797D321F8CCCAA00C0EA00 /* RuNetrisStreamingViewProxy.m */,
+				24DE9E0F11C5FE74003F90F6 /* RuNetrisStreamingModuleAssets.h */,
+				24DE9E1011C5FE74003F90F6 /* RuNetrisStreamingModuleAssets.m */,
+				24DD6CF71134B3F500162E58 /* RuNetrisStreamingModule.h */,
+				24DD6CF81134B3F500162E58 /* RuNetrisStreamingModule.m */,
+				4D073ECA1F8FAA8D0092F04A /* mobistream */,
+			);
+			name = Classes;
+			sourceTree = "<group>";
+		};
+		32C88DFF0371C24200C91783 /* Other Sources */ = {
+			isa = PBXGroup;
+			children = (
+				AA747D9E0F9514B9006C5449 /* RuNetrisStreaming_Prefix.pch */,
+				24DD6D1B1134B66800162E58 /* titanium.xcconfig */,
+			);
+			name = "Other Sources";
+			sourceTree = "<group>";
+		};
+		4D073ECA1F8FAA8D0092F04A /* mobistream */ = {
+			isa = PBXGroup;
+			children = (
+				4D83C59D1F9F723B00B575B4 /* EchdError.swift */,
+				4D83C5731F9F6CEB00B575B4 /* VideoService.swift */,
+				4D073ECD1F8FAAAC0092F04A /* AACEncoder.h */,
+				4D83C59F1F9F72A000B575B4 /* SettingsService.swift */,
+				4D073EDA1F8FAAAE0092F04A /* AACEncoder.m */,
+				4D83C59B1F9F71C500B575B4 /* ServerSettingsEntity.swift */,
+				4D073ED01F8FAAAD0092F04A /* ApplicationErrors.h */,
+				4D073EDE1F8FAAAF0092F04A /* ApplicationErrors.m */,
+				4D073EE41F8FAAB00092F04A /* AudioEncoder.swift */,
+				4D073EE01F8FAAAF0092F04A /* ConnectionDelegate.h */,
+				4D073ED81F8FAAAE0092F04A /* ConnectionManager.swift */,
+				4D073EE31F8FAAB00092F04A /* InterleavedPacketizer.h */,
+				4D073EE51F8FAAB00092F04A /* InterleavedPacketizer.m */,
+				4D073ECF1F8FAAAC0092F04A /* MobiCamera.swift */,
+				4D073ED11F8FAAAD0092F04A /* Mobistreamer-Bridging-Header.h */,
+				4D83C5A11F9F75A200B575B4 /* FrameEntity.swift */,
+				4D83C5A41F9F75A300B575B4 /* FrameManager.swift */,
+				4D83C5A31F9F75A300B575B4 /* FrameQueue.swift */,
+				4D83C5B11F9F75D700B575B4 /* FrameStorage.swift */,
+				4D83C5B31F9F75D700B575B4 /* StorageFrameItem.swift */,
+				4D83C5AF1F9F75D600B575B4 /* StorageFrameItemTransport.swift */,
+				4D83C5B21F9F75D700B575B4 /* StorageRTPSession.swift */,
+				4D83C5B01F9F75D600B575B4 /* StorageSessionTransport.swift */,
+				4D83C5A21F9F75A200B575B4 /* FrameUploader.swift */,
+				4D83C5A71F9F75A400B575B4 /* SocketConnection.swift */,
+				4D83C5A51F9F75A300B575B4 /* UploadOperation.swift */,
+				4D83C5A61F9F75A300B575B4 /* UploadOperationQueue.swift */,
+				4D073ED31F8FAAAD0092F04A /* MobistreamManager.swift */,
+				4D073EDD1F8FAAAF0092F04A /* NALUnit.cpp */,
+				4D073ED21F8FAAAD0092F04A /* NALUnit.h */,
+				4D073ECC1F8FAAAC0092F04A /* NetworkUtil.h */,
+				4D073EE61F8FAAB00092F04A /* NetworkUtil.m */,
+				4D073EE71F8FAAB10092F04A /* RTPPacketizer.h */,
+				4D073ECE1F8FAAAC0092F04A /* RTPPacketizer.mm */,
+				4D073EDB1F8FAAAE0092F04A /* RTPPacketizer2.h */,
+				4D073ED61F8FAAAD0092F04A /* RTPPacketizer2.mm */,
+				4D073EDF1F8FAAAF0092F04A /* ServerSettings.swift */,
+				4D073ED71F8FAAAE0092F04A /* SimpleConnection.h */,
+				4D073ED41F8FAAAD0092F04A /* SimpleConnection.mm */,
+				4D073ED91F8FAAAE0092F04A /* SimpleConnectionDelegate.h */,
+				4D073ED51F8FAAAD0092F04A /* StreamCameraManager.swift */,
+				4D073EE11F8FAAAF0092F04A /* StreamConnection.swift */,
+				4D073EE81F8FAAB10092F04A /* VideoConnection.h */,
+				4D073EDC1F8FAAAE0092F04A /* VideoConnection.mm */,
+				4D073EE21F8FAAAF0092F04A /* VideoEncoder.swift */,
+				4D073ECB1F8FAAAB0092F04A /* CCTVStreamingModule-Bridging-Header.h */,
+				4D073EE91F8FAABD0092F04A /* GeoLocation */,
+			);
+			name = mobistream;
+			sourceTree = "<group>";
+		};
+		4D073EE91F8FAABD0092F04A /* GeoLocation */ = {
+			isa = PBXGroup;
+			children = (
+				4D073EEA1F8FAABD0092F04A /* GeoLocation.h */,
+				4D073EEB1F8FAABD0092F04A /* GpsServerConnection.h */,
+				4D073EEC1F8FAABD0092F04A /* LocationServer.swift */,
+				4D073EED1F8FAABD0092F04A /* GeoLocationServer.h */,
+				4D073EEE1F8FAABD0092F04A /* GeoLocation.m */,
+				4D073EEF1F8FAABD0092F04A /* GpsServerConnection.m */,
+				4D073EF01F8FAABD0092F04A /* GeoLocationDelegate.h */,
+				4D073EF11F8FAABD0092F04A /* GeoLocationServer.m */,
+			);
+			name = GeoLocation;
+			path = Classes/mobistream/GeoLocation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		D2AAC07A0554694100DB518D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA747D9F0F9514B9006C5449 /* RuNetrisStreaming_Prefix.pch in Headers */,
+				C9797D371F8CCCAB00C0EA00 /* RuNetrisStreamingView.h in Headers */,
+				24DD6CF91134B3F500162E58 /* RuNetrisStreamingModule.h in Headers */,
+				C9797D351F8CCCAB00C0EA00 /* RuNetrisStreamingViewProxy.h in Headers */,
+				24DE9E1111C5FE74003F90F6 /* RuNetrisStreamingModuleAssets.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		D2AAC07D0554694100DB518D /* CCTVStreamingModule */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB921E08733DC00010E9CD /* Build configuration list for PBXNativeTarget "CCTVStreamingModule" */;
+			buildPhases = (
+				D2AAC07A0554694100DB518D /* Headers */,
+				D2AAC07B0554694100DB518D /* Sources */,
+				D2AAC07C0554694100DB518D /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CCTVStreamingModule;
+			productName = CCTVStreamingModule;
+			productReference = D2AAC07E0554694100DB518D /* libru.netris.streaming.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0867D690FE84028FC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0800;
+				TargetAttributes = {
+					D2AAC07D0554694100DB518D = {
+						LastSwiftMigration = 0900;
+					};
+				};
+			};
+			buildConfigurationList = 1DEB922208733DC00010E9CD /* Build configuration list for PBXProject "CCTVStreamingModule" */;
+			compatibilityVersion = "Xcode 8.0";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = 0867D691FE84028FC02AAC07 /* CCTVStreamingModule */;
+			productRefGroup = 034768DFFF38A50411DB9C8B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D2AAC07D0554694100DB518D /* CCTVStreamingModule */,
+				24416B8111C4CA220047AFDD /* Build & Test */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		24416B8011C4CA220047AFDD /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here\n\npython \"${TITANIUM_SDK}/titanium.py\" run --dir=\"${PROJECT_DIR}\"\nexit $?\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D2AAC07B0554694100DB518D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4D83C5AD1F9F75A400B575B4 /* UploadOperationQueue.swift in Sources */,
+				4D83C5741F9F6D7500B575B4 /* VideoService.swift in Sources */,
+				4D83C5751F9F6D7500B575B4 /* AACEncoder.h in Sources */,
+				4D83C5761F9F6D7600B575B4 /* AACEncoder.m in Sources */,
+				4D83C5771F9F6D7600B575B4 /* ApplicationErrors.h in Sources */,
+				4D83C5781F9F6D7600B575B4 /* ApplicationErrors.m in Sources */,
+				4D83C5791F9F6D7600B575B4 /* AudioEncoder.swift in Sources */,
+				4D83C5B51F9F75D800B575B4 /* StorageSessionTransport.swift in Sources */,
+				4D83C57A1F9F6D7600B575B4 /* ConnectionDelegate.h in Sources */,
+				4D83C57B1F9F6D7600B575B4 /* ConnectionManager.swift in Sources */,
+				4D83C57C1F9F6D7600B575B4 /* InterleavedPacketizer.h in Sources */,
+				4D83C57D1F9F6D7600B575B4 /* InterleavedPacketizer.m in Sources */,
+				4D83C5B81F9F75D800B575B4 /* StorageFrameItem.swift in Sources */,
+				4D83C57E1F9F6D7600B575B4 /* MobiCamera.swift in Sources */,
+				4D83C57F1F9F6D7600B575B4 /* Mobistreamer-Bridging-Header.h in Sources */,
+				4D83C5801F9F6D7600B575B4 /* MobistreamManager.swift in Sources */,
+				4D83C5B41F9F75D800B575B4 /* StorageFrameItemTransport.swift in Sources */,
+				4D83C5811F9F6D7600B575B4 /* NALUnit.cpp in Sources */,
+				4D83C5821F9F6D7600B575B4 /* NALUnit.h in Sources */,
+				4D83C5831F9F6D7600B575B4 /* NetworkUtil.h in Sources */,
+				4D83C5841F9F6D7600B575B4 /* NetworkUtil.m in Sources */,
+				4D83C5851F9F6D7600B575B4 /* RTPPacketizer.h in Sources */,
+				4D83C5861F9F6D7600B575B4 /* RTPPacketizer.mm in Sources */,
+				4D83C5AC1F9F75A400B575B4 /* UploadOperation.swift in Sources */,
+				4D83C5871F9F6D7600B575B4 /* RTPPacketizer2.h in Sources */,
+				4D83C5A01F9F72A100B575B4 /* SettingsService.swift in Sources */,
+				4D83C5881F9F6D7600B575B4 /* RTPPacketizer2.mm in Sources */,
+				4D83C5891F9F6D7600B575B4 /* ServerSettings.swift in Sources */,
+				4D83C59C1F9F71C500B575B4 /* ServerSettingsEntity.swift in Sources */,
+				4D83C58A1F9F6D7600B575B4 /* SimpleConnection.h in Sources */,
+				4D83C58B1F9F6D7600B575B4 /* SimpleConnection.mm in Sources */,
+				4D83C58C1F9F6D7600B575B4 /* SimpleConnectionDelegate.h in Sources */,
+				4D83C58D1F9F6D7600B575B4 /* StreamCameraManager.swift in Sources */,
+				4D83C58E1F9F6D7600B575B4 /* StreamConnection.swift in Sources */,
+				4D83C58F1F9F6D7600B575B4 /* VideoConnection.h in Sources */,
+				4D83C5901F9F6D7600B575B4 /* VideoConnection.mm in Sources */,
+				4D83C5911F9F6D7600B575B4 /* VideoEncoder.swift in Sources */,
+				4D83C5921F9F6D7600B575B4 /* CCTVStreamingModule-Bridging-Header.h in Sources */,
+				4D83C5B61F9F75D800B575B4 /* FrameStorage.swift in Sources */,
+				4D83C5931F9F6D7600B575B4 /* GeoLocation.h in Sources */,
+				4D83C5941F9F6D7600B575B4 /* GpsServerConnection.h in Sources */,
+				4D83C5951F9F6D7600B575B4 /* LocationServer.swift in Sources */,
+				4D83C5961F9F6D7600B575B4 /* GeoLocationServer.h in Sources */,
+				4D83C5A91F9F75A400B575B4 /* FrameUploader.swift in Sources */,
+				4D83C5AE1F9F75A400B575B4 /* SocketConnection.swift in Sources */,
+				4D83C5971F9F6D7600B575B4 /* GeoLocation.m in Sources */,
+				4D83C5981F9F6D7600B575B4 /* GpsServerConnection.m in Sources */,
+				4D83C5A81F9F75A400B575B4 /* FrameEntity.swift in Sources */,
+				4D83C5991F9F6D7600B575B4 /* GeoLocationDelegate.h in Sources */,
+				4D83C59A1F9F6D7600B575B4 /* GeoLocationServer.m in Sources */,
+				C9797D381F8CCCAB00C0EA00 /* RuNetrisStreamingView.m in Sources */,
+				C9797D361F8CCCAB00C0EA00 /* RuNetrisStreamingViewProxy.m in Sources */,
+				4D83C5AB1F9F75A400B575B4 /* FrameManager.swift in Sources */,
+				4D83C5AA1F9F75A400B575B4 /* FrameQueue.swift in Sources */,
+				4D83C5B71F9F75D800B575B4 /* StorageRTPSession.swift in Sources */,
+				4D83C59E1F9F723B00B575B4 /* EchdError.swift in Sources */,
+				24DD6CFA1134B3F500162E58 /* RuNetrisStreamingModule.m in Sources */,
+				24DE9E1211C5FE74003F90F6 /* RuNetrisStreamingModuleAssets.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		24416B8511C4CA280047AFDD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2AAC07D0554694100DB518D /* CCTVStreamingModule */;
+			targetProxy = 24416B8411C4CA280047AFDD /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB921F08733DC00010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 24DD6D1B1134B66800162E58 /* titanium.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DSTROOT = /tmp/RuNetrisStreaming.dst;
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = RuNetrisStreaming_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = "TI_VERSION=$(TI_VERSION)";
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				GCC_VERSION = "";
+				GCC_WARN_ABOUT_RETURN_TYPE = NO;
+				GCC_WARN_MISSING_PARENTHESES = NO;
+				GCC_WARN_SHADOW = NO;
+				GCC_WARN_STRICT_SELECTOR_MATCH = NO;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_PARAMETER = NO;
+				GCC_WARN_UNUSED_VALUE = NO;
+				GCC_WARN_UNUSED_VARIABLE = NO;
+				INSTALL_PATH = /usr/local/lib;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DDEBUG",
+					"-DTI_POST_1_2",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = ru.netris.streaming;
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				RUN_CLANG_STATIC_ANALYZER = NO;
+				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "CCTVStreamingModule-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
+				USER_HEADER_SEARCH_PATHS = "";
+				WARNING_CFLAGS = "-Wno-arc-performSelector-leaks";
+			};
+			name = Debug;
+		};
+		1DEB922008733DC00010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 24DD6D1B1134B66800162E58 /* titanium.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				DSTROOT = /tmp/RuNetrisStreaming.dst;
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = RuNetrisStreaming_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = "TI_VERSION=$(TI_VERSION)";
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				GCC_VERSION = "";
+				GCC_WARN_ABOUT_RETURN_TYPE = NO;
+				GCC_WARN_MISSING_PARENTHESES = NO;
+				GCC_WARN_SHADOW = NO;
+				GCC_WARN_STRICT_SELECTOR_MATCH = NO;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_PARAMETER = NO;
+				GCC_WARN_UNUSED_VALUE = NO;
+				GCC_WARN_UNUSED_VARIABLE = NO;
+				INSTALL_PATH = /usr/local/lib;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = "-DTI_POST_1_2";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = ru.netris.streaming;
+				RUN_CLANG_STATIC_ANALYZER = NO;
+				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "CCTVStreamingModule-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
+				USER_HEADER_SEARCH_PATHS = "";
+				WARNING_CFLAGS = "-Wno-arc-performSelector-leaks";
+			};
+			name = Release;
+		};
+		1DEB922308733DC00010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 24DD6D1B1134B66800162E58 /* titanium.xcconfig */;
+			buildSettings = {
+				CLANG_CXX_LIBRARY = "libstdc++";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DSTROOT = /tmp/RuNetrisStreaming.dst;
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = RuNetrisStreaming_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = "TI_VERSION=$(TI_VERSION)";
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				GCC_VERSION = "";
+				GCC_WARN_ABOUT_RETURN_TYPE = NO;
+				GCC_WARN_MISSING_PARENTHESES = NO;
+				GCC_WARN_SHADOW = NO;
+				GCC_WARN_STRICT_SELECTOR_MATCH = NO;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_PARAMETER = NO;
+				GCC_WARN_UNUSED_VALUE = NO;
+				GCC_WARN_UNUSED_VARIABLE = NO;
+				INSTALL_PATH = /usr/local/lib;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = (
+					"-DDEBUG",
+					"-DTI_POST_1_2",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = ru.netris.streaming;
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
+				RUN_CLANG_STATIC_ANALYZER = NO;
+				SDKROOT = iphoneos;
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Debug;
+		};
+		1DEB922408733DC00010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 24DD6D1B1134B66800162E58 /* titanium.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LIBRARY = "libstdc++";
+				DSTROOT = /tmp/RuNetrisStreaming.dst;
+				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = RuNetrisStreaming_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = "TI_VERSION=$(TI_VERSION)";
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				GCC_VERSION = "";
+				GCC_WARN_ABOUT_RETURN_TYPE = NO;
+				GCC_WARN_MISSING_PARENTHESES = NO;
+				GCC_WARN_SHADOW = NO;
+				GCC_WARN_STRICT_SELECTOR_MATCH = NO;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_PARAMETER = NO;
+				GCC_WARN_UNUSED_VALUE = NO;
+				GCC_WARN_UNUSED_VARIABLE = NO;
+				INSTALL_PATH = /usr/local/lib;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				OTHER_CFLAGS = "-DTI_POST_1_2";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = ru.netris.streaming;
+				RUN_CLANG_STATIC_ANALYZER = NO;
+				SDKROOT = iphoneos;
+				USER_HEADER_SEARCH_PATHS = "";
+			};
+			name = Release;
+		};
+		24416B8211C4CA220047AFDD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 24DD6D1B1134B66800162E58 /* titanium.xcconfig */;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Build & test";
+			};
+			name = Debug;
+		};
+		24416B8311C4CA220047AFDD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 24DD6D1B1134B66800162E58 /* titanium.xcconfig */;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = "Build & test";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB921E08733DC00010E9CD /* Build configuration list for PBXNativeTarget "CCTVStreamingModule" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB921F08733DC00010E9CD /* Debug */,
+				1DEB922008733DC00010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1DEB922208733DC00010E9CD /* Build configuration list for PBXProject "CCTVStreamingModule" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB922308733DC00010E9CD /* Debug */,
+				1DEB922408733DC00010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		24416B8A11C4CA520047AFDD /* Build configuration list for PBXAggregateTarget "Build & Test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				24416B8211C4CA220047AFDD /* Debug */,
+				24416B8311C4CA220047AFDD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0867D690FE84028FC02AAC07 /* Project object */;
+}
