@@ -780,6 +780,9 @@ public class Camera2VideoFragment extends Fragment
             texture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
             mPreviewBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
 
+//            mPreviewBuilder.set(CaptureRequest.FLASH_MODE, mTorchOnFlag
+//                    ? CameraMetadata.FLASH_MODE_TORCH : CameraMetadata.FLASH_MODE_OFF);
+
             Surface previewSurface = new Surface(texture);
             mPreviewBuilder.addTarget(previewSurface);
 

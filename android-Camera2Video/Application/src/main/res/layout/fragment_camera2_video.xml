@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|left"
             android:padding="20dp"
-            android:src="@mipmap/flash_on" />
+            android:src="@mipmap/flash_off" />
 
         <Button
             android:id="@+id/video"
