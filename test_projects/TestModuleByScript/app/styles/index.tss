@@ -1,0 +1,55 @@
+"Window": {
+	width: "100%",
+	height: "100%",
+  exitOnClose: true,
+  backgroundColor: "#CCCCCC",
+  orientationModes: [
+				      Ti.UI.PORTRAIT,
+				      Ti.UI.UPSIDE_PORTRAIT,
+				      Ti.UI.LANDSCAPE_LEFT, 
+				      Ti.UI.LANDSCAPE_RIGHT
+				    ]
+}
+
+"Window[platform=android]": {
+	theme: "Theme.NoActionBar",	
+}
+
+".streaming_module_container": {
+	top: 0,
+	bottom: 50,
+	left: 0,
+	right: 0
+}
+
+".streaming_module": {
+	width: "100%",
+	height: "100%",
+	backgroundColor: "#DDFFDD"
+}
+
+".control_panel": {
+	bottom: 0,
+	height: 50
+}
+
+".button": {
+	height: 50,
+	width: "25%",
+	backgroundColor: "#00DDDD"
+}
+
+"#torchSwitcher": {
+	left: 10
+}
+
+"#startButton": {
+	center: {
+		x: "50%",
+		y: "50%"
+	}
+}
+
+"#cameraSwitcher": {
+	right: 10
+}
