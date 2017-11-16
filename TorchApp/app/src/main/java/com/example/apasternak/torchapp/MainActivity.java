@@ -1,6 +1,8 @@
 package com.example.apasternak.torchapp;
 
 import android.content.Context;
+import android.content.Intent;
+import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraManager;
 import android.media.MediaPlayer;
 import android.os.Build;
@@ -12,6 +14,7 @@ import android.widget.ImageButton;
 public class MainActivity extends AppCompatActivity {
 
     ImageButton mTorchOn;
+    ImageButton mTorchOff;
     boolean mTorchOnFlag = false;
     String mCameraId;
     CameraManager mCameraManager;
@@ -22,28 +25,52 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mTorchOn = findViewById(R.id.flash);
+        mCameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+        try {
+            mCameraId = mCameraManager.getCameraIdList()[0];
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+
+        mTorchOn = findViewById(R.id.flash_on);
         mTorchOn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    mCameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-                    mCameraId = mCameraManager.getCameraIdList()[0];
+                startService(v);
 
+                try {
+                    if (!mTorchOnFlag) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            mCameraManager.setTorchMode(mCameraId, true);
+//                            playOnOffSound();
+
+                            mTorchOn.setVisibility(View.INVISIBLE);
+                            mTorchOff.setVisibility(View.VISIBLE);
+                        }
+                        mTorchOnFlag = true;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        mTorchOff = findViewById(R.id.flash_off);
+        mTorchOff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stopService(v);
+
+                try {
                     if (mTorchOnFlag) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             mCameraManager.setTorchMode(mCameraId, false);
-                            playOnOffSound();
-                            mTorchOn.setImageResource(R.mipmap.flash_on);
+//                            playOnOffSound();
+
+                            mTorchOff.setVisibility(View.INVISIBLE);
+                            mTorchOn.setVisibility(View.VISIBLE);
                         }
                         mTorchOnFlag = false;
-                    } else {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            mCameraManager.setTorchMode(mCameraId, true);
-                            playOnOffSound();
-                            mTorchOn.setImageResource(R.mipmap.flash_off);
-                        }
-                        mTorchOnFlag = true;
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -63,5 +90,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mMediaPlayer.start();
+    }
+
+    public void startService(View view) {
+        startService(new Intent(getBaseContext(), TorchService.class));
+    }
+
+    public void stopService(View view) {
+        stopService(new Intent(getBaseContext(), TorchService.class));
     }
 }
