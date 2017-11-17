@@ -10,11 +10,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 
 public class MainActivity extends AppCompatActivity {
 
-    ImageButton mTorchOn;
-    ImageButton mTorchOff;
+    ImageButton mToggleTorch;
     boolean mTorchOnFlag = false;
     String mCameraId;
     CameraManager mCameraManager;
@@ -32,8 +32,8 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        mTorchOn = findViewById(R.id.flash_on);
-        mTorchOn.setOnClickListener(new View.OnClickListener() {
+        mToggleTorch = findViewById(R.id.flash);
+        mToggleTorch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startService(v);
@@ -42,33 +42,16 @@ public class MainActivity extends AppCompatActivity {
                     if (!mTorchOnFlag) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             mCameraManager.setTorchMode(mCameraId, true);
-//                            playOnOffSound();
-
-                            mTorchOn.setVisibility(View.INVISIBLE);
-                            mTorchOff.setVisibility(View.VISIBLE);
+                            mToggleTorch.setImageResource(R.mipmap.flash_off);
+                            playOnOffSound(true);
                         }
                         mTorchOnFlag = true;
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        mTorchOff = findViewById(R.id.flash_off);
-        mTorchOff.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stopService(v);
-
-                try {
-                    if (mTorchOnFlag) {
+                    else {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             mCameraManager.setTorchMode(mCameraId, false);
-//                            playOnOffSound();
-
-                            mTorchOff.setVisibility(View.INVISIBLE);
-                            mTorchOn.setVisibility(View.VISIBLE);
+                            mToggleTorch.setImageResource(R.mipmap.flash_on);
+                            playOnOffSound(false);
                         }
                         mTorchOnFlag = false;
                     }
@@ -79,8 +62,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    void playOnOffSound() {
-        mMediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.haha);
+    void playOnOffSound(boolean isOn) {
+        if (isOn)
+            mMediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.lightsaber_on);
+        else
+            mMediaPlayer = MediaPlayer.create(MainActivity.this, R.raw.lightsaber_off);
+
         mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 
             @Override
