@@ -37,9 +37,7 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
-import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.net.Uri;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -974,10 +972,8 @@ public class Camera2VideoFragment extends Fragment
                     mChronometer.stop();
                     mChronometer.setVisibility(View.INVISIBLE);
 
-//                    stopRecordingVideo();
                     stopCamera();
                 } else {
-//                    startRecordingVideo();
                     startCamera();
                 }
                 break;
@@ -1196,7 +1192,6 @@ public class Camera2VideoFragment extends Fragment
                         @Override
                         public void onConfigured(@NonNull CameraCaptureSession session) {
                             mPreviewSession = session;
-//                            updatePreview();
                             updateFrame();
                         }
 
@@ -1212,23 +1207,6 @@ public class Camera2VideoFragment extends Fragment
             e.printStackTrace();
         }
     }
-
-//    /**
-//     * Update the camera preview. {@link #startPreview()} needs to be called in advance.
-//     */
-//    private void updatePreview() {
-//        if (null == mCameraDevice) {
-//            return;
-//        }
-//        try {
-//            setUpCaptureRequestBuilder(mPreviewBuilder);
-//            HandlerThread thread = new HandlerThread("CameraPreview");
-//            thread.start();
-//            mPreviewSession.setRepeatingRequest(mPreviewBuilder.build(), null, mBackgroundHandler);
-//        } catch (CameraAccessException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     private void setUpCaptureRequestBuilder(CaptureRequest.Builder builder) {
         builder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
@@ -1265,115 +1243,11 @@ public class Camera2VideoFragment extends Fragment
         mTextureView.setTransform(matrix);
     }
 
-//    private void setUpMediaRecorder() throws IOException {
-//        final Activity activity = getActivity();
-//        if (null == activity) {
-//            return;
-//        }
-//        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-//        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
-//        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-//        if (mNextVideoAbsolutePath == null || mNextVideoAbsolutePath.isEmpty()) {
-//            mNextVideoAbsolutePath = getVideoFilePath(getActivity());
-//        }
-//        mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
-//        mMediaRecorder.setVideoEncodingBitRate(10000000);
-//        mMediaRecorder.setVideoFrameRate(30);
-//        mMediaRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
-//        mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-//        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-//        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
-//        switch (mSensorOrientation) {
-//            case SENSOR_ORIENTATION_DEFAULT_DEGREES:
-//                mMediaRecorder.setOrientationHint(DEFAULT_ORIENTATIONS.get(rotation));
-//                break;
-//            case SENSOR_ORIENTATION_INVERSE_DEGREES:
-//                mMediaRecorder.setOrientationHint(INVERSE_ORIENTATIONS.get(rotation));
-//                break;
-//        }
-//        mMediaRecorder.prepare();
-//    }
-
     private String getVideoFilePath(Context context) {
         final File dir = context.getExternalFilesDir(null);
         return (dir == null ? "" : (dir.getAbsolutePath() + "/"))
                 + System.currentTimeMillis() + ".mp4";
     }
-
-//    private void startRecordingVideo() {
-//        if (null == mCameraDevice || !mTextureView.isAvailable() || null == mPreviewSize) {
-//            return;
-//        }
-//        try {
-//            closePreviewSession();
-//            configureCamera();
-////            setUpMediaRecorder();
-//            SurfaceTexture texture = mTextureView.getSurfaceTexture();
-//            assert texture != null;
-//            texture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
-//            mPreviewBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
-//            List<Surface> surfaces = new ArrayList<>();
-//
-//            // Set up Surface for the camera preview
-//            Surface previewSurface = new Surface(texture);
-//            surfaces.add(previewSurface);
-//            mPreviewBuilder.addTarget(previewSurface);
-//
-//            // Set up Surface for the MediaRecorder
-//            Surface recorderSurface = mMediaRecorder.getSurface();
-//            surfaces.add(recorderSurface);
-//            mPreviewBuilder.addTarget(recorderSurface);
-//
-//            // Start a capture session
-//            // Once the session starts, we can update the UI and start recording
-//            mCameraDevice.createCaptureSession(surfaces, new CameraCaptureSession.StateCallback() {
-//
-//                @RequiresApi(api = Build.VERSION_CODES.O)
-//                @Override
-//                public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
-//                    mPreviewSession = cameraCaptureSession;
-//                    updatePreview();
-//
-//                    final SurfaceTexture surface = new SurfaceTexture(true);
-//
-//                    getActivity().runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            // UI
-//                            mButtonVideo.setText(R.string.stop);
-//                            mIsRecordingVideo = true;
-//
-//                            surface.setOnFrameAvailableListener(new
-//                                    SurfaceTexture.OnFrameAvailableListener() {
-//                                @Override
-//                                public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-//                                    mGLSurfaceView.requestRender();
-//                                }
-//                            });
-//
-//                            // Start recording
-//                            mMediaRecorder.start();
-//
-//                            // Setting the recording time counter
-//                            mChronometer.setBase(SystemClock.elapsedRealtime());
-//                            mChronometer.setVisibility(View.VISIBLE);
-//                            mChronometer.start();
-//                        }
-//                    });
-//                }
-//
-//                @Override
-//                public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
-//                    Activity activity = getActivity();
-//                    if (null != activity) {
-//                        Toast.makeText(activity, "Failed", Toast.LENGTH_SHORT).show();
-//                    }
-//                }
-//            }, mBackgroundHandler);
-//        } catch (CameraAccessException/* | IOException*/ e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     private void closePreviewSession() {
         if (mPreviewSession != null) {
@@ -1381,24 +1255,6 @@ public class Camera2VideoFragment extends Fragment
             mPreviewSession = null;
         }
     }
-
-//    private void stopRecordingVideo() {
-//        // UI
-//        mIsRecordingVideo = false;
-//        mButtonVideo.setText(R.string.record);
-//        // Stop recording
-//        mMediaRecorder.stop();
-//        mMediaRecorder.reset();
-//
-//        Activity activity = getActivity();
-//        if (null != activity) {
-//            Toast.makeText(activity, "Video saved: " + mNextVideoAbsolutePath,
-//                    Toast.LENGTH_SHORT).show();
-//            Log.d(TAG, "Video saved: " + mNextVideoAbsolutePath);
-//        }
-//        mNextVideoAbsolutePath = null;
-//        startPreview();
-//    }
 
     /**
      * Compares two {@code Size}s based on their areas.
