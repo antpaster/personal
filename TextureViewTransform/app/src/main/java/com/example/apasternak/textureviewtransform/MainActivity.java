@@ -21,6 +21,7 @@ import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.SurfaceTexture;
 import android.graphics.drawable.Drawable;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
@@ -56,13 +57,20 @@ public class MainActivity extends AppCompatActivity {
     String mImagePath = "";
     ImageView mImageView;
 
+    Intent mCurrentIntent;
+
     @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mCurrentIntent = getIntent();
+
         mTextureView = findViewById(R.id.textureView);
+        assert mTextureView != null;
+        mTextureView.setSurfaceTextureListener(mTextureListener);
+
         mImageView = findViewById(R.id.imageView);
 
         mInsertImageButton = findViewById(R.id.insert);
@@ -88,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                Bitmap bm = ProcessingBitmap(mStringForDrawing);
+                Bitmap bm = writeTextOnBitmap(mStringForDrawing);
 
                 mImageView.setImageBitmap(bm);
 
@@ -100,6 +108,50 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    TextureView.SurfaceTextureListener mTextureListener = new TextureView.SurfaceTextureListener() {
+        @Override
+        public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+            cameraImageCapture("");
+        }
+
+        @Override
+        public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+
+        }
+
+        @Override
+        public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+            return false;
+        }
+
+        @Override
+        public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+
+        }
+    };
+
+    // Camera state changing handling
+    private final CameraDevice.StateCallback mStateCallback = new CameraDevice.StateCallback() {
+        @Override
+        public void onOpened(@NonNull CameraDevice camera) {
+            // Camera is opened
+            mCameraDevice = camera;
+            createCameraPreview();
+        }
+
+        @Override
+        public void onDisconnected(@NonNull CameraDevice camera) {
+            camera.close();
+//            mCameraDevice = null;
+        }
+
+        @Override
+        public void onError(@NonNull CameraDevice camera, int error) {
+            camera.close();
+            mCameraDevice = null;
+        }
+    };
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -122,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
 
     Uri pickedImage;
 
-    Bitmap ProcessingBitmap(String captionString) {
+    Bitmap writeTextOnBitmap(String captionString) {
         Bitmap bm1;
         Bitmap newBitmap = null;
 //        try {
@@ -212,38 +264,6 @@ public class MainActivity extends AppCompatActivity {
     Handler mBackgroundHandler;
 
     Semaphore mCameraOpenCloseLock = new Semaphore(1);
-
-    CameraDevice.StateCallback mStateCallback = new CameraDevice.StateCallback() {
-
-        @Override
-        public void onOpened(@NonNull CameraDevice cameraDevice) {
-            mCameraDevice = cameraDevice;
-            startPreview();
-            mCameraOpenCloseLock.release();
-            if (null != mTextureView) {
-                configureTransform(mTextureView.getWidth(), mTextureView.getHeight());
-            }
-        }
-
-        @Override
-        public void onDisconnected(@NonNull CameraDevice cameraDevice) {
-            mCameraOpenCloseLock.release();
-            cameraDevice.close();
-            mCameraDevice = null;
-        }
-
-        @Override
-        public void onError(@NonNull CameraDevice cameraDevice, int error) {
-            mCameraOpenCloseLock.release();
-            cameraDevice.close();
-            mCameraDevice = null;
-            Activity activity = getActivity();
-            if (null != activity) {
-                activity.finish();
-            }
-        }
-
-    };
 
     void cameraImageCapture(String path) {
         if (null == mCameraDevice || !mTextureView.isAvailable())
