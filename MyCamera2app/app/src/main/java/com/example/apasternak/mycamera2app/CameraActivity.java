@@ -15,6 +15,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
+import android.graphics.drawable.Drawable;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -27,6 +28,8 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.net.Uri;
+import android.opengl.GLES20;
+import android.opengl.GLUtils;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
@@ -60,6 +63,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import javax.microedition.khronos.opengles.GL10;
 
 import static android.app.PendingIntent.getActivity;
 import static android.graphics.ImageFormat.JPEG;
@@ -100,8 +105,6 @@ public class CameraActivity extends AppCompatActivity {
         INVERSE_ORIENTATIONS.append(Surface.ROTATION_270, 0);
     }
 
-    /**********************************************************************************************/
-    // Camera section
     private String mCameraId;
     private CameraDevice mCameraDevice;
     private CameraCaptureSession mCaptureSession;
@@ -117,6 +120,8 @@ public class CameraActivity extends AppCompatActivity {
     private boolean mFlashSupported;
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
+
+    CameraActivity mActivity = this;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -231,7 +236,7 @@ public class CameraActivity extends AppCompatActivity {
                     (float) viewHeight / mPreviewSize.getHeight(),
                     (float) viewWidth / mPreviewSize.getWidth());
             matrix.postScale(scale, scale, centerX, centerY);
-            matrix.postRotate(90 * (rotation - 2), centerX, centerY); // todo deal with it
+            matrix.postRotate(90 * (rotation - 2), centerX, centerY);
         }
         mTextureView.setTransform(matrix);
     }
@@ -253,7 +258,6 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
-    Uri mPickedImage;
     String mCapturedImagePath;
 
     Bitmap writeTextOnBitmap(Bitmap source, String captionString) {
@@ -271,29 +275,102 @@ public class CameraActivity extends AppCompatActivity {
         newBitmap = Bitmap.createBitmap(source.getWidth(), source.getHeight(), config);
 
         Canvas canvas = new Canvas(newBitmap);
-        canvas.drawBitmap(source, 0, 0, null);
+        newBitmap.eraseColor(0);
 
-        Paint paintText = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paintText.setColor(Color.RED);
+//        // get a background image from resources
+//// note the image format must match the bitmap format
+//        Drawable background = context.getResources().getDrawable(R.drawable.background);
+//        background.setBounds(0, 0, 256, 256);
+//        background.draw(canvas); // draw the background to our bitmap
 
-        float textSizePx = 100;
-        paintText.setTextSize(textSizePx);
-        paintText.setStyle(Paint.Style.FILL);
-        paintText.setShadowLayer(10f, 10f, 10f, Color.BLACK);
+// Draw the text
+        Paint textPaint = new Paint();
+        textPaint.setTextSize(32);
+        textPaint.setAntiAlias(true);
+        textPaint.setARGB(0xff, 0x00, 0x00, 0x00);
+// draw the text centered
+        canvas.drawText("Hello World", 16,112, textPaint);
 
-        Rect textRect = new Rect();
-        paintText.getTextBounds(captionString, 0, captionString.length(), textRect);
+        GLES20 gl = new GLES20();
+        int[] textures = new int[10];
 
-        if (textRect.width() >= (canvas.getWidth() - 4))
-            paintText.setTextSize(20);
+//Generate one texture pointer...
+        gl.glGenTextures(1, textures, 0);
+//...and bind it to our array
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, textures[0]);
 
-        int xPos = (canvas.getWidth() / 2) - 2;
-        int yPos = (int) ((canvas.getHeight() / 2) - ((paintText.descent() + paintText.ascent())
-                / 2)) ;
+//Create Nearest Filtered Texture
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
 
-        canvas.drawText(captionString, 0, textSizePx, paintText);
+//Different possible texture parameters, e.g. GL10.GL_CLAMP_TO_EDGE
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_REPEAT);
+        gl.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_REPEAT);
+
+//Use the Android GLUtils to specify a two-dimensional texture image from our bitmap
+        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, newBitmap, 0);
+
+//        canvas.drawBitmap(source, 0, 0, null);
+//
+//        Paint paintText = new Paint(Paint.ANTI_ALIAS_FLAG);
+//        paintText.setColor(Color.RED);
+//
+//        float textSizePx = 100;
+//        paintText.setTextSize(textSizePx);
+//        paintText.setStyle(Paint.Style.FILL);
+//        paintText.setShadowLayer(10f, 10f, 10f, Color.BLACK);
+//
+//        Rect textRect = new Rect();
+//        paintText.getTextBounds(captionString, 0, captionString.length(), textRect);
+//
+//        if (textRect.width() >= (canvas.getWidth() - 4))
+//            paintText.setTextSize(20);
+//
+//        int xPos = (canvas.getWidth() / 2) - 2;
+//        int yPos = (int) ((canvas.getHeight() / 2) - ((paintText.descent() + paintText.ascent())
+//                / 2)) ;
+//
+//        canvas.drawText(captionString, 0, textSizePx, paintText);
 
         return newBitmap;
+    }
+
+    Bitmap rotateAndScaleBitmap(Bitmap sourceBm) {
+        int width = sourceBm.getWidth();
+        int height = sourceBm.getHeight();
+
+        float aspectRatio = (float) width / (float) height;
+        int newHeight = width;
+        int newWidth = (int) (width * aspectRatio);
+
+        // calculate the scale
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+
+        // create a matrix for the manipulation
+        Matrix matrix = new Matrix();
+        // resize the bit map
+        matrix.postScale(scaleWidth, scaleHeight);
+        // rotate the Bitmap
+        matrix.postRotate(90);
+
+        // recreate the new Bitmap
+        Bitmap resultBm = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        resultBm.eraseColor(Color.GREEN);
+
+        Canvas canvas = new Canvas(resultBm);
+
+        Bitmap foregroundBm = Bitmap.createBitmap(sourceBm, 0, 0,
+                newWidth, newHeight, matrix, true);
+        canvas.drawBitmap(foregroundBm, 0, (height - newWidth) / 2, null);
+
+        scaleWidth = scaleHeight = (float) 1.0;
+        matrix.postScale(scaleWidth, scaleHeight);
+        matrix.postRotate(90);
+
+        resultBm = Bitmap.createBitmap(resultBm, 0, 0, width, height, matrix, true);
+
+        return resultBm;
     }
 
     protected void takePicture() {
@@ -358,7 +435,18 @@ public class CameraActivity extends AppCompatActivity {
 
                         // Getting the Bitmap object from byte array and writing test on it
                         Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                        bm = writeTextOnBitmap(bm, "Aschspdofafdlfgk!!!");
+
+                        int rotation = mActivity.getWindowManager().getDefaultDisplay().getRotation();
+                        if(Surface.ROTATION_0 == rotation || Surface.ROTATION_180 == rotation) {
+                            bm = rotateAndScaleBitmap(bm);
+                        }
+
+                        // The date and time of capturing
+                        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                        Date nowDate = Calendar.getInstance().getTime();
+                        String nowDateString = dateFormat.format(nowDate);
+
+                        bm = writeTextOnBitmap(bm, nowDateString);
 
                         // Making the byte array back from the processed Bitmap object
                         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -572,31 +660,8 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         Log.e(TAG, "onPause");
-        //closeCamera();
+        closeCamera();
         stopBackgroundThread();
         super.onPause();
     }
-
-//    private void setAutoFlash(CaptureRequest.Builder requestBuilder) {
-//        if (mFlashSupported) {
-//            requestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-//                    CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
-//        }
-//    }
-
-//    /**********************************************************************************************/
-//    // Video section
-//    static final int REQUEST_VIDEO_CAPTURE = 1;
-//    private VideoView mVideoView;
-//
-//
-//    private void dispatchTakeVideoIntent() {
-//        Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-//        if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
-//            startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
-//        }
-//    }
-
-//    @Override
-//    protected void onActivity
 }
