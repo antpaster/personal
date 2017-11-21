@@ -45,6 +45,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -254,52 +256,43 @@ public class CameraActivity extends AppCompatActivity {
     Uri mPickedImage;
     String mCapturedImagePath;
 
-    Bitmap writeTextOnBitmap(Image source, String captionString) {
-        Bitmap bm1;
+    Bitmap writeTextOnBitmap(Bitmap source, String captionString) {
+
         Bitmap newBitmap = null;
 
         Toast.makeText(CameraActivity.this, "R.drawable.iss",
                 Toast.LENGTH_LONG).show();
 
-        try {
-            mPickedImage = mCurrentIntent.getData();
-
-//            bm1 = BitmapFactory.decodeStream()
-            bm1 = BitmapFactory.decodeStream(getContentResolver().openInputStream(mPickedImage));
-    //        bm1 = BitmapFactory.decodeResource(getResources(), R.drawable.iss);
-
-            Bitmap.Config config = bm1.getConfig();
-            if (config == null) {
-                config = Bitmap.Config.ARGB_8888;
-            }
-
-            newBitmap = Bitmap.createBitmap(bm1.getWidth(), bm1.getHeight(), config);
-
-            Canvas canvas = new Canvas(newBitmap);
-            canvas.drawBitmap(bm1, 0, 0, null);
-
-            Paint paintText = new Paint(Paint.ANTI_ALIAS_FLAG);
-            paintText.setColor(Color.RED);
-
-            float textSizePx = 100;
-            paintText.setTextSize(textSizePx);
-            paintText.setStyle(Paint.Style.FILL);
-            paintText.setShadowLayer(10f, 10f, 10f, Color.BLACK);
-
-            Rect textRect = new Rect();
-            paintText.getTextBounds(captionString, 0, captionString.length(), textRect);
-
-            if (textRect.width() >= (canvas.getWidth() - 4))
-                paintText.setTextSize(20);
-
-            int xPos = (canvas.getWidth() / 2) - 2;
-            int yPos = (int) ((canvas.getHeight() / 2) - ((paintText.descent() + paintText.ascent())
-                    / 2)) ;
-
-            canvas.drawText(captionString, 0, textSizePx, paintText);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        Bitmap.Config config = source.getConfig();
+        if (config == null) {
+            config = Bitmap.Config.ARGB_8888;
         }
+
+        newBitmap = Bitmap.createBitmap(source.getWidth(), source.getHeight(), config);
+
+        Canvas canvas = new Canvas(newBitmap);
+        canvas.drawBitmap(source, 0, 0, null);
+
+        Paint paintText = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paintText.setColor(Color.RED);
+
+        float textSizePx = 100;
+        paintText.setTextSize(textSizePx);
+        paintText.setStyle(Paint.Style.FILL);
+        paintText.setShadowLayer(10f, 10f, 10f, Color.BLACK);
+
+        Rect textRect = new Rect();
+        paintText.getTextBounds(captionString, 0, captionString.length(), textRect);
+
+        if (textRect.width() >= (canvas.getWidth() - 4))
+            paintText.setTextSize(20);
+
+        int xPos = (canvas.getWidth() / 2) - 2;
+        int yPos = (int) ((canvas.getHeight() / 2) - ((paintText.descent() + paintText.ascent())
+                / 2)) ;
+
+        canvas.drawText(captionString, 0, textSizePx, paintText);
+
         return newBitmap;
     }
 
@@ -358,12 +351,21 @@ public class CameraActivity extends AppCompatActivity {
                 public void onImageAvailable(ImageReader reader) {
                     Image image = null;
                     try {
-                        // TODO process bitmap here!
                         image = reader.acquireLatestImage();
                         ByteBuffer buffer = image.getPlanes()[0].getBuffer();
                         byte[] bytes = new byte[buffer.capacity()];
                         buffer.get(bytes);
-                        save(bytes);
+
+                        // Getting the Bitmap object from byte array and writing test on it
+                        Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        bm = writeTextOnBitmap(bm, "Aschspdofafdlfgk!!!");
+
+                        // Making the byte array back from the processed Bitmap object
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bm.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                        byte[] outBytes = stream.toByteArray();
+
+                        save(outBytes);
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     } catch (IOException e) {
@@ -376,18 +378,10 @@ public class CameraActivity extends AppCompatActivity {
                 }
 
                 private void save(byte[] bytes) throws IOException {
-
-//                    Bitmap bm = writeTextOnBitmap("F*ck your own face!");
-
                     OutputStream output = null;
                     try {
                         output = new FileOutputStream(file);
 
-//                        bm.compress(Bitmap.CompressFormat.JPEG, 85, output);
-//
-//                        output.flush();
-//
-//                        output.close();
                         output.write(bytes);
                     } finally {
                         if (null != output) {
