@@ -1,4 +1,4 @@
-#Wed Nov 15 17:21:15 MSK 2017
+#Wed Nov 22 17:00:24 MSK 2017
 base.0=/home/apasternak/Repository/android-Camera2Video/Application/build/intermediates/transforms/dexMerger/debug/0
+path.0=classes.dex
 renamed.0=classes.dex
-file.0=/home/apasternak/Repository/android-Camera2Video/Application/build/intermediates/transforms/dexMerger/debug/0/classes.dex

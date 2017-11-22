@@ -26,9 +26,16 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -41,10 +48,12 @@ import android.media.MediaRecorder;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.opengl.GLUtils;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Parcel;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
@@ -63,17 +72,24 @@ import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+
+import javax.microedition.khronos.opengles.GL10;
 
 public class Camera2VideoFragment extends Fragment
         implements View.OnClickListener, FragmentCompat.OnRequestPermissionsResultCallback,
@@ -507,7 +523,7 @@ public class Camera2VideoFragment extends Fragment
 
     static final boolean VERBOSE = false;
 
-    SurfaceTextureManager mStManager;
+    SurfaceTextureManager mStManager = null/* = new SurfaceTextureManager()*/;
 
     /**
      * Manages a SurfaceTexture.  Creates SurfaceTexture and TextureRender objects, and provides
@@ -666,6 +682,103 @@ public class Camera2VideoFragment extends Fragment
         }
     }
 
+    GLES20 mGles20 = new GLES20();
+    int[] mTextures = new int[10];
+
+    void setGlTexture(Bitmap sourceBm) {
+        // Generate one texture pointer...
+        mGles20.glGenTextures(1, mTextures, 0);
+        // ...and bind it to our array
+        mGles20.glBindTexture(GL10.GL_TEXTURE_2D, mTextures[0]);
+
+        // Create Nearest Filtered Texture
+        mGles20.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
+        mGles20.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+
+        // Different possible texture parameters, e.g. GL10.GL_CLAMP_TO_EDGE
+        mGles20.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_REPEAT);
+        mGles20.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_REPEAT);
+
+        // Use the Android GLUtils to specify a two-dimensional texture image from our bitmap
+        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, sourceBm, 0);
+    }
+
+    Bitmap rotateAndScaleBitmap(Bitmap sourceBm) {
+        int width = sourceBm.getWidth();
+        int height = sourceBm.getHeight();
+
+        float aspectRatio = (float) width / (float) height;
+        int newHeight = width;
+        int newWidth = (int) (width * aspectRatio);
+
+        // calculate the scale
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+
+        // create a matrix for the manipulation
+        Matrix matrix = new Matrix();
+        // resize the bit map
+        matrix.postScale(scaleWidth, scaleHeight);
+        // rotate the Bitmap
+        matrix.postRotate(90);
+
+        // recreate the new Bitmap
+        Bitmap resultBm = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        resultBm.eraseColor(Color.BLACK);
+
+        Canvas canvas = new Canvas(resultBm);
+
+        Bitmap foregroundBm = Bitmap.createBitmap(sourceBm, 0, 0, width, height, matrix, true);
+        canvas.drawBitmap(foregroundBm, 0, (height - newWidth) / 2, null);
+
+        matrix.reset();
+        scaleWidth = scaleHeight = (float) 1.0;
+        matrix.postScale(scaleWidth, scaleHeight);
+        matrix.postRotate(270);
+
+        resultBm = Bitmap.createBitmap(resultBm, 0, 0, width, height, matrix, true);
+
+        setGlTexture(resultBm);
+
+        return resultBm;
+    }
+
+    Bitmap writeTextOnBitmap(Bitmap source, String captionString) {
+        Bitmap newBitmap = null;
+
+        Bitmap.Config config = source.getConfig();
+        if (config == null) {
+            config = Bitmap.Config.ARGB_8888;
+        }
+
+        newBitmap = Bitmap.createBitmap(source.getWidth(), source.getHeight(), config);
+
+        // Prepare the Canvas
+        Canvas canvas = new Canvas(newBitmap);
+        newBitmap.eraseColor(Color.GREEN);
+
+        // Draw the background from the source Bitmap
+        Drawable background = new BitmapDrawable(getResources(), source);
+        background.setBounds(0, 0, source.getWidth(), source.getHeight());
+        background.draw(canvas); // draw the background to our bitmap
+
+        // Draw the text
+        Paint textPaint = new Paint();
+        float textSizePx = 100;
+        textPaint.setTextSize(textSizePx);
+        textPaint.setStyle(Paint.Style.FILL);
+        textPaint.setAntiAlias(true);
+        textPaint.setColor(Color.RED);
+//        textPaint.setARGB(0xff, 0x00, 0x00, 0x00);
+
+        // Draw the text at the upper left corner
+        canvas.drawText(captionString, 0,textSizePx, textPaint);
+
+        setGlTexture(newBitmap);
+
+        return newBitmap;
+    }
+
     @Override
     public void startCamera() {
         if (null == mCameraDevice || !mTextureView.isAvailable() || null == mPreviewSize) {
@@ -674,7 +787,6 @@ public class Camera2VideoFragment extends Fragment
         try {
             closePreviewSession();
             configureCamera();
-//            setUpMediaRecorder();
             SurfaceTexture texture = mTextureView.getSurfaceTexture();
             assert texture != null;
             texture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
@@ -688,6 +800,36 @@ public class Camera2VideoFragment extends Fragment
 
             // Set up Surface for the MediaRecorder
             Surface recorderSurface = mMediaRecorder.getSurface();
+
+//            Parcel parcel = Parcel.obtain();
+//            recorderSurface.writeToParcel(parcel, 0);
+//            byte[] surfaceInBytes = parcel.createByteArray();
+//
+//            // Getting the Bitmap object from byte array and writing test on it
+//            Bitmap bm = BitmapFactory.decodeByteArray(surfaceInBytes, 0, surfaceInBytes.length);
+//
+//            Activity activity = getActivity();
+//            int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+//            if(Surface.ROTATION_0 == rotation || Surface.ROTATION_180 == rotation) {
+//                bm = rotateAndScaleBitmap(bm);
+//            }
+//
+//            // The date and time of capturing
+//            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+//            Date nowDate = Calendar.getInstance().getTime();
+//            String nowDateString = dateFormat.format(nowDate);
+//
+//            bm = writeTextOnBitmap(bm, nowDateString);
+//
+//            // Making the byte array back from the processed Bitmap object
+//            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//            bm.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+//            byte[] outBytes = stream.toByteArray();
+//
+//            parcel.unmarshall(outBytes, 0, outBytes.length);
+//
+//            recorderSurface.readFromParcel(parcel);
+
             surfaces.add(recorderSurface);
             mPreviewBuilder.addTarget(recorderSurface);
 
@@ -699,7 +841,6 @@ public class Camera2VideoFragment extends Fragment
                 @Override
                 public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
                     mPreviewSession = cameraCaptureSession;
-//                    updatePreview();
                     updateFrame();
 
                     final SurfaceTexture surface = new SurfaceTexture(true);
@@ -715,7 +856,36 @@ public class Camera2VideoFragment extends Fragment
                                     SurfaceTexture.OnFrameAvailableListener() {
                                 @Override
                                 public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-                                    mGLSurfaceView.requestRender();
+
+//                                    // todo paste the image transform here!
+//                                    Parcel parcel = Parcel.obtain();
+//                                    recorderSurface.writeToParcel(parcel, 0);
+//                                    byte[] surfaceInBytes = parcel.createByteArray();
+//
+//                                    // Getting the Bitmap object from byte array and writing test on it
+//                                    Bitmap bm = BitmapFactory.decodeByteArray(surfaceInBytes, 0, surfaceInBytes.length);
+//
+//                                    Activity activity = getActivity();
+//                                    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+//                                    if(Surface.ROTATION_0 == rotation || Surface.ROTATION_180 == rotation) {
+//                                        bm = rotateAndScaleBitmap(bm);
+//                                    }
+//
+//                                    // The date and time of capturing
+//                                    DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+//                                    Date nowDate = Calendar.getInstance().getTime();
+//                                    String nowDateString = dateFormat.format(nowDate);
+//
+//                                    bm = writeTextOnBitmap(bm, nowDateString);
+//
+//                                    // Making the byte array back from the processed Bitmap object
+//                                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+//                                    bm.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+//                                    byte[] outBytes = stream.toByteArray();
+//
+//                                    parcel.unmarshall(outBytes, 0, outBytes.length);
+//
+//                                    recorderSurface.readFromParcel(parcel);
                                 }
                             });
 
@@ -727,19 +897,21 @@ public class Camera2VideoFragment extends Fragment
                             mChronometer.setVisibility(View.VISIBLE);
                             mChronometer.start();
 
-                            // Every seconds there is a swapping of the colors
-                            if (System.currentTimeMillis() % 1000 == 0) {
-                                String fragmentShader = SWAPPED_FRAGMENT_SHADER;
-                                mStManager.changeFragmentShader(fragmentShader);
-                            }
-
-                            // Acquire a new frame of input, and render it to the Surface.  If we had a
-                            // GLSurfaceView we could switch EGL contexts and call drawImage() a second
-                            // time to render it on screen.  The texture can be shared between contexts by
-                            // passing the GLSurfaceView's EGLContext as eglCreateContext()'s share_context
-                            // argument.
-                            mStManager.awaitNewImage();
-                            mStManager.drawImage();
+//                            mStManager = new SurfaceTextureManager();
+//
+//                            // Every seconds there is a swapping of the colors
+//                            if (System.currentTimeMillis() % 1000 == 0) {
+//                                String fragmentShader = SWAPPED_FRAGMENT_SHADER;
+//                                mStManager.changeFragmentShader(fragmentShader);
+//                            }
+//
+//                            // Acquire a new frame of input, and render it to the Surface.  If we had a
+//                            // GLSurfaceView we could switch EGL contexts and call drawImage() a second
+//                            // time to render it on screen.  The texture can be shared between contexts by
+//                            // passing the GLSurfaceView's EGLContext as eglCreateContext()'s share_context
+//                            // argument.
+//                            mStManager.awaitNewImage();
+//                            mStManager.drawImage();
                         }
                     });
                 }
