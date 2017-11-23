@@ -27,6 +27,7 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -45,7 +46,9 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaRecorder;
 import android.opengl.GLES10;
+import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
+import android.opengl.GLES30;
 import android.opengl.GLUtils;
 import android.os.Build;
 import android.os.Bundle;
@@ -313,7 +316,7 @@ public class Camera2VideoFragment extends Fragment
 
     GLES10 mGles10 = new GLES10();
     GLES20 mGles20 = new GLES20();
-//    GLES32 mGles32 = GLES32.;
+    GLES30 mGles30 = new GLES30();
     int[] mTextures = new int[10];
     float[] mTexMatrix = new float[16];
 
@@ -321,18 +324,19 @@ public class Camera2VideoFragment extends Fragment
         // Generate one texture pointer...
         mGles20.glGenTextures(1, mTextures, 0);
         // ...and bind it to our array
-        mGles20.glBindTexture(GL10.GL_TEXTURE_2D, mTextures[0]);
+        mGles20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mTextures[0]);
 
         // Create Nearest Filtered Texture
-        mGles20.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
-        mGles20.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
+        mGles20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST);
+        mGles20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR);
 
         // Different possible texture parameters, e.g. GL10.GL_CLAMP_TO_EDGE
-        mGles20.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_S, GL10.GL_REPEAT);
-        mGles20.glTexParameterf(GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_WRAP_T, GL10.GL_REPEAT);
+        mGles20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_WRAP_S, GL10.GL_REPEAT);
+        mGles20.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GL10.GL_TEXTURE_WRAP_T, GL10.GL_REPEAT);
 
         // Use the Android GLUtils to specify a two-dimensional texture image from our bitmap
-        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, sourceBm, 0);
+        GLUtils.texImage2D(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0, sourceBm, 0);
+//        GLES11Ext.GL_TEXTURE_EXTERNAL_OES
     }
 
     Bitmap rotateAndScaleBitmap(Bitmap sourceBm) {
@@ -376,7 +380,7 @@ public class Camera2VideoFragment extends Fragment
     }
 
     Bitmap writeTextOnBitmap(Bitmap source, String captionString) {
-        Bitmap newBitmap = null;
+        Bitmap newBitmap;
 
         Bitmap.Config config = source.getConfig();
         if (config == null) {
@@ -489,13 +493,31 @@ public class Camera2VideoFragment extends Fragment
                                 @Override
                                 public void onFrameAvailable(SurfaceTexture surfaceTexture) {
 
-                                    mGles20.glGenTextures(1, mTextures, 0);
+//                                    surfaceTexture.releaseTexImage();
+//                                    surfaceTexture.attachToGLContext(mTextures[0]);
+//                                    mGles30.glGenTextures(1, mTextures, 0);
+//
+//                                    surfaceTexture.attachToGLContext(mTextures[0]);
+//                                    final Surface s = new Surface(surfaceTexture);
 
-                                    surfaceTexture.attachToGLContext(mTextures[0]);
-                                    final Surface s = new Surface(surfaceTexture);
+                                    Bitmap bm = BitmapFactory.decodeResource(getResources(),
+                                            R.drawable.ic_launcher);
+                                    setGlTexture(bm);
 
                                     surfaceTexture.updateTexImage();
                                     surfaceTexture.getTransformMatrix(mTexMatrix);
+
+                                    GLES10.glViewport(0, 0, mPreviewSize.getWidth(),
+                                            mPreviewSize.getHeight());
+                                    GLES10.glMatrixMode(GLES10.GL_PROJECTION);
+                                    GLES10.glLoadIdentity();
+                                    GLES10.glOrthof(0, mPreviewSize.getWidth(), 0,
+                                            mPreviewSize.getHeight(), 0, 1);
+                                    GLES10.glMatrixMode(GLES10.GL_MODELVIEW);
+                                    GLES10.glLoadIdentity();
+                                    GLES10.glMatrixMode(GLES10.GL_TEXTURE);
+                                    GLES10.glLoadIdentity();
+                                    GLES10.glLoadMatrixf(mTexMatrix, 0);
 
 //                                    // todo paste the image transform here!
 //                                    Parcel parcel = Parcel.obtain();
