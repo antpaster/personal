@@ -4,7 +4,17 @@
             "outputFile": "/home/apasternak/Repository/android-Camera2Video/Application/build/intermediates/incremental/mergeDebugAndroidTestResources/merged.dir/values-v16/values-v16.xml",
             "map": [
                 {
-                    "source": "/home/apasternak/.gradle/caches/transforms-1/files-1.1/appcompat-v7-26.1.0.aar/c37b1ebe8372ec5e7090a803493a27e9/res/values-v16/values-v16.xml",
+                    "source": "/home/apasternak/.gradle/caches/transforms-1/files-1.1/support-compat-26.1.0.aar/a2327751ada5b9ce404d6f1e8da96197/res/values-v16/values-v16.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "65",
+                        "endOffsets": "116"
+                    }
+                },
+                {
+                    "source": "/home/apasternak/.gradle/caches/transforms-1/files-1.1/appcompat-v7-26.1.0.aar/0580cc9bc6ea28fa80ede3eda0d5e098/res/values-v16/values-v16.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
@@ -20,16 +30,6 @@
                         "endLines": "6",
                         "endColumns": "12",
                         "endOffsets": "289"
-                    }
-                },
-                {
-                    "source": "/home/apasternak/.gradle/caches/transforms-1/files-1.1/support-compat-26.1.0.aar/8d11e6cd8ab985560861fe90e77660cb/res/values-v16/values-v16.xml",
-                    "from": {
-                        "startLines": "2",
-                        "startColumns": "4",
-                        "startOffsets": "55",
-                        "endColumns": "65",
-                        "endOffsets": "116"
                     }
                 }
             ]

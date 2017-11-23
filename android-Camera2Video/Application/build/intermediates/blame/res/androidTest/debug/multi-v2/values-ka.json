@@ -4,7 +4,7 @@
             "outputFile": "/home/apasternak/Repository/android-Camera2Video/Application/build/intermediates/incremental/mergeDebugAndroidTestResources/merged.dir/values-ka/values-ka.xml",
             "map": [
                 {
-                    "source": "/home/apasternak/.gradle/caches/transforms-1/files-1.1/appcompat-v7-26.1.0.aar/c37b1ebe8372ec5e7090a803493a27e9/res/values-ka/values-ka.xml",
+                    "source": "/home/apasternak/.gradle/caches/transforms-1/files-1.1/appcompat-v7-26.1.0.aar/0580cc9bc6ea28fa80ede3eda0d5e098/res/values-ka/values-ka.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
