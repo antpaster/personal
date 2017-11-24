@@ -44,6 +44,7 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.media.MediaCodec;
 import android.media.MediaRecorder;
 import android.opengl.GLES10;
 import android.opengl.GLES11Ext;
@@ -63,6 +64,7 @@ import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.Surface;
+import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -73,6 +75,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -221,53 +224,6 @@ public class Camera2VideoFragment extends Fragment
 
     Chronometer mChronometer;
 
-//    MediaPlayer mMediaPlayer;
-
-//    void initializeMediaPlayer() {
-//        mMediaPlayer = new MediaPlayer();
-//        Uri uri = Uri.parse(mCameraDataAdapter.getList().get(0).getPath());
-//
-//        try {
-//            mMediaPlayer.setDataSource(mActivity, uri);
-//            mMediaPlayer.setSurface(mMediaSurface);
-//            mMediaPlayer.prepareAsync();
-//            mMediaPlayer.setOnPreparedListener(mMediaPlayer);
-//            mMediaPlayer.setOnCompletionListener(mMediaPlayer);
-//
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-    Matrix mTransformMatrix;
-
-//    void setupMatrix(int width, int height, int degrees, boolean isHorizontal) {
-//        Log.d(TAG, "setupMatrix for " + degrees + " degrees");
-//        Matrix matrix = new Matrix();
-//        //The video will be streched if the aspect ratio is in 1,5(recording at 480)
-//        RectF src;
-//        if (isHorizontal)
-////In my case, I changed this line, cause with my onMeasure() and onLayout() methods my container view is already rotated and scaled, so I need to sent the inverted params to the src.
-//            src = new RectF(0, 0,mThumbnailContainer.getmWidth(), mThumbnailContainer.getmHeight());
-//        else
-//            src = new RectF(0, 0, mThumbnailContainer.getmWidth(),mThumbnailContainer.getmHeight());
-//        RectF dst = new RectF(0, 0, width, height);
-//        RectF screen = new RectF(dst);
-//        Log.d(TAG, "Matrix: " + width + "x" + height);
-//        Log.d(TAG, "Matrix: " + mThumbnailContainer.getmWidth() + "x" + mThumbnailContainer.getmHeight());
-//        matrix.postRotate(degrees, screen.centerX(), screen.centerY());
-//        matrix.mapRect(dst);
-//
-//        matrix.setRectToRect(src, dst, Matrix.ScaleToFit.CENTER);
-//        matrix.mapRect(src);
-//
-//        matrix.setRectToRect(screen, src, Matrix.ScaleToFit.FILL);
-//        matrix.postRotate(degrees, screen.centerX(), screen.centerY());
-//
-//        mVideoView.setTransform(matrix);
-//    }
-
     /**
      * Initializing the connection between the device and the host
      *
@@ -320,7 +276,7 @@ public class Camera2VideoFragment extends Fragment
     int[] mTextures = new int[10];
     float[] mTexMatrix = new float[16];
 
-    void setGlTexture(Bitmap sourceBm) {
+    private void setGlTexture(Bitmap sourceBm) {
         // Generate one texture pointer...
         mGles20.glGenTextures(1, mTextures, 0);
         // ...and bind it to our array
@@ -339,7 +295,7 @@ public class Camera2VideoFragment extends Fragment
 //        GLES11Ext.GL_TEXTURE_EXTERNAL_OES
     }
 
-    Bitmap rotateAndScaleBitmap(Bitmap sourceBm) {
+    private Bitmap rotateAndScaleBitmap(Bitmap sourceBm) {
         int width = sourceBm.getWidth();
         int height = sourceBm.getHeight();
 
@@ -379,7 +335,7 @@ public class Camera2VideoFragment extends Fragment
         return resultBm;
     }
 
-    Bitmap writeTextOnBitmap(Bitmap source, String captionString) {
+    private Bitmap writeTextOnBitmap(Bitmap source, String captionString) {
         Bitmap newBitmap;
 
         Bitmap.Config config = source.getConfig();
@@ -415,6 +371,136 @@ public class Camera2VideoFragment extends Fragment
         return newBitmap;
     }
 
+    EglCore mEglCore;
+    WindowSurface mDisplaySurface;
+    WindowSurface mEncoderSurface;
+    FullFrameRect mFullFrameBlit;
+    CircularEncoder mCircEncoder;
+    final float[] mTmpMatrix = new float[16];
+    int mFrameNum = 0;
+    boolean mFileSaveInProgress = false;
+
+    /**
+     * Draws a frame onto the SurfaceView and the encoder surface.
+     * <p>
+     * This will be called whenever we get a new preview frame from the camera.  This runs
+     * on the UI thread, which ordinarily isn't a great idea -- you really want heavy work
+     * to be on a different thread -- but we're really just throwing a few things at the GPU.
+     * The upside is that we don't have to worry about managing state changes between threads.
+     * <p>
+     * If there was a pending frame available notification when we shut down, we might get
+     * here after onPause().
+     */
+    private void drawFrame(final View view, SurfaceTexture cameraTexture) {
+        //Log.d(TAG, "drawFrame");
+        if (mEglCore == null) {
+            Log.d(TAG, "Skipping drawFrame after shutdown");
+            return;
+        }
+
+        // Latch the next frame from the camera.
+        mDisplaySurface.makeCurrent();
+        cameraTexture.updateTexImage();
+        cameraTexture.getTransformMatrix(mTmpMatrix);
+
+        mGles20.glGenTextures(1, mTextures, 0);
+
+        try {
+            MediaCodec encoder = MediaCodec.createEncoderByType("video/avc");
+            ByteBuffer outputBuffer = encoder.getOutputBuffer(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Fill the SurfaceView with it.
+        SurfaceView sv = view.findViewById(R.id.texture);
+        int viewWidth = sv.getWidth();
+        int viewHeight = sv.getHeight();
+        GLES20.glViewport(0, 0, viewWidth, viewHeight);
+        mFullFrameBlit.drawFrame(mTextures[0], mTmpMatrix);
+
+        drawExtra(mFrameNum, viewWidth, viewHeight);
+
+        mDisplaySurface.swapBuffers();
+
+        // Send it to the video encoder.
+        if (!mFileSaveInProgress) {
+            mEncoderSurface.makeCurrent();
+            GLES20.glViewport(0, 0, mPreviewSize.getWidth(), mPreviewSize.getHeight());
+            mFullFrameBlit.drawFrame(mTextures[0], mTmpMatrix);
+
+            drawExtra(mFrameNum, mPreviewSize.getWidth(), mPreviewSize.getHeight());
+
+            mCircEncoder.frameAvailableSoon();
+            mEncoderSurface.setPresentationTime(cameraTexture.getTimestamp());
+            mEncoderSurface.swapBuffers();
+        }
+
+        mFrameNum++;
+    }
+
+    /**
+     * Adds a bit of extra stuff to the display just to give it flavor.
+     */
+    private static void drawExtra(int frameNum, int width, int height) {
+        // We "draw" with the scissor rect and clear calls.  Note this uses window coordinates.
+        int val = frameNum % 3;
+        switch (val) {
+            case 0:  GLES20.glClearColor(1.0f, 0.0f, 0.0f, 1.0f);   break;
+            case 1:  GLES20.glClearColor(0.0f, 1.0f, 0.0f, 1.0f);   break;
+            case 2:  GLES20.glClearColor(0.0f, 0.0f, 1.0f, 1.0f);   break;
+        }
+
+        int xpos = (int) (width * ((frameNum % 100) / 100.0f));
+        GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
+        GLES20.glScissor(xpos, 0, width / 32, height / 32);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        GLES20.glDisable(GLES20.GL_SCISSOR_TEST);
+    }
+
+//    @Override   // SurfaceHolder.Callback
+//    public void surfaceCreated(SurfaceHolder holder) {
+//        Log.d(TAG, "surfaceCreated holder=" + holder);
+//
+//        // Set up everything that requires an EGL context.
+//        //
+//        // We had to wait until we had a surface because you can't make an EGL context current
+//        // without one, and creating a temporary 1x1 pbuffer is a waste of time.
+//        //
+//        // The display surface that we use for the SurfaceView, and the encoder surface we
+//        // use for video, use the same EGL context.
+//        mEglCore = new EglCore(null, EglCore.FLAG_RECORDABLE);
+//        mDisplaySurface = new WindowSurface(mEglCore, holder.getSurface(), false);
+//        mDisplaySurface.makeCurrent();
+//
+//        mFullFrameBlit = new FullFrameRect(
+//                new Texture2dProgram(Texture2dProgram.ProgramType.TEXTURE_EXT));
+//        mTextureId = mFullFrameBlit.createTextureObject();
+//        mCameraTexture = new SurfaceTexture(mTextureId);
+//        mCameraTexture.setOnFrameAvailableListener(this);
+//
+//        Log.d(TAG, "starting camera preview");
+//        try {
+//            mCamera.setPreviewTexture(mCameraTexture);
+//        } catch (IOException ioe) {
+//            throw new RuntimeException(ioe);
+//        }
+//        mCamera.startPreview();
+//
+//        // TODO: adjust bit rate based on frame rate?
+//        // TODO: adjust video width/height based on what we're getting from the camera preview?
+//        //       (can we guarantee that camera preview size is compatible with AVC video encoder?)
+//        try {
+//            mCircEncoder = new CircularEncoder(VIDEO_WIDTH, VIDEO_HEIGHT, 6000000,
+//                    mCameraPreviewThousandFps / 1000, 7, mHandler);
+//        } catch (IOException ioe) {
+//            throw new RuntimeException(ioe);
+//        }
+//        mEncoderSurface = new WindowSurface(mEglCore, mCircEncoder.getInputSurface(), true);
+//
+//        updateControls();
+//    }
+
     @Override
     public void startCamera() {
         if (null == mCameraDevice || !mTextureView.isAvailable() || null == mPreviewSize) {
@@ -436,35 +522,6 @@ public class Camera2VideoFragment extends Fragment
 
             // Set up Surface for the MediaRecorder
             Surface recorderSurface = mMediaRecorder.getSurface();
-
-//            Parcel parcel = Parcel.obtain();
-//            recorderSurface.writeToParcel(parcel, 0);
-//            byte[] surfaceInBytes = parcel.createByteArray();
-//
-//            // Getting the Bitmap object from byte array and writing test on it
-//            Bitmap bm = BitmapFactory.decodeByteArray(surfaceInBytes, 0, surfaceInBytes.length);
-//
-//            Activity activity = getActivity();
-//            int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
-//            if(Surface.ROTATION_0 == rotation || Surface.ROTATION_180 == rotation) {
-//                bm = rotateAndScaleBitmap(bm);
-//            }
-//
-//            // The date and time of capturing
-//            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-//            Date nowDate = Calendar.getInstance().getTime();
-//            String nowDateString = dateFormat.format(nowDate);
-//
-//            bm = writeTextOnBitmap(bm, nowDateString);
-//
-//            // Making the byte array back from the processed Bitmap object
-//            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//            bm.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-//            byte[] outBytes = stream.toByteArray();
-//
-//            parcel.unmarshall(outBytes, 0, outBytes.length);
-//
-//            recorderSurface.readFromParcel(parcel);
 
             surfaces.add(recorderSurface);
             mPreviewBuilder.addTarget(recorderSurface);
@@ -493,31 +550,7 @@ public class Camera2VideoFragment extends Fragment
                                 @Override
                                 public void onFrameAvailable(SurfaceTexture surfaceTexture) {
 
-//                                    surfaceTexture.releaseTexImage();
-//                                    surfaceTexture.attachToGLContext(mTextures[0]);
-//                                    mGles30.glGenTextures(1, mTextures, 0);
-//
-//                                    surfaceTexture.attachToGLContext(mTextures[0]);
-//                                    final Surface s = new Surface(surfaceTexture);
-
-                                    Bitmap bm = BitmapFactory.decodeResource(getResources(),
-                                            R.drawable.ic_launcher);
-                                    setGlTexture(bm);
-
-                                    surfaceTexture.updateTexImage();
-                                    surfaceTexture.getTransformMatrix(mTexMatrix);
-
-                                    GLES10.glViewport(0, 0, mPreviewSize.getWidth(),
-                                            mPreviewSize.getHeight());
-                                    GLES10.glMatrixMode(GLES10.GL_PROJECTION);
-                                    GLES10.glLoadIdentity();
-                                    GLES10.glOrthof(0, mPreviewSize.getWidth(), 0,
-                                            mPreviewSize.getHeight(), 0, 1);
-                                    GLES10.glMatrixMode(GLES10.GL_MODELVIEW);
-                                    GLES10.glLoadIdentity();
-                                    GLES10.glMatrixMode(GLES10.GL_TEXTURE);
-                                    GLES10.glLoadIdentity();
-                                    GLES10.glLoadMatrixf(mTexMatrix, 0);
+                                    drawFrame(mView, surfaceTexture);
 
 //                                    // todo paste the image transform here!
 //                                    Parcel parcel = Parcel.obtain();
@@ -553,6 +586,8 @@ public class Camera2VideoFragment extends Fragment
 
                             // Start recording
                             mMediaRecorder.start();
+
+                            drawFrame(mView, surface);
 
                             // Setting the recording time counter
                             mChronometer.setBase(SystemClock.elapsedRealtime());
@@ -751,8 +786,12 @@ public class Camera2VideoFragment extends Fragment
         return inflater.inflate(R.layout.fragment_camera2_video, container, false);
     }
 
+    View mView;
+
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
+        mView = view;
+
         mTextureView = view.findViewById(R.id.texture);
         mButtonVideo = view.findViewById(R.id.video);
         mButtonVideo.setOnClickListener(this);
@@ -1085,7 +1124,6 @@ public class Camera2VideoFragment extends Fragment
             return Long.signum((long) lhs.getWidth() * lhs.getHeight() -
                     (long) rhs.getWidth() * rhs.getHeight());
         }
-
     }
 
     public static class ErrorDialog extends DialogFragment {
