@@ -45,6 +45,7 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaCodec;
+import android.media.MediaMuxer;
 import android.media.MediaRecorder;
 import android.opengl.GLES10;
 import android.opengl.GLES11Ext;
@@ -117,6 +118,8 @@ public class Camera2VideoFragment extends Fragment
         INVERSE_ORIENTATIONS.append(Surface.ROTATION_180, 90);
         INVERSE_ORIENTATIONS.append(Surface.ROTATION_270, 0);
     }
+
+    private CameraRecordingStream mCameraRecordingStream = new CameraRecordingStream();
 
     /**
      * An {@link AutoFitTextureView} for camera preview.
@@ -241,18 +244,18 @@ public class Camera2VideoFragment extends Fragment
         if (null == activity) {
             return;
         }
-        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
-        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+//        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+//        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+//        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         if (mNextVideoAbsolutePath == null || mNextVideoAbsolutePath.isEmpty()) {
             mNextVideoAbsolutePath = getVideoFilePath(getActivity());
         }
-        mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
-        mMediaRecorder.setVideoEncodingBitRate(10000000);
-        mMediaRecorder.setVideoFrameRate(30);
-        mMediaRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
-        mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+//        mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
+//        mMediaRecorder.setVideoEncodingBitRate(10000000);
+//        mMediaRecorder.setVideoFrameRate(30);
+//        mMediaRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
+//        mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+//        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
         int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
         switch (mSensorOrientation) {
             case SENSOR_ORIENTATION_DEFAULT_DEGREES:
@@ -263,11 +266,11 @@ public class Camera2VideoFragment extends Fragment
                 break;
         }
 
-        try {
-            mMediaRecorder.prepare();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            mMediaRecorder.prepare();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     GLES10 mGles10 = new GLES10();
@@ -508,7 +511,10 @@ public class Camera2VideoFragment extends Fragment
         }
         try {
             closePreviewSession();
-            configureCamera();
+            configureCamera(); // Dealing with output video file and rotations for now. todo refactor
+
+            mCameraRecordingStream.configure(getContext(), mVideoSize, true, 10000000);
+
             SurfaceTexture texture = mTextureView.getSurfaceTexture();
             assert texture != null;
             texture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
@@ -518,13 +524,20 @@ public class Camera2VideoFragment extends Fragment
             // Set up Surface for the camera preview
             Surface previewSurface = new Surface(texture);
             surfaces.add(previewSurface);
-            mPreviewBuilder.addTarget(previewSurface);
+//            mPreviewBuilder.addTarget(previewSurface);
 
             // Set up Surface for the MediaRecorder
-            Surface recorderSurface = mMediaRecorder.getSurface();
+            Surface recorderSurface;
+            if (null != mCameraRecordingStream.getCurrentFrameSurface()) {
+//                recorderSurface = mMediaRecorder.getSurface();
+//                recorderSurface = mCameraRecordingStream.getCurrentFrameSurface();
+                recorderSurface = mCameraRecordingStream.getEncoder().createInputSurface();
+                surfaces.add(recorderSurface);
+            }
+//            mPreviewBuilder.addTarget(recorderSurface);
 
-            surfaces.add(recorderSurface);
-            mPreviewBuilder.addTarget(recorderSurface);
+            mCameraRecordingStream.onConfiguringOutputs(surfaces, false);
+            mCameraRecordingStream.onConfiguringRequest(mPreviewBuilder, false);
 
             // Start a capture session
             // Once the session starts, we can update the UI and start recording
@@ -585,7 +598,9 @@ public class Camera2VideoFragment extends Fragment
                             });
 
                             // Start recording
-                            mMediaRecorder.start();
+//                            mMediaRecorder.start();
+
+                            mCameraRecordingStream.start();
 
                             drawFrame(mView, surface);
 
@@ -616,8 +631,10 @@ public class Camera2VideoFragment extends Fragment
         mIsRecordingVideo = false;
         mButtonVideo.setText(R.string.record);
         // Stop recording
-        mMediaRecorder.stop();
-        mMediaRecorder.reset();
+//        mMediaRecorder.stop();
+//        mMediaRecorder.reset();
+
+        mCameraRecordingStream.stop();
 
         Activity activity = getActivity();
         if (null != activity) {
