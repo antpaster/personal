@@ -27,7 +27,6 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -45,6 +44,8 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaCodec;
+import android.media.MediaCodecInfo;
+import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.media.MediaRecorder;
 import android.opengl.GLES10;
@@ -56,6 +57,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Parcel;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
@@ -77,9 +79,11 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -118,8 +122,6 @@ public class Camera2VideoFragment extends Fragment
         INVERSE_ORIENTATIONS.append(Surface.ROTATION_180, 90);
         INVERSE_ORIENTATIONS.append(Surface.ROTATION_270, 0);
     }
-
-    private CameraRecordingStream mCameraRecordingStream = new CameraRecordingStream();
 
     /**
      * An {@link AutoFitTextureView} for camera preview.
@@ -193,16 +195,6 @@ public class Camera2VideoFragment extends Fragment
     private boolean mIsRecordingVideo;
 
     /**
-     * An additional thread for running tasks that shouldn't block the UI.
-     */
-    private HandlerThread mBackgroundThread;
-
-    /**
-     * A {@link Handler} for running tasks in the background.
-     */
-    private Handler mBackgroundHandler;
-
-    /**
      * A {@link Semaphore} to prevent the app from exiting before closing the camera.
      */
     private Semaphore mCameraOpenCloseLock = new Semaphore(1);
@@ -227,6 +219,433 @@ public class Camera2VideoFragment extends Fragment
 
     Chronometer mChronometer;
 
+//    private static final String TAG = "CameraRecordingStream";
+    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final int STREAM_STATE_IDLE = 0;
+    private static final int STREAM_STATE_CONFIGURED = 1;
+    private static final int STREAM_STATE_RECORDING = 2;
+    private static final String MIME_TYPE = "video/avc"; // H.264 AVC encoding
+    private static final int FRAME_RATE = 30; // 30fps
+    private static final int IFRAME_INTERVAL = 1; // 1 seconds between I-frames
+    private static final int TIMEOUT_USEC = 10000; // Timeout value 10ms.
+
+    // Sync object to protect stream state access from multiple threads.
+    private final Object mStateLock = new Object();
+
+    private int mStreamState = STREAM_STATE_IDLE;
+
+    private MediaCodec mEncoder;
+    private Surface mRecordingSurface;
+    private int mEncBitRate = 10000000;
+    private MediaCodec.BufferInfo mBufferInfo;
+    private MediaMuxer mMuxer;
+    private int mTrackIndex = -1;
+    private boolean mMuxerStarted;
+    private boolean mUseMediaCodec = false;
+    private Size mStreamSize = new Size(-1, -1);
+
+    private HandlerThread mRecordingThread;
+    private Thread mBackgroundThread;
+    private Handler mRecordingHandler;
+    private Surface mCurrentFrameSurface;
+
+    /**
+     * Add the stream output surface to the target output surface list.
+     *
+     * @param outputSurfaces The output surface list where the stream can
+     * add/remove its output surface.
+     * @param detach Detach the recording surface from the outputSurfaces.
+     */
+    public synchronized void onConfiguringOutputs(List<Surface> outputSurfaces,
+                                                  boolean detach) {
+        if (detach) {
+            // Can detach the surface in CONFIGURED and RECORDING state
+            if (getStreamState() != STREAM_STATE_IDLE) {
+                outputSurfaces.remove(mRecordingSurface);
+            } else {
+                Log.w(TAG, "Can not detach surface when recording stream is in IDLE state");
+            }
+        } else {
+            // Can add surface only in CONFIGURED state.
+            if (getStreamState() == STREAM_STATE_CONFIGURED) {
+                outputSurfaces.add(mRecordingSurface);
+            } else {
+                Log.w(TAG, "Can only add surface when recording stream is in CONFIGURED state");
+            }
+        }
+    }
+
+    /**
+     * Update capture request with configuration required for recording stream.
+     *
+     * @param requestBuilder Capture request builder that needs to be updated
+     * for recording specific camera settings.
+     * @param detach Detach the recording surface from the capture request.
+     */
+    public synchronized void onConfiguringRequest(CaptureRequest.Builder requestBuilder,
+                                                  boolean detach) {
+        if (detach) {
+            // Can detach the surface in CONFIGURED and RECORDING state
+            if (getStreamState() != STREAM_STATE_IDLE) {
+                requestBuilder.removeTarget(mRecordingSurface);
+            } else {
+                Log.w(TAG, "Can not detach surface when recording stream is in IDLE state");
+            }
+        } else {
+            // Can add surface only in CONFIGURED state.
+            if (getStreamState() == STREAM_STATE_CONFIGURED) {
+                requestBuilder.addTarget(mRecordingSurface);
+            } else {
+                Log.w(TAG, "Can only add surface when recording stream is in CONFIGURED state");
+            }
+        }
+    }
+
+    /**
+     * Start recording stream. Calling start on an already started stream has no
+     * effect.
+     */
+    public synchronized void start() {
+        if (getStreamState() == STREAM_STATE_RECORDING) {
+            Log.w(TAG, "Recording stream is already started");
+            return;
+        }
+
+        if (getStreamState() != STREAM_STATE_CONFIGURED) {
+            throw new IllegalStateException("Recording stream is not configured yet");
+        }
+
+        if (mUseMediaCodec) {
+            setStreamState(STREAM_STATE_RECORDING);
+            startMediaCodecRecording();
+//            startBackgroundThread();
+        } else {
+            mMediaRecorder.start();
+        }
+    }
+
+    /**
+     * Starts MediaCodec mode recording.
+     */
+    private void startMediaCodecRecording() {
+        /**
+         * Start video recording asynchronously. we need a loop to handle output
+         * data for each frame.
+         */
+        mBackgroundThread = new Thread() {
+            @Override
+            public void run() {
+                if (VERBOSE) {
+                    Log.v(TAG, "Recording thread starts");
+                }
+                while (getStreamState() == STREAM_STATE_RECORDING) {
+                    // Feed encoder output into the muxer until recording stops.
+                    doMediaCodecEncoding(/* notifyEndOfStream */false);
+                }
+                if (VERBOSE) {
+                    Log.v(TAG, "Recording thread completes");
+                }
+                return;
+            }
+        };
+        mBackgroundThread.start();
+    }
+
+    /**
+     * <p>
+     * Stop recording stream. Calling stop on an already stopped stream has no
+     * effect. Producer(in this case, CameraDevice) should stop before this call
+     * to avoid sending buffers to a stopped encoder.
+     * </p>
+     * <p>
+     * TODO: We have to release encoder and muxer for MediaCodec mode because
+     * encoder is closely coupled with muxer, and muxer can not be reused
+     * across different recording session(by design, you can not reset/restart
+     * it). To save the subsequent start recording time, we need avoid releasing
+     * encoder for future.
+     * </p>
+     */
+    public synchronized void stop() {
+        if (getStreamState() != STREAM_STATE_RECORDING) {
+            Log.w(TAG, "Recording stream is not started yet");
+            return;
+        }
+        setStreamState(STREAM_STATE_IDLE);
+        Log.e(TAG, "setting camera to idle");
+        if (mUseMediaCodec) {
+            // Wait until recording thread stop
+            try {
+                mBackgroundThread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Stop recording failed", e);
+            }
+            // Drain encoder
+            doMediaCodecEncoding(/* notifyEndOfStream */true);
+            releaseEncoder();
+            releaseMuxer();
+        } else {
+            mMediaRecorder.stop();
+            mMediaRecorder.reset();
+        }
+    }
+
+    /**
+     * Starts a background thread and its {@link Handler}.
+     */
+    private void startBackgroundThread() {
+        mRecordingThread = new HandlerThread("CameraBackground")/* {
+            @Override
+            public void run() {
+                if (VERBOSE) {
+                    Log.v(TAG, "Recording thread starts");
+                }
+                while (getStreamState() == STREAM_STATE_RECORDING) {
+                    // Feed encoder output into the muxer until recording stops.
+                    doMediaCodecEncoding(*//* notifyEndOfStream *//*false);
+                }
+                if (VERBOSE) {
+                    Log.v(TAG, "Recording thread completes");
+                }
+                return;
+            }
+        }*/;
+        mRecordingThread.start();
+        mRecordingHandler = new Handler(mRecordingThread.getLooper());
+    }
+
+    /**
+     * Stops the background thread and its {@link Handler}.
+     */
+    private void stopBackgroundThread() {
+        mRecordingThread.quitSafely();
+        try {
+            mRecordingThread.join();
+            mRecordingThread = null;
+            mRecordingHandler = null;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Thread-safe access to the stream state.
+    private synchronized void setStreamState(int state) {
+        synchronized (mStateLock) {
+            if (state < STREAM_STATE_IDLE) {
+                throw new IllegalStateException("try to set an invalid state");
+            }
+            mStreamState = state;
+        }
+    }
+
+    // Thread-safe access to the stream state.
+    private int getStreamState() {
+        synchronized(mStateLock) {
+            return mStreamState;
+        }
+    }
+
+    private void releaseEncoder() {
+        // Release encoder
+        if (VERBOSE) {
+            Log.v(TAG, "releasing encoder");
+        }
+        if (mEncoder != null) {
+            mEncoder.stop();
+            mEncoder.release();
+            if (mRecordingSurface != null) {
+                mRecordingSurface.release();
+            }
+            mEncoder = null;
+        }
+    }
+
+    private void releaseMuxer() {
+        if (VERBOSE) {
+            Log.v(TAG, "releasing muxer");
+        }
+        if (mMuxer != null) {
+            mMuxer.stop();
+            mMuxer.release();
+            mMuxer = null;
+        }
+    }
+
+    private String getOutputMediaFileName() {
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String mediaFileName = getContext().getExternalFilesDir(null).getAbsolutePath()
+                + File.separator + "VID_" + timeStamp + ".mp4";
+        return mediaFileName;
+    }
+
+    /**
+     * Configures encoder and muxer state, and prepares the input Surface.
+     * Initializes mEncoder, mMuxer, mRecordingSurface, mBufferInfo,
+     * mTrackIndex, and mMuxerStarted.
+     */
+    private void configureMediaCodecEncoder() {
+        mBufferInfo = new MediaCodec.BufferInfo();
+        MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, mStreamSize.getWidth(),
+                mStreamSize.getHeight());
+        /**
+         * Set encoding properties. Failing to specify some of these can cause
+         * the MediaCodec configure() call to throw an exception.
+         */
+        format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
+                MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+        format.setInteger(MediaFormat.KEY_BIT_RATE, mEncBitRate);
+        format.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE);
+        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, IFRAME_INTERVAL);
+        Log.i(TAG, "configure video encoding format: " + format);
+
+        // Create/configure a MediaCodec encoder.
+        try {
+            mEncoder = MediaCodec.createEncoderByType(MIME_TYPE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        mEncoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+        mRecordingSurface = mCurrentFrameSurface = mEncoder.createInputSurface();
+        mEncoder.start();
+        String outputFileName = getOutputMediaFileName();
+        if (outputFileName == null) {
+            throw new IllegalStateException("Failed to get video output file");
+        }
+        /**
+         * Create a MediaMuxer. We can't add the video track and start() the
+         * muxer until the encoder starts and notifies the new media format.
+         */
+        try {
+            mMuxer = new MediaMuxer(outputFileName, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+        } catch (IOException ioe) {
+            throw new IllegalStateException("MediaMuxer creation failed", ioe);
+        }
+        mMuxerStarted = false;
+    }
+
+    /**
+     * Do encoding by using MediaCodec encoder, then extracts all pending data
+     * from the encoder and forwards it to the muxer.
+     * <p>
+     * If notifyEndOfStream is not set, this returns when there is no more data
+     * to output. If it is set, we send EOS to the encoder, and then iterate
+     * until we see EOS on the output. Calling this with notifyEndOfStream set
+     * should be done once, before stopping the muxer.
+     * </p>
+     * <p>
+     * We're just using the muxer to get a .mp4 file and audio is not included
+     * here.
+     * </p>
+     */
+    private void doMediaCodecEncoding(boolean notifyEndOfStream) {
+        if (VERBOSE) {
+            Log.v(TAG, "doMediaCodecEncoding(" + notifyEndOfStream + ")");
+        }
+        if (notifyEndOfStream) {
+            mEncoder.signalEndOfInputStream();
+        }
+
+        boolean notDone = true;
+        while (notDone) {
+            int encoderStatus = mEncoder.dequeueOutputBuffer(mBufferInfo, TIMEOUT_USEC);
+            if (encoderStatus == MediaCodec.INFO_TRY_AGAIN_LATER) {
+                if (!notifyEndOfStream) {
+                    /**
+                     * Break out of the while loop because the encoder is not
+                     * ready to output anything yet.
+                     */
+                    notDone = false;
+                } else {
+                    if (VERBOSE) {
+                        Log.v(TAG, "no output available, spinning to await EOS");
+                    }
+                }
+//            } else if (encoderStatus == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED
+//                    /*MediaCodec.INFO_OUTPUT_FORMAT_CHANGED*/) {
+//                // generic case for mediacodec, not likely occurs for encoder.
+//                encoderOutputBuffers = mEncoder.getOutputBuffer(0);
+            } else if (encoderStatus == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+                /**
+                 * should happen before receiving buffers, and should only
+                 * happen once
+                 */
+                if (mMuxerStarted) {
+                    throw new IllegalStateException("format changed twice");
+                }
+                MediaFormat newFormat = mEncoder.getOutputFormat();
+                if (VERBOSE) {
+                    Log.v(TAG, "encoder output format changed: " + newFormat);
+                }
+                mTrackIndex = mMuxer.addTrack(newFormat);
+                mMuxer.start();
+                mMuxerStarted = true;
+            } else if (encoderStatus < 0) {
+                Log.w(TAG, "unexpected result from encoder.dequeueOutputBuffer: " + encoderStatus);
+            } else {
+                // Normal flow: get output encoded buffer, send to muxer.
+                ByteBuffer encoderOutputBuffer = mEncoder.getOutputBuffer(encoderStatus);
+
+                mCurrentFrameSurface = null;
+                Parcel parcel = null;
+                byte[] bytes;
+
+                if (encoderOutputBuffer.hasArray()) {
+                    bytes = encoderOutputBuffer.array();
+                }
+                else {
+                    continue;
+                }
+
+                parcel.unmarshall(bytes, 0, bytes.length);
+                mCurrentFrameSurface.readFromParcel(parcel);
+
+                if (encoderOutputBuffer == null) {
+                    throw new RuntimeException("encoderOutputBuffer " + encoderStatus +
+                            " was null");
+                }
+                if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
+                    /**
+                     * The codec config data was pulled out and fed to the muxer
+                     * when we got the INFO_OUTPUT_FORMAT_CHANGED status. Ignore
+                     * it.
+                     */
+                    if (VERBOSE) {
+                        Log.v(TAG, "ignoring BUFFER_FLAG_CODEC_CONFIG");
+                    }
+                    mBufferInfo.size = 0;
+                }
+                if (mBufferInfo.size != 0) {
+                    if (!mMuxerStarted) {
+                        throw new RuntimeException("muxer hasn't started");
+                    }
+                    /**
+                     * It's usually necessary to adjust the ByteBuffer values to
+                     * match BufferInfo.
+                     */
+                    encoderOutputBuffer.position(mBufferInfo.offset);
+                    encoderOutputBuffer.limit(mBufferInfo.offset + mBufferInfo.size);
+                    mMuxer.writeSampleData(mTrackIndex, encoderOutputBuffer, mBufferInfo);
+                    if (VERBOSE) {
+                        Log.v(TAG, "sent " + mBufferInfo.size + " bytes to muxer");
+                    }
+                }
+                mEncoder.releaseOutputBuffer(encoderStatus, false);
+                if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+                    if (!notifyEndOfStream) {
+                        Log.w(TAG, "reached end of stream unexpectedly");
+                    } else {
+                        if (VERBOSE) {
+                            Log.v(TAG, "end of stream reached");
+                        }
+                    }
+                    // Finish encoding.
+                    notDone = false;
+                }
+            }
+        } // End of while(notDone)
+    }
+
     /**
      * Initializing the connection between the device and the host
      *
@@ -244,33 +663,89 @@ public class Camera2VideoFragment extends Fragment
         if (null == activity) {
             return;
         }
-//        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-//        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
-//        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-        if (mNextVideoAbsolutePath == null || mNextVideoAbsolutePath.isEmpty()) {
-            mNextVideoAbsolutePath = getVideoFilePath(getActivity());
-        }
-//        mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
-//        mMediaRecorder.setVideoEncodingBitRate(10000000);
-//        mMediaRecorder.setVideoFrameRate(30);
-//        mMediaRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
-//        mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-//        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
-        switch (mSensorOrientation) {
-            case SENSOR_ORIENTATION_DEFAULT_DEGREES:
-                mMediaRecorder.setOrientationHint(DEFAULT_ORIENTATIONS.get(rotation));
-                break;
-            case SENSOR_ORIENTATION_INVERSE_DEGREES:
-                mMediaRecorder.setOrientationHint(INVERSE_ORIENTATIONS.get(rotation));
-                break;
-        }
 
-//        try {
-//            mMediaRecorder.prepare();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        if (getStreamState() == STREAM_STATE_RECORDING) {
+            throw new IllegalStateException(
+                    "Stream can only be configured when stream is in IDLE state");
+        }
+        boolean isConfigChanged = (!mStreamSize.equals(mVideoSize));
+        mStreamSize = mVideoSize;
+
+        if (mUseMediaCodec) {
+            if (getStreamState() == STREAM_STATE_CONFIGURED) {
+                /**
+                 * Stream is already configured, need release encoder and muxer
+                 * first, then reconfigure only if configuration is changed.
+                 */
+                if (!isConfigChanged) {
+                    /**
+                     * TODO: this is only the skeleton, it is tricky to
+                     * implement because muxer need reconfigure always. But
+                     * muxer is closely coupled with MediaCodec for now because
+                     * muxer can only be started once format change callback is
+                     * sent from mediacodec. We need decouple MediaCodec and
+                     * Muxer for future.
+                     */
+                }
+                releaseEncoder();
+                releaseMuxer();
+                configureMediaCodecEncoder();
+            } else {
+                configureMediaCodecEncoder();
+            }
+        } else {
+            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+            mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+
+            if (mNextVideoFullFileName == null || mNextVideoFullFileName.isEmpty()) {
+                mNextVideoFullFileName = getOutputMediaFileName();
+            }
+
+            mMediaRecorder.setOutputFile(mNextVideoFullFileName);
+            mMediaRecorder.setVideoEncodingBitRate(mEncBitRate);
+            mMediaRecorder.setVideoFrameRate(FRAME_RATE);
+            mMediaRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
+            mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+            mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+
+//            mMediaRecorder.setVideoEncodingBitRate(mEncBitRate);
+//
+//            mMediaRecorder.setVideoSize(mVideoSize.getWidth(), mVideoSize.getHeight());
+//
+//            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+//            mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+//
+//            mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+//            mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+//
+//            mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+//
+//            mMediaRecorder.setOutputFile(mNextVideoFullFileName);
+//
+//            mMediaRecorder.setVideoFrameRate(30);
+
+            int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+            switch (mSensorOrientation) {
+                case SENSOR_ORIENTATION_DEFAULT_DEGREES:
+                    mMediaRecorder.setOrientationHint(DEFAULT_ORIENTATIONS.get(rotation));
+                    break;
+                case SENSOR_ORIENTATION_INVERSE_DEGREES:
+                    mMediaRecorder.setOrientationHint(INVERSE_ORIENTATIONS.get(rotation));
+                    break;
+            }
+
+            try {
+                mMediaRecorder.prepare();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        setStreamState(STREAM_STATE_CONFIGURED);
+        
+        if (mNextVideoFullFileName == null || mNextVideoFullFileName.isEmpty()) {
+            mNextVideoFullFileName = getOutputMediaFileName();
+        }
     }
 
     GLES10 mGles10 = new GLES10();
@@ -511,9 +986,7 @@ public class Camera2VideoFragment extends Fragment
         }
         try {
             closePreviewSession();
-            configureCamera(); // Dealing with output video file and rotations for now. todo refactor
-
-            mCameraRecordingStream.configure(getContext(), mVideoSize, true, 10000000);
+            configureCamera();
 
             SurfaceTexture texture = mTextureView.getSurfaceTexture();
             assert texture != null;
@@ -527,17 +1000,23 @@ public class Camera2VideoFragment extends Fragment
 //            mPreviewBuilder.addTarget(previewSurface);
 
             // Set up Surface for the MediaRecorder
-            Surface recorderSurface;
-            if (null != mCameraRecordingStream.getCurrentFrameSurface()) {
-//                recorderSurface = mMediaRecorder.getSurface();
-//                recorderSurface = mCameraRecordingStream.getCurrentFrameSurface();
-                recorderSurface = mCameraRecordingStream.getEncoder().createInputSurface();
-                surfaces.add(recorderSurface);
+            Surface recorderSurface = null;
+
+            if (mUseMediaCodec) {
+                if (null != mCurrentFrameSurface) {
+                    recorderSurface = mCurrentFrameSurface;
+                } else {
+                    recorderSurface = mEncoder.createInputSurface();
+                }
+            } else {
+                recorderSurface = mMediaRecorder.getSurface();
             }
+
+            surfaces.add(recorderSurface);
 //            mPreviewBuilder.addTarget(recorderSurface);
 
-            mCameraRecordingStream.onConfiguringOutputs(surfaces, false);
-            mCameraRecordingStream.onConfiguringRequest(mPreviewBuilder, false);
+            onConfiguringOutputs(surfaces, false);
+            onConfiguringRequest(mPreviewBuilder, false);
 
             // Start a capture session
             // Once the session starts, we can update the UI and start recording
@@ -558,49 +1037,47 @@ public class Camera2VideoFragment extends Fragment
                             mButtonVideo.setText(R.string.stop);
                             mIsRecordingVideo = true;
 
-                            surface.setOnFrameAvailableListener(new
-                                    SurfaceTexture.OnFrameAvailableListener() {
-                                @Override
-                                public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-
-                                    drawFrame(mView, surfaceTexture);
-
-//                                    // todo paste the image transform here!
-//                                    Parcel parcel = Parcel.obtain();
-//                                    recorderSurface.writeToParcel(parcel, 0);
-//                                    byte[] surfaceInBytes = parcel.createByteArray();
+//                            surface.setOnFrameAvailableListener(new
+//                                    SurfaceTexture.OnFrameAvailableListener() {
+//                                @Override
+//                                public void onFrameAvailable(SurfaceTexture surfaceTexture) {
 //
-//                                    // Getting the Bitmap object from byte array and writing test on it
-//                                    Bitmap bm = BitmapFactory.decodeByteArray(surfaceInBytes, 0, surfaceInBytes.length);
+//                                    drawFrame(mView, surfaceTexture);
 //
-//                                    Activity activity = getActivity();
-//                                    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
-//                                    if(Surface.ROTATION_0 == rotation || Surface.ROTATION_180 == rotation) {
-//                                        bm = rotateAndScaleBitmap(bm);
-//                                    }
-//
-//                                    // The date and time of capturing
-//                                    DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-//                                    Date nowDate = Calendar.getInstance().getTime();
-//                                    String nowDateString = dateFormat.format(nowDate);
-//
-//                                    bm = writeTextOnBitmap(bm, nowDateString);
-//
-//                                    // Making the byte array back from the processed Bitmap object
-//                                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//                                    bm.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-//                                    byte[] outBytes = stream.toByteArray();
-//
-//                                    parcel.unmarshall(outBytes, 0, outBytes.length);
-//
-//                                    recorderSurface.readFromParcel(parcel);
-                                }
-                            });
+////                                    // todo paste the image transform here!
+////                                    Parcel parcel = Parcel.obtain();
+////                                    recorderSurface.writeToParcel(parcel, 0);
+////                                    byte[] surfaceInBytes = parcel.createByteArray();
+////
+////                                    // Getting the Bitmap object from byte array and writing test on it
+////                                    Bitmap bm = BitmapFactory.decodeByteArray(surfaceInBytes, 0, surfaceInBytes.length);
+////
+////                                    Activity activity = getActivity();
+////                                    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+////                                    if(Surface.ROTATION_0 == rotation || Surface.ROTATION_180 == rotation) {
+////                                        bm = rotateAndScaleBitmap(bm);
+////                                    }
+////
+////                                    // The date and time of capturing
+////                                    DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+////                                    Date nowDate = Calendar.getInstance().getTime();
+////                                    String nowDateString = dateFormat.format(nowDate);
+////
+////                                    bm = writeTextOnBitmap(bm, nowDateString);
+////
+////                                    // Making the byte array back from the processed Bitmap object
+////                                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+////                                    bm.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+////                                    byte[] outBytes = stream.toByteArray();
+////
+////                                    parcel.unmarshall(outBytes, 0, outBytes.length);
+////
+////                                    recorderSurface.readFromParcel(parcel);
+//                                }
+//                            });
 
                             // Start recording
-//                            mMediaRecorder.start();
-
-                            mCameraRecordingStream.start();
+                            start();
 
                             drawFrame(mView, surface);
 
@@ -619,7 +1096,7 @@ public class Camera2VideoFragment extends Fragment
                         Toast.makeText(activity, "Failed", Toast.LENGTH_SHORT).show();
                     }
                 }
-            }, mBackgroundHandler);
+            }, mRecordingHandler);
         } catch (CameraAccessException/* | IOException*/ e) {
             e.printStackTrace();
         }
@@ -630,19 +1107,17 @@ public class Camera2VideoFragment extends Fragment
         // UI
         mIsRecordingVideo = false;
         mButtonVideo.setText(R.string.record);
-        // Stop recording
-//        mMediaRecorder.stop();
-//        mMediaRecorder.reset();
 
-        mCameraRecordingStream.stop();
+        // Stop recording
+        stop();
 
         Activity activity = getActivity();
         if (null != activity) {
-            Toast.makeText(activity, "Video saved: " + mNextVideoAbsolutePath,
+            Toast.makeText(activity, "Video saved: " + mNextVideoFullFileName,
                     Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "Video saved: " + mNextVideoAbsolutePath);
+            Log.d(TAG, "Video saved: " + mNextVideoFullFileName);
         }
-        mNextVideoAbsolutePath = null;
+        mNextVideoFullFileName = null;
         startPreview();
     }
 
@@ -663,7 +1138,7 @@ public class Camera2VideoFragment extends Fragment
             setUpCaptureRequestBuilder(mPreviewBuilder);
             HandlerThread thread = new HandlerThread("CameraPreview");
             thread.start();
-            mPreviewSession.setRepeatingRequest(mPreviewBuilder.build(), null, mBackgroundHandler);
+            mPreviewSession.setRepeatingRequest(mPreviewBuilder.build(), null, mRecordingHandler);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -702,6 +1177,10 @@ public class Camera2VideoFragment extends Fragment
 
     }
 
+    public static Camera2VideoFragment newInstance() {
+        return new Camera2VideoFragment();
+    }
+
     /**
      * {@link CameraDevice.StateCallback} is called when {@link CameraDevice} changes its status.
      */
@@ -737,16 +1216,12 @@ public class Camera2VideoFragment extends Fragment
 
     };
     private Integer mSensorOrientation;
-    private String mNextVideoAbsolutePath;
+    private String mNextVideoFullFileName;
     private CaptureRequest.Builder mPreviewBuilder;
 
     public Camera2VideoFragment() {
 
     }
-
-//    public static Camera2VideoFragment newInstance() {
-//        return new Camera2VideoFragment();
-//    }
 
     /**
      * In this sample, we choose a video size with 3x4 aspect ratio. Also, we don't use sizes
@@ -814,7 +1289,7 @@ public class Camera2VideoFragment extends Fragment
         mButtonVideo.setOnClickListener(this);
         view.findViewById(R.id.info).setOnClickListener(this);
 
-        mToggleFlashButton = view.findViewById(R.id.flash);
+        mToggleFlashButton = view.findViewById(R.id.mediaCodec);
         mToggleFlashButton.setOnClickListener(this);
 
         mChronometer = view.findViewById(R.id.chronometer);
@@ -824,6 +1299,7 @@ public class Camera2VideoFragment extends Fragment
     public void onResume() {
         super.onResume();
         startBackgroundThread();
+
         if (mTextureView.isAvailable()) {
             openCamera(mTextureView.getWidth(), mTextureView.getHeight());
         } else {
@@ -864,50 +1340,21 @@ public class Camera2VideoFragment extends Fragment
                 break;
             }
 
-            case R.id.flash: {
+            case R.id.mediaCodec: {
                 try {
                     mCameraId = mCameraManager.getCameraIdList()[0];
 
-                    if (mTorchOnFlag) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            mCameraManager.setTorchMode(mCameraId, false);
-                            mToggleFlashButton.setImageResource(R.mipmap.flash_off);
-                        }
-                        mTorchOnFlag = false;
+                    if (mUseMediaCodec) {
+                        mToggleFlashButton.setImageResource(R.mipmap.mediacodec_off);
+                        mUseMediaCodec = false;
                     } else {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            mCameraManager.setTorchMode(mCameraId, true);
-                            mToggleFlashButton.setImageResource(R.mipmap.flash_on);
-                        }
-                        mTorchOnFlag = true;
+                        mToggleFlashButton.setImageResource(R.mipmap.mediacodec_on);
+                        mUseMediaCodec = true;
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        }
-    }
-
-    /**
-     * Starts a background thread and its {@link Handler}.
-     */
-    private void startBackgroundThread() {
-        mBackgroundThread = new HandlerThread("CameraBackground");
-        mBackgroundThread.start();
-        mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
-    }
-
-    /**
-     * Stops the background thread and its {@link Handler}.
-     */
-    private void stopBackgroundThread() {
-        mBackgroundThread.quitSafely();
-        try {
-            mBackgroundThread.join();
-            mBackgroundThread = null;
-            mBackgroundHandler = null;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 
@@ -978,10 +1425,12 @@ public class Camera2VideoFragment extends Fragment
             requestVideoPermissions();
             return;
         }
+
         final Activity activity = getActivity();
         if (null == activity || activity.isFinishing()) {
             return;
         }
+
         CameraManager manager = (CameraManager) activity.getSystemService(Context.CAMERA_SERVICE);
         try {
             Log.d(TAG, "tryAcquire");
@@ -1032,10 +1481,19 @@ public class Camera2VideoFragment extends Fragment
                 mCameraDevice.close();
                 mCameraDevice = null;
             }
-            if (null != mMediaRecorder) {
-                mMediaRecorder.release();
-                mMediaRecorder = null;
+
+            if (mUseMediaCodec) {
+                if (null != mEncoder) {
+                    mEncoder.release();
+                    mEncoder = null;
+                }
+            } else {
+                if (null != mMediaRecorder) {
+                    mMediaRecorder.release();
+                    mMediaRecorder = null;
+                }
             }
+
         } catch (InterruptedException e) {
             throw new RuntimeException("Interrupted while trying to lock camera closing.");
         } finally {
@@ -1076,7 +1534,7 @@ public class Camera2VideoFragment extends Fragment
                                 Toast.makeText(activity, "Failed", Toast.LENGTH_SHORT).show();
                             }
                         }
-                    }, mBackgroundHandler);
+                    }, mRecordingHandler);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -1115,12 +1573,6 @@ public class Camera2VideoFragment extends Fragment
             matrix.postRotate(90 * (rotation - 2), centerX, centerY); // todo deal with it
         }
         mTextureView.setTransform(matrix);
-    }
-
-    private String getVideoFilePath(Context context) {
-        final File dir = context.getExternalFilesDir(null);
-        return (dir == null ? "" : (dir.getAbsolutePath() + "/"))
-                + System.currentTimeMillis() + ".mp4";
     }
 
     private void closePreviewSession() {
