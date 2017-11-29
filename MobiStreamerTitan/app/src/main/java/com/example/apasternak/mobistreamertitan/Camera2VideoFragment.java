@@ -27,6 +27,7 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -43,6 +44,7 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.media.Image;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
@@ -78,6 +80,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -241,13 +244,12 @@ public class Camera2VideoFragment extends Fragment
     private MediaMuxer mMuxer;
     private int mTrackIndex = -1;
     private boolean mMuxerStarted;
-    private boolean mUseMediaCodec = false;
+    private boolean mUseMediaCodec = true;
     private Size mStreamSize = new Size(-1, -1);
 
     private HandlerThread mRecordingThread;
     private Thread mBackgroundThread;
     private Handler mRecordingHandler;
-    private Surface mCurrentFrameSurface;
 
     /**
      * Add the stream output surface to the target output surface list.
@@ -302,10 +304,10 @@ public class Camera2VideoFragment extends Fragment
     }
 
     /**
-     * Start recording stream. Calling start on an already started stream has no
+     * Start recording stream. Calling startEncoding on an already started stream has no
      * effect.
      */
-    public synchronized void start() {
+    private synchronized void startEncoding() {
         if (getStreamState() == STREAM_STATE_RECORDING) {
             Log.w(TAG, "Recording stream is already started");
             return;
@@ -317,17 +319,47 @@ public class Camera2VideoFragment extends Fragment
 
         if (mUseMediaCodec) {
             setStreamState(STREAM_STATE_RECORDING);
-            startMediaCodecRecording();
+            encodeCycle();
 //            startBackgroundThread();
         } else {
             mMediaRecorder.start();
         }
     }
 
+    // todo its an overriden Thread.run() method
+    private void decodeCycle() {
+        try {
+            MediaCodec.BufferInfo info = new MediaCodec.BufferInfo(); // переиспользуем BufferInfo
+            while (getStreamState() == STREAM_STATE_RECORDING) {
+                if (mConfigured) { // если кодек готов
+                    int index = mDecoder.dequeueOutputBuffer(info, TIMEOUT_USEC);
+                    if (index >= 0) { // буфер с индексом index доступен
+                        // info.size > 0: если буфер не нулевого размера, то рендерим на Surface
+                        mDecoder.releaseOutputBuffer(index, info.size > 0);
+                        // заканчиваем работу декодера если достигнут конец потока данных
+                        if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) == MediaCodec.BUFFER_FLAG_END_OF_STREAM) {
+                            setStreamState(STREAM_STATE_IDLE);
+                            break;
+                        }
+                    }
+                } else {
+                    // просто спим, т.к. кодек не готов
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException ignore) {
+                    }
+                }
+            }
+        } finally {
+            // освобождение ресурсов
+            releaseMediaCodec(mDecoder);
+        }
+    }
+
     /**
      * Starts MediaCodec mode recording.
      */
-    private void startMediaCodecRecording() {
+    private void encodeCycle() {
         /**
          * Start video recording asynchronously. we need a loop to handle output
          * data for each frame.
@@ -335,15 +367,24 @@ public class Camera2VideoFragment extends Fragment
         mBackgroundThread = new Thread() {
             @Override
             public void run() {
-                if (VERBOSE) {
-                    Log.v(TAG, "Recording thread starts");
-                }
-                while (getStreamState() == STREAM_STATE_RECORDING) {
-                    // Feed encoder output into the muxer until recording stops.
-                    doMediaCodecEncoding(/* notifyEndOfStream */false);
-                }
-                if (VERBOSE) {
-                    Log.v(TAG, "Recording thread completes");
+                configureEncoder();
+
+                try {
+                    while (getStreamState() == STREAM_STATE_RECORDING) {
+                        if (VERBOSE) {
+                            Log.v(TAG, "Recording thread starts");
+                        }
+
+                        // Feed encoder output into the muxer until recording stops.
+                        doEncoding(/* notifyEndOfStream */false);
+                    }
+                } finally {
+                    if (VERBOSE) {
+                        Log.v(TAG, "Recording thread completes");
+                    }
+
+                    releaseMediaCodec(mEncoder);
+                    releaseMuxer();
                 }
                 return;
             }
@@ -353,19 +394,19 @@ public class Camera2VideoFragment extends Fragment
 
     /**
      * <p>
-     * Stop recording stream. Calling stop on an already stopped stream has no
-     * effect. Producer(in this case, CameraDevice) should stop before this call
+     * Stop recording stream. Calling stopEncoding on an already stopped stream has no
+     * effect. Producer(in this case, CameraDevice) should stopEncoding before this call
      * to avoid sending buffers to a stopped encoder.
      * </p>
      * <p>
      * TODO: We have to release encoder and muxer for MediaCodec mode because
      * encoder is closely coupled with muxer, and muxer can not be reused
      * across different recording session(by design, you can not reset/restart
-     * it). To save the subsequent start recording time, we need avoid releasing
+     * it). To save the subsequent startEncoding recording time, we need avoid releasing
      * encoder for future.
      * </p>
      */
-    public synchronized void stop() {
+    private synchronized void stopEncoding() {
         if (getStreamState() != STREAM_STATE_RECORDING) {
             Log.w(TAG, "Recording stream is not started yet");
             return;
@@ -373,16 +414,16 @@ public class Camera2VideoFragment extends Fragment
         setStreamState(STREAM_STATE_IDLE);
         Log.e(TAG, "setting camera to idle");
         if (mUseMediaCodec) {
-            // Wait until recording thread stop
+            // Wait until recording thread stopEncoding todo find out how to deal with bkgd thread
             try {
                 mBackgroundThread.join();
             } catch (InterruptedException e) {
                 throw new RuntimeException("Stop recording failed", e);
             }
-            // Drain encoder
-            doMediaCodecEncoding(/* notifyEndOfStream */true);
-            releaseEncoder();
-            releaseMuxer();
+//            // Drain encoder
+//            doEncoding(/* notifyEndOfStream */true);
+//            releaseMediaCodec(mEncoder);
+//            releaseMuxer();
         } else {
             mMediaRecorder.stop();
             mMediaRecorder.reset();
@@ -401,7 +442,7 @@ public class Camera2VideoFragment extends Fragment
                 }
                 while (getStreamState() == STREAM_STATE_RECORDING) {
                     // Feed encoder output into the muxer until recording stops.
-                    doMediaCodecEncoding(*//* notifyEndOfStream *//*false);
+                    doEncoding(*//* notifyEndOfStream *//*false);
                 }
                 if (VERBOSE) {
                     Log.v(TAG, "Recording thread completes");
@@ -444,18 +485,19 @@ public class Camera2VideoFragment extends Fragment
         }
     }
 
-    private void releaseEncoder() {
+    private void releaseMediaCodec(MediaCodec mediaCodec) {
         // Release encoder
         if (VERBOSE) {
             Log.v(TAG, "releasing encoder");
         }
-        if (mEncoder != null) {
-            mEncoder.stop();
-            mEncoder.release();
+        if (mediaCodec != null && mConfigured) {
+            mediaCodec.stop();
+            mediaCodec.release();
             if (mRecordingSurface != null) {
                 mRecordingSurface.release();
             }
             mEncoder = null;
+            mConfigured = false;
         }
     }
 
@@ -483,8 +525,9 @@ public class Camera2VideoFragment extends Fragment
      * Initializes mEncoder, mMuxer, mRecordingSurface, mBufferInfo,
      * mTrackIndex, and mMuxerStarted.
      */
-    private void configureMediaCodecEncoder() {
+    private void configureEncoder() {
         mBufferInfo = new MediaCodec.BufferInfo();
+
         MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, mStreamSize.getWidth(),
                 mStreamSize.getHeight());
         /**
@@ -506,14 +549,16 @@ public class Camera2VideoFragment extends Fragment
         }
 
         mEncoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-        mRecordingSurface = mCurrentFrameSurface = mEncoder.createInputSurface();
+        mConfigured = true;
+        mRecordingSurface = mEncoder.createInputSurface();
+
         mEncoder.start();
         String outputFileName = getOutputMediaFileName();
         if (outputFileName == null) {
             throw new IllegalStateException("Failed to get video output file");
         }
         /**
-         * Create a MediaMuxer. We can't add the video track and start() the
+         * Create a MediaMuxer. We can't add the video track and startEncoding() the
          * muxer until the encoder starts and notifies the new media format.
          */
         try {
@@ -538,9 +583,9 @@ public class Camera2VideoFragment extends Fragment
      * here.
      * </p>
      */
-    private void doMediaCodecEncoding(boolean notifyEndOfStream) {
+    private void doEncoding(boolean notifyEndOfStream) {
         if (VERBOSE) {
-            Log.v(TAG, "doMediaCodecEncoding(" + notifyEndOfStream + ")");
+            Log.v(TAG, "doEncoding(" + notifyEndOfStream + ")");
         }
         if (notifyEndOfStream) {
             mEncoder.signalEndOfInputStream();
@@ -548,102 +593,157 @@ public class Camera2VideoFragment extends Fragment
 
         boolean notDone = true;
         while (notDone) {
-            int encoderStatus = mEncoder.dequeueOutputBuffer(mBufferInfo, TIMEOUT_USEC);
-            if (encoderStatus == MediaCodec.INFO_TRY_AGAIN_LATER) {
-                if (!notifyEndOfStream) {
-                    /**
-                     * Break out of the while loop because the encoder is not
-                     * ready to output anything yet.
-                     */
-                    notDone = false;
-                } else {
-                    if (VERBOSE) {
-                        Log.v(TAG, "no output available, spinning to await EOS");
-                    }
-                }
-//            } else if (encoderStatus == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED
-//                    /*MediaCodec.INFO_OUTPUT_FORMAT_CHANGED*/) {
-//                // generic case for mediacodec, not likely occurs for encoder.
-//                encoderOutputBuffers = mEncoder.getOutputBuffer(0);
-            } else if (encoderStatus == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-                /**
-                 * should happen before receiving buffers, and should only
-                 * happen once
-                 */
-                if (mMuxerStarted) {
-                    throw new IllegalStateException("format changed twice");
-                }
-                MediaFormat newFormat = mEncoder.getOutputFormat();
-                if (VERBOSE) {
-                    Log.v(TAG, "encoder output format changed: " + newFormat);
-                }
-                mTrackIndex = mMuxer.addTrack(newFormat);
-                mMuxer.start();
-                mMuxerStarted = true;
-            } else if (encoderStatus < 0) {
-                Log.w(TAG, "unexpected result from encoder.dequeueOutputBuffer: " + encoderStatus);
-            } else {
-                // Normal flow: get output encoded buffer, send to muxer.
-                ByteBuffer encoderOutputBuffer = mEncoder.getOutputBuffer(encoderStatus);
+            int inputBufferId = mEncoder.dequeueInputBuffer(TIMEOUT_USEC);
+            if (inputBufferId >= 0) {
+                ByteBuffer inputBuffer = mEncoder.getInputBuffer(inputBufferId);
 
-                mCurrentFrameSurface = null;
+                byte[] bytes;
+
+                if (inputBuffer.hasArray()) {
+                    bytes = inputBuffer.array();
+                } else {
+                    continue;
+                }
+
+                mEncoder.queueInputBuffer(inputBufferId, 0, bytes.length, TIMEOUT_USEC, 0);
+            }
+
+            int outputBufferId = mEncoder.dequeueOutputBuffer(mBufferInfo, TIMEOUT_USEC);
+            if (outputBufferId >= 0) {
+                ByteBuffer outputBuffer = mEncoder.getOutputBuffer(outputBufferId);
+                MediaFormat bufferFormat = mEncoder.getOutputFormat(outputBufferId);
+
                 Parcel parcel = null;
                 byte[] bytes;
 
-                if (encoderOutputBuffer.hasArray()) {
-                    bytes = encoderOutputBuffer.array();
+                if (outputBuffer.hasArray()) {
+                    bytes = outputBuffer.array();
                 }
                 else {
                     continue;
                 }
 
                 parcel.unmarshall(bytes, 0, bytes.length);
-                mCurrentFrameSurface.readFromParcel(parcel);
+                mRecordingSurface.readFromParcel(parcel);
 
-                if (encoderOutputBuffer == null) {
-                    throw new RuntimeException("encoderOutputBuffer " + encoderStatus +
-                            " was null");
-                }
-                if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
-                    /**
-                     * The codec config data was pulled out and fed to the muxer
-                     * when we got the INFO_OUTPUT_FORMAT_CHANGED status. Ignore
-                     * it.
-                     */
+                mEncoder.releaseOutputBuffer(outputBufferId, true);
+            }/* else if (outputBufferId == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+                outputF
+            }*/
+
+            if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+                if (!notifyEndOfStream) {
+                    Log.w(TAG, "reached end of stream unexpectedly");
+                } else {
                     if (VERBOSE) {
-                        Log.v(TAG, "ignoring BUFFER_FLAG_CODEC_CONFIG");
-                    }
-                    mBufferInfo.size = 0;
-                }
-                if (mBufferInfo.size != 0) {
-                    if (!mMuxerStarted) {
-                        throw new RuntimeException("muxer hasn't started");
-                    }
-                    /**
-                     * It's usually necessary to adjust the ByteBuffer values to
-                     * match BufferInfo.
-                     */
-                    encoderOutputBuffer.position(mBufferInfo.offset);
-                    encoderOutputBuffer.limit(mBufferInfo.offset + mBufferInfo.size);
-                    mMuxer.writeSampleData(mTrackIndex, encoderOutputBuffer, mBufferInfo);
-                    if (VERBOSE) {
-                        Log.v(TAG, "sent " + mBufferInfo.size + " bytes to muxer");
+                        Log.v(TAG, "end of stream reached");
                     }
                 }
-                mEncoder.releaseOutputBuffer(encoderStatus, false);
-                if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
-                    if (!notifyEndOfStream) {
-                        Log.w(TAG, "reached end of stream unexpectedly");
-                    } else {
-                        if (VERBOSE) {
-                            Log.v(TAG, "end of stream reached");
-                        }
-                    }
-                    // Finish encoding.
-                    notDone = false;
-                }
+                // Finish encoding.
+                notDone = false;
             }
-        } // End of while(notDone)
+        }
+
+//        while (notDone) {
+//            // = mEncoder.dequeueOutputBuffer(mBufferInfo, TIMEOUT_USEC);
+//
+//            if (encoderStatus == MediaCodec.INFO_TRY_AGAIN_LATER) {
+//                if (!notifyEndOfStream) {
+//                    /**
+//                     * Break out of the while loop because the encoder is not
+//                     * ready to output anything yet.
+//                     */
+//                    notDone = false;
+//                } else {
+//                    if (VERBOSE) {
+//                        Log.v(TAG, "no output available, spinning to await EOS");
+//                    }
+//                }
+////            } else if (encoderStatus == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED
+////                    /*MediaCodec.INFO_OUTPUT_FORMAT_CHANGED*/) {
+////                // generic case for mediacodec, not likely occurs for encoder.
+////                encoderOutputBuffers = mEncoder.getOutputBuffer(0);
+//            } else if (encoderStatus == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+//                /**
+//                 * should happen before receiving buffers, and should only
+//                 * happen once
+//                 */
+//                if (mMuxerStarted) {
+//                    throw new IllegalStateException("format changed twice");
+//                }
+//                MediaFormat newFormat = mEncoder.getOutputFormat();
+//                if (VERBOSE) {
+//                    Log.v(TAG, "encoder output format changed: " + newFormat);
+//                }
+//                mTrackIndex = mMuxer.addTrack(newFormat);
+//                mMuxer.start();
+//                mMuxerStarted = true;
+//            } else if (encoderStatus < 0) {
+//                Log.w(TAG, "unexpected result from encoder.dequeueOutputBuffer: " + encoderStatus);
+//            } else {
+//                // Normal flow: get output encoded buffer, send to muxer.
+//                ByteBuffer encoderOutputBuffer = mEncoder.getOutputBuffer(encoderStatus);
+//
+////                Image frameImage = mEncoder.getOutputImage(encoderStatus); // todo work directly with image
+////                Bitmap bm = BitmapFactory.decodeResource(frameImage, 0);
+//
+//                Parcel parcel = null;
+//                byte[] bytes;
+//
+//                if (encoderOutputBuffer.hasArray()) {
+//                    bytes = encoderOutputBuffer.array();
+//                }
+//                else {
+//                    continue;
+//                }
+//
+//                parcel.unmarshall(bytes, 0, bytes.length);
+//                mRecordingSurface.readFromParcel(parcel);
+//
+//                if (encoderOutputBuffer == null) {
+//                    throw new RuntimeException("encoderOutputBuffer " + encoderStatus +
+//                            " was null");
+//                }
+//                if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
+//                    /**
+//                     * The codec config data was pulled out and fed to the muxer
+//                     * when we got the INFO_OUTPUT_FORMAT_CHANGED status. Ignore
+//                     * it.
+//                     */
+//                    if (VERBOSE) {
+//                        Log.v(TAG, "ignoring BUFFER_FLAG_CODEC_CONFIG");
+//                    }
+//                    mBufferInfo.size = 0;
+//                }
+//                if (mBufferInfo.size != 0) {
+//                    if (!mMuxerStarted) {
+//                        throw new RuntimeException("muxer hasn't started");
+//                    }
+//                    /**
+//                     * It's usually necessary to adjust the ByteBuffer values to
+//                     * match BufferInfo.
+//                     */
+//                    encoderOutputBuffer.position(mBufferInfo.offset);
+//                    encoderOutputBuffer.limit(mBufferInfo.offset + mBufferInfo.size);
+//                    mMuxer.writeSampleData(mTrackIndex, encoderOutputBuffer, mBufferInfo);
+//                    if (VERBOSE) {
+//                        Log.v(TAG, "sent " + mBufferInfo.size + " bytes to muxer");
+//                    }
+//                }
+//                mEncoder.releaseOutputBuffer(encoderStatus, false);
+//                if ((mBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+//                    if (!notifyEndOfStream) {
+//                        Log.w(TAG, "reached end of stream unexpectedly");
+//                    } else {
+//                        if (VERBOSE) {
+//                            Log.v(TAG, "end of stream reached");
+//                        }
+//                    }
+//                    // Finish encoding.
+//                    notDone = false;
+//                }
+//            }
+//        } // End of while(notDone)
     }
 
     /**
@@ -687,11 +787,11 @@ public class Camera2VideoFragment extends Fragment
                      * Muxer for future.
                      */
                 }
-                releaseEncoder();
+                releaseMediaCodec(mEncoder);
                 releaseMuxer();
-                configureMediaCodecEncoder();
+                configureEncoder();
             } else {
-                configureMediaCodecEncoder();
+                configureEncoder();
             }
         } else {
             mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -745,6 +845,45 @@ public class Camera2VideoFragment extends Fragment
         
         if (mNextVideoFullFileName == null || mNextVideoFullFileName.isEmpty()) {
             mNextVideoFullFileName = getOutputMediaFileName();
+        }
+    }
+
+    private volatile boolean mConfigured;
+    private MediaCodec mDecoder;
+
+    private synchronized void configureDecoder(Surface surface, int width, int height,
+            ByteBuffer csd0) {
+        if (mConfigured) { // просто флаг, чтобы знать, что декодер готов
+            throw new IllegalStateException();
+        }
+        // создаем видео формат
+        MediaFormat format = MediaFormat.createVideoFormat("video/avc", width, height);
+        // передаем наш csd-0
+        format.setByteBuffer("csd-0", csd0);
+
+        // создаем декодер
+        try {
+            mDecoder = MediaCodec.createDecoderByType("video/avc");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // конфигурируем декодер
+        mDecoder.configure(format, surface, null, 0);
+        mDecoder.start();
+        mConfigured = true;
+    }
+
+    private void decodeSample(byte[] data, int offset, int size, long presentationTimeUs, int flags) {
+        if (mConfigured) {
+            // вызов блокирующий
+                        int index = mDecoder.dequeueInputBuffer(TIMEOUT_USEC);
+            if (index >= 0) {
+                ByteBuffer buffer = mDecoder.getInputBuffer(index);
+                buffer.clear(); // обязательно сбросить позицию и размер буфера
+                buffer.put(data, offset, size);
+                // сообщаем системе о доступности буфера данных
+                mDecoder.queueInputBuffer(index, 0, size, presentationTimeUs, flags);
+            }
         }
     }
 
@@ -1003,11 +1142,7 @@ public class Camera2VideoFragment extends Fragment
             Surface recorderSurface = null;
 
             if (mUseMediaCodec) {
-                if (null != mCurrentFrameSurface) {
-                    recorderSurface = mCurrentFrameSurface;
-                } else {
-                    recorderSurface = mEncoder.createInputSurface();
-                }
+                recorderSurface = mRecordingSurface;
             } else {
                 recorderSurface = mMediaRecorder.getSurface();
             }
@@ -1019,7 +1154,7 @@ public class Camera2VideoFragment extends Fragment
             onConfiguringRequest(mPreviewBuilder, false);
 
             // Start a capture session
-            // Once the session starts, we can update the UI and start recording
+            // Once the session starts, we can update the UI and startEncoding recording
             mCameraDevice.createCaptureSession(surfaces, new CameraCaptureSession.StateCallback() {
 
                 @RequiresApi(api = Build.VERSION_CODES.O)
@@ -1077,9 +1212,9 @@ public class Camera2VideoFragment extends Fragment
 //                            });
 
                             // Start recording
-                            start();
+                            startEncoding();
 
-                            drawFrame(mView, surface);
+//                            drawFrame(mView, surface);
 
                             // Setting the recording time counter
                             mChronometer.setBase(SystemClock.elapsedRealtime());
@@ -1109,7 +1244,7 @@ public class Camera2VideoFragment extends Fragment
         mButtonVideo.setText(R.string.record);
 
         // Stop recording
-        stop();
+        stopEncoding();
 
         Activity activity = getActivity();
         if (null != activity) {
@@ -1345,10 +1480,14 @@ public class Camera2VideoFragment extends Fragment
                     mCameraId = mCameraManager.getCameraIdList()[0];
 
                     if (mUseMediaCodec) {
-                        mToggleFlashButton.setImageResource(R.mipmap.mediacodec_off);
+                        Toast.makeText(getContext(), "MediaCodec is turned off!",
+                                Toast.LENGTH_SHORT).show();
+                        mToggleFlashButton.setImageResource(R.mipmap.mediacodec_on);
                         mUseMediaCodec = false;
                     } else {
-                        mToggleFlashButton.setImageResource(R.mipmap.mediacodec_on);
+                        Toast.makeText(getContext(), "MediaCodec is turned on!",
+                                Toast.LENGTH_SHORT).show();
+                        mToggleFlashButton.setImageResource(R.mipmap.mediacodec_off);
                         mUseMediaCodec = true;
                     }
                 } catch (Exception e) {
