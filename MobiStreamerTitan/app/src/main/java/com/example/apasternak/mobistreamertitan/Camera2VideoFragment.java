@@ -235,6 +235,11 @@ public class Camera2VideoFragment extends Fragment
     private int mStreamState = STREAM_STATE_IDLE;
 
     private MediaCodec mEncoder;
+
+    public void setRecordingSurface(Surface recordingSurface) {
+        mRecordingSurface = recordingSurface;
+    }
+
     private Surface mRecordingSurface;
     private int mEncBitRate = 10000000;
     private MediaCodec.BufferInfo mBufferInfo;
@@ -404,6 +409,14 @@ public class Camera2VideoFragment extends Fragment
      * </p>
      */
     private synchronized void stopEncoding() {
+        // Added by Ben Ning, to resolve exception issue when stop recording.
+        try {
+            mPreviewSession.stopRepeating();
+            mPreviewSession.abortCaptures();
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+
         if (mUseMediaCodec) {
             if (getStreamState() != STREAM_STATE_RECORDING) {
                 Log.w(TAG, "Recording stream is not started yet");
@@ -549,7 +562,7 @@ public class Camera2VideoFragment extends Fragment
 
             mEncoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             mConfigured = true;
-            mRecordingSurface = mEncoder.createInputSurface();
+//            mRecordingSurface = mEncoder.createInputSurface();
 
             mEncoder.start();
             String outputFileName = getOutputMediaFileName();
@@ -1155,7 +1168,11 @@ public class Camera2VideoFragment extends Fragment
                             mIsRecordingVideo = true;
 
                             // Start recording
-                            startRecording();
+                            try {
+                                startRecording();
+                            } catch (IllegalStateException e) {
+                                e.printStackTrace();
+                            }
 
 //                            drawFrame(mView, surface);
 
@@ -1502,7 +1519,7 @@ public class Camera2VideoFragment extends Fragment
      * Tries to open a {@link CameraDevice}. The result is listened by `mStateCallback`.
      */
     @SuppressWarnings("MissingPermission")
-    private void openCamera(int width, int height) {
+    public void openCamera(int width, int height) {
         if (!hasPermissionsGranted(VIDEO_PERMISSIONS)) {
             requestVideoPermissions();
             return;
@@ -1555,7 +1572,7 @@ public class Camera2VideoFragment extends Fragment
         }
     }
 
-    private void closeCamera() {
+    public void closeCamera() {
         try {
             mCameraOpenCloseLock.acquire();
             closePreviewSession();
@@ -1586,7 +1603,7 @@ public class Camera2VideoFragment extends Fragment
     /**
      * Start the camera preview.
      */
-    private void startPreview() {
+    public void startPreview() {
         if (null == mCameraDevice || !mTextureView.isAvailable() || null == mPreviewSize) {
             return;
         }
