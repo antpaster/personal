@@ -17,8 +17,11 @@
 package com.example.apasternak.mobistreamertitan;
 
 import android.content.Context;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.TextureView;
+import android.view.View;
 
 /**
  * A {@link TextureView} that can be adjusted to a specified aspect ratio.
@@ -48,13 +51,17 @@ public class AutoFitTextureView extends TextureView {
      * @param width  Relative horizontal size
      * @param height Relative vertical size
      */
+//    @RequiresApi(api = 26)
     public void setAspectRatio(int width, int height) {
         if (width < 0 || height < 0) {
             throw new IllegalArgumentException("Size cannot be negative.");
         }
         mRatioWidth = width;
         mRatioHeight = height;
-        requestLayout();
+
+//        if (Build.VERSION.SDK_INT > 25) {
+            requestLayout();
+//        }
     }
 
     @Override
