@@ -54,17 +54,14 @@ import android.opengl.EGLContext;
 import android.opengl.EGLDisplay;
 import android.opengl.EGLExt;
 import android.opengl.EGLSurface;
-import android.opengl.GLES10;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
-import android.opengl.GLES30;
 import android.opengl.GLUtils;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Parcel;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
@@ -74,13 +71,13 @@ import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.Surface;
-import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.io.File;
@@ -135,7 +132,7 @@ public class Camera2VideoFragment extends Fragment
     /**
      * An {@link AutoFitTextureView} for camera preview.
      */
-    private AutoFitTextureView mTextureView;
+    private TextureView mTextureView;
 
     /**
      * Button to record video
@@ -240,9 +237,6 @@ public class Camera2VideoFragment extends Fragment
     public static final int DURATION_SEC = 10;
     private int mEncBitRate = 10000000;
 
-    public static final String OUTPUT_DIR
-            = Environment.getExternalStorageDirectory().getAbsolutePath();
-
     // Fragment shader that swaps color channels around.
     private static final String SWAPPED_FRAGMENT_SHADER =
             "#extension GL_OES_EGL_image_external : require\n" +
@@ -310,11 +304,11 @@ public class Camera2VideoFragment extends Fragment
      *
      * The wrapper propagates exceptions thrown by the worker thread back to the caller.
      */
-    private static class CameraToMpegWrapper implements Runnable {
+    private static class Camera2VideoFragmentWrapper implements Runnable {
         private Throwable mThrowable;
         private Camera2VideoFragment mTest;
 
-        private CameraToMpegWrapper(Camera2VideoFragment test) {
+        private Camera2VideoFragmentWrapper(Camera2VideoFragment test) {
             mTest = test;
         }
 
@@ -329,7 +323,7 @@ public class Camera2VideoFragment extends Fragment
 
         /** Entry point. */
         public static void runTest(Camera2VideoFragment obj) throws Throwable {
-            CameraToMpegWrapper wrapper = new CameraToMpegWrapper(obj);
+            Camera2VideoFragmentWrapper wrapper = new Camera2VideoFragmentWrapper(obj);
             Thread th = new Thread(wrapper, "codec test");
             th.start();
             th.join();
@@ -354,6 +348,14 @@ public class Camera2VideoFragment extends Fragment
         private EGLDisplay mEGLDisplay = EGL14.EGL_NO_DISPLAY;
         private EGLContext mEGLContext = EGL14.EGL_NO_CONTEXT;
         private EGLSurface mEGLSurface = EGL14.EGL_NO_SURFACE;
+
+        public Surface getSurface() {
+            return mSurface;
+        }
+
+        public void setSurface(Surface surface) {
+            mSurface = surface;
+        }
 
         private Surface mSurface;
 
@@ -802,7 +804,7 @@ public class Camera2VideoFragment extends Fragment
 
     /** test entry point */
     public void testEncodeCameraToMp4() throws Throwable {
-        CameraToMpegWrapper.runTest(this);
+        Camera2VideoFragmentWrapper.runTest(this);
     }
 
     /**
@@ -816,65 +818,24 @@ public class Camera2VideoFragment extends Fragment
         Log.d(TAG, MIME_TYPE + " output " + encWidth + "x" + encHeight + " @" + mEncBitRate);
 
         try {
-            openCamera(encWidth, encHeight);
+//            openCamera(encWidth, encHeight);
 //            prepareCamera(encWidth, encHeight);
             prepareEncoder(encWidth, encHeight, mEncBitRate);
             mRecordingSurface.makeCurrent();
 //            mCamera2VideoFragment.setRecordingSurface(mRecordingSurface);
+            mStManager = new SurfaceTextureManager();
+            SurfaceTexture surfaceTexture = mStManager.getSurfaceTexture();
+
+            mRecordingSurface.setSurface(new Surface(surfaceTexture));
+
 //            prepareSurfaceTexture(); // todo check out, done in startCamera()
 
 //            mCamera.startPreview();
-            startPreview();
+//            startPreview();
 
-            long startWhen = System.nanoTime();
-            long desiredEnd = startWhen + DURATION_SEC * 1000000000L;
-            SurfaceTexture st = mStManager.getSurfaceTexture();
-            int frameCount = 0;
+            startCamera();
 
-            while (System.nanoTime() < desiredEnd) {
-                // Feed any pending encoder output into the muxer.
-                drainEncoder(false);
-
-                // Switch up the colors every 15 frames.  Besides demonstrating the use of
-                // fragment shaders for video editing, this provides a visual indication of
-                // the frame rate: if the camera is capturing at 15fps, the colors will change
-                // once per second.
-                if ((frameCount % 15) == 0) {
-                    String fragmentShader = null;
-                    if ((frameCount & 0x01) != 0) {
-                        fragmentShader = SWAPPED_FRAGMENT_SHADER;
-                    }
-                    mStManager.changeFragmentShader(fragmentShader);
-                }
-                frameCount++;
-
-                // Acquire a new frame of input, and render it to the Surface.  If we had a
-                // GLSurfaceView we could switch EGL contexts and call drawImage() a second
-                // time to render it on screen.  The texture can be shared between contexts by
-                // passing the GLSurfaceView's EGLContext as eglCreateContext()'s share_context
-                // argument.
-                mStManager.awaitNewImage();
-                mStManager.drawImage();
-
-                // Set the presentation time stamp from the SurfaceTexture's time stamp.  This
-                // will be used by MediaMuxer to set the PTS in the video.
-                if (VERBOSE) {
-                    Log.d(TAG, "present: " +
-                            ((st.getTimestamp() - startWhen) / 1000000.0) + "ms");
-                }
-                mRecordingSurface.setPresentationTime(st.getTimestamp());
-
-                // Submit it to the encoder.  The eglSwapBuffers call will block if the input
-                // is full, which would be bad if it stayed full until we dequeued an output
-                // buffer (which we can't do, since we're stuck here).  So long as we fully drain
-                // the encoder before supplying additional input, the system guarantees that we
-                // can supply another frame without blocking.
-                if (VERBOSE) Log.d(TAG, "sending frame to encoder");
-                mRecordingSurface.swapBuffers();
-            }
-
-            // send end-of-stream to encoder, and drain remaining output
-            drainEncoder(true);
+//            encodingCycle();
         } finally {
             // release everything we grabbed
 //            releaseCamera(); // todo done in closeCamera()
@@ -882,6 +843,58 @@ public class Camera2VideoFragment extends Fragment
 //            releaseSurfaceTexture(); // todo done in closeCamera()
             closeCamera();
         }
+    }
+
+    private void encodingCycle() {
+        long startWhen = System.nanoTime();
+        long desiredEnd = startWhen + DURATION_SEC * 1000000000L;
+        SurfaceTexture st = mStManager.getSurfaceTexture();
+        int frameCount = 0;
+
+        while (System.nanoTime() < desiredEnd) {
+            // Feed any pending encoder output into the muxer.
+            drainEncoder(false);
+
+            // Switch up the colors every 15 frames.  Besides demonstrating the use of
+            // fragment shaders for video editing, this provides a visual indication of
+            // the frame rate: if the camera is capturing at 15fps, the colors will change
+            // once per second.
+            if ((frameCount % 15) == 0) {
+                String fragmentShader = null;
+                if ((frameCount & 0x01) != 0) {
+                    fragmentShader = SWAPPED_FRAGMENT_SHADER;
+                }
+                mStManager.changeFragmentShader(fragmentShader);
+            }
+            frameCount++;
+
+            // Acquire a new frame of input, and render it to the Surface.  If we had a
+            // GLSurfaceView we could switch EGL contexts and call drawImage() a second
+            // time to render it on screen.  The texture can be shared between contexts by
+            // passing the GLSurfaceView's EGLContext as eglCreateContext()'s share_context
+            // argument.
+            mStManager.awaitNewImage();
+            mStManager.drawImage();
+
+            // Set the presentation time stamp from the SurfaceTexture's time stamp.  This
+            // will be used by MediaMuxer to set the PTS in the video.
+            if (VERBOSE) {
+                Log.d(TAG, "present: " +
+                        ((st.getTimestamp() - startWhen) / 1000000.0) + "ms");
+            }
+            mRecordingSurface.setPresentationTime(st.getTimestamp());
+
+            // Submit it to the encoder.  The eglSwapBuffers call will block if the input
+            // is full, which would be bad if it stayed full until we dequeued an output
+            // buffer (which we can't do, since we're stuck here).  So long as we fully drain
+            // the encoder before supplying additional input, the system guarantees that we
+            // can supply another frame without blocking.
+            if (VERBOSE) Log.d(TAG, "sending frame to encoder");
+            mRecordingSurface.swapBuffers();
+        }
+
+        // send end-of-stream to encoder, and drain remaining output
+        drainEncoder(true);
     }
 
     /**
@@ -922,12 +935,11 @@ public class Camera2VideoFragment extends Fragment
 
         // Output filename.  Ideally this would use Context.getFilesDir() rather than a
         // hard-coded output directory.
-        String outputPath = new File(OUTPUT_DIR,
-                "test." + width + "x" + height + ".mp4").toString();
+        String outputPath = new File(getContext().getExternalFilesDir(null).getAbsolutePath(),
+                "test_" + width + "x" + height + ".mp4").toString();
         Log.i(TAG, "Output file is " + outputPath);
 
-
-        // Create a MediaMuxer.  We can't add the video track and start() the muxer here,
+        // Create a MediaMuxer. We can't add the video track and start() the muxer here,
         // because our MediaFormat doesn't have the Magic Goodies.  These can only be
         // obtained from the encoder after it has started processing data.
         //
@@ -975,7 +987,7 @@ public class Camera2VideoFragment extends Fragment
      * not recording audio.
      */
     private void drainEncoder(boolean endOfStream) {
-        final int TIMEOUT_USEC = 10000;
+        final int TIMEOUT_USEC = 1000000;
         if (VERBOSE) Log.d(TAG, "drainEncoder(" + endOfStream + ")");
 
         if (endOfStream) {
@@ -1054,57 +1066,57 @@ public class Camera2VideoFragment extends Fragment
         }
     }
 
-//    /**
-//     * Add the stream output surface to the target output surface list.
-//     *
-//     * @param outputSurfaces The output surface list where the stream can
-//     * add/remove its output surface.
-//     * @param detach Detach the recording surface from the outputSurfaces.
-//     */
-//    public synchronized void onConfiguringOutputs(List<Surface> outputSurfaces,
-//                                                  boolean detach) {
-//        if (detach) {
-//            // Can detach the surface in CONFIGURED and RECORDING state
-//            if (getStreamState() != STREAM_STATE_IDLE) {
-//                outputSurfaces.remove(mRecordingSurface);
-//            } else {
-//                Log.w(TAG, "Can not detach surface when recording stream is in IDLE state");
-//            }
-//        } else {
-//            // Can add surface only in CONFIGURED state.
-//            if (getStreamState() == STREAM_STATE_CONFIGURED) {
-//                outputSurfaces.add(mRecordingSurface);
-//            } else {
-//                Log.w(TAG, "Can only add surface when recording stream is in CONFIGURED state");
-//            }
-//        }
-//    }
+    /**
+     * Add the stream output surface to the target output surface list.
+     *
+     * @param outputSurfaces The output surface list where the stream can
+     * add/remove its output surface.
+     * @param detach Detach the recording surface from the outputSurfaces.
+     */
+    public synchronized void onConfiguringOutputs(List<Surface> outputSurfaces,
+                                                  boolean detach) {
+        if (detach) {
+            // Can detach the surface in CONFIGURED and RECORDING state
+            if (getStreamState() != STREAM_STATE_IDLE) {
+                outputSurfaces.remove(mRecordingSurface);
+            } else {
+                Log.w(TAG, "Can not detach surface when recording stream is in IDLE state");
+            }
+        } else {
+            // Can add surface only in CONFIGURED state.
+            if (getStreamState() == STREAM_STATE_CONFIGURED) {
+                outputSurfaces.add(mRecordingSurface.getSurface());
+            } else {
+                Log.w(TAG, "Can only add surface when recording stream is in CONFIGURED state");
+            }
+        }
+    }
 
-//    /**
-//     * Update capture request with configuration required for recording stream.
-//     *
-//     * @param requestBuilder Capture request builder that needs to be updated
-//     * for recording specific camera settings.
-//     * @param detach Detach the recording surface from the capture request.
-//     */
-//    public synchronized void onConfiguringRequest(CaptureRequest.Builder requestBuilder,
-//                                                  boolean detach) {
-//        if (detach) {
-//            // Can detach the surface in CONFIGURED and RECORDING state
-//            if (getStreamState() != STREAM_STATE_IDLE) {
-//                requestBuilder.removeTarget(mRecordingSurface);
-//            } else {
-//                Log.w(TAG, "Can not detach surface when recording stream is in IDLE state");
-//            }
-//        } else {
-//            // Can add surface only in CONFIGURED state.
-//            if (getStreamState() == STREAM_STATE_CONFIGURED) {
-//                requestBuilder.addTarget(mRecordingSurface);
-//            } else {
-//                Log.w(TAG, "Can only add surface when recording stream is in CONFIGURED state");
-//            }
-//        }
-//    }
+    /**
+     * Update capture request with configuration required for recording stream.
+     *
+     * @param requestBuilder Capture request builder that needs to be updated
+     * for recording specific camera settings.
+     * @param detach Detach the recording surface from the capture request.
+     */
+    public synchronized void onConfiguringRequest(CaptureRequest.Builder requestBuilder,
+                                                  boolean detach) {
+        if (detach) {
+            // Can detach the surface in CONFIGURED and RECORDING state
+            if (getStreamState() != STREAM_STATE_IDLE) {
+                requestBuilder.removeTarget(mRecordingSurface.getSurface());
+            } else {
+                Log.w(TAG, "Can not detach surface when recording stream is in IDLE state");
+            }
+        } else {
+            // Can add surface only in CONFIGURED state.
+            if (getStreamState() == STREAM_STATE_CONFIGURED) {
+                requestBuilder.addTarget(mRecordingSurface.getSurface());
+            } else {
+                Log.w(TAG, "Can only add surface when recording stream is in CONFIGURED state");
+            }
+        }
+    }
 
 //    /**
 //     * Start recording stream. Calling startRecording on an already started stream has no
@@ -1179,7 +1191,8 @@ public class Camera2VideoFragment extends Fragment
 //                        }
 //
 //                        // Feed encoder output into the muxer until recording stops.
-//                        doEncoding(/* notifyEndOfStream */false);
+////                        doEncoding(/* notifyEndOfStream */false);
+////                        encodeCameraToMpeg();
 //                    }
 ////                } finally {
 //                    if (VERBOSE) {
@@ -1242,61 +1255,61 @@ public class Camera2VideoFragment extends Fragment
 //        }
 //    }
 
-//    /**
-//     * Starts a background thread and its {@link Handler}.
-//     */
-//    private void startBackgroundThread() {
-//        mRecordingThread = new HandlerThread("CameraBackground")/* {
-//            @Override
-//            public void run() {
-//                if (VERBOSE) {
-//                    Log.v(TAG, "Recording thread starts");
-//                }
-//                while (getStreamState() == STREAM_STATE_RECORDING) {
-//                    // Feed encoder output into the muxer until recording stops.
-//                    doEncoding(*//* notifyEndOfStream *//*false);
-//                }
-//                if (VERBOSE) {
-//                    Log.v(TAG, "Recording thread completes");
-//                }
-//                return;
-//            }
-//        }*/;
-//        mRecordingThread.start();
-//        mRecordingHandler = new Handler(mRecordingThread.getLooper());
-//    }
-//
-//    /**
-//     * Stops the background thread and its {@link Handler}.
-//     */
-//    private void stopBackgroundThread() {
-//        mRecordingThread.quitSafely();
-//        try {
-//            mRecordingThread.join();
-//            mRecordingThread = null;
-//            mRecordingHandler = null;
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    // Thread-safe access to the stream state.
-//    private synchronized void setStreamState(int state) {
-//        synchronized (mStateLock) {
-//            if (state < STREAM_STATE_IDLE) {
-//                throw new IllegalStateException("try to set an invalid state");
-//            }
-//            mStreamState = state;
-//        }
-//    }
-//
-//    // Thread-safe access to the stream state.
-//    private int getStreamState() {
-//        synchronized(mStateLock) {
-//            return mStreamState;
-//        }
-//    }
-//
+    /**
+     * Starts a background thread and its {@link Handler}.
+     */
+    private void startBackgroundThread() {
+        mRecordingThread = new HandlerThread("CameraBackground")/* {
+            @Override
+            public void run() {
+                if (VERBOSE) {
+                    Log.v(TAG, "Recording thread starts");
+                }
+                while (getStreamState() == STREAM_STATE_RECORDING) {
+                    // Feed encoder output into the muxer until recording stops.
+                    doEncoding(*//* notifyEndOfStream *//*false);
+                }
+                if (VERBOSE) {
+                    Log.v(TAG, "Recording thread completes");
+                }
+                return;
+            }
+        }*/;
+        mRecordingThread.start();
+        mRecordingHandler = new Handler(mRecordingThread.getLooper());
+    }
+
+    /**
+     * Stops the background thread and its {@link Handler}.
+     */
+    private void stopBackgroundThread() {
+        mRecordingThread.quitSafely();
+        try {
+            mRecordingThread.join();
+            mRecordingThread = null;
+            mRecordingHandler = null;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Thread-safe access to the stream state.
+    private synchronized void setStreamState(int state) {
+        synchronized (mStateLock) {
+            if (state < STREAM_STATE_IDLE) {
+                throw new IllegalStateException("try to set an invalid state");
+            }
+            mStreamState = state;
+        }
+    }
+
+    // Thread-safe access to the stream state.
+    private int getStreamState() {
+        synchronized(mStateLock) {
+            return mStreamState;
+        }
+    }
+
 //    private void releaseMediaCodec(MediaCodec mediaCodec) {
 //        // Release encoder
 //        if (VERBOSE) {
@@ -1324,13 +1337,13 @@ public class Camera2VideoFragment extends Fragment
 //        }
 //    }
 //
-//    private String getOutputMediaFileName() {
-//        // Create a media file name
-//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-//        String mediaFileName = getContext().getExternalFilesDir(null).getAbsolutePath()
-//                + File.separator + "VID_" + timeStamp + ".mp4";
-//        return mediaFileName;
-//    }
+    private String getOutputMediaFileName() {
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String mediaFileName = getContext().getExternalFilesDir(null).getAbsolutePath()
+                + File.separator + "VID_" + timeStamp + ".mp4";
+        return mediaFileName;
+    }
 //
 //    /**
 //     * Configures encoder and muxer state, and prepares the input Surface.
@@ -1898,86 +1911,90 @@ public class Camera2VideoFragment extends Fragment
 
     @Override
     public void startCamera() {
-//        if (null == mCameraDevice || !mTextureView.isAvailable() || null == mPreviewSize) {
-//            return;
-//        }
-//        try {
-//            closePreviewSession();
-//            configureCamera();
-//
-//            SurfaceTexture texture = mTextureView.getSurfaceTexture();
-//            assert texture != null;
-//            texture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
-//            mPreviewBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
-//            List<Surface> surfaces = new ArrayList<>();
-//
-//            // Set up Surface for the camera preview
-//            Surface previewSurface = new Surface(texture);
-//            surfaces.add(previewSurface);
-////            mPreviewBuilder.addTarget(previewSurface);
-//
-//            // Set up Surface for the MediaRecorder
-//            Surface recorderSurface = null;
-//
-//            if (mUseMediaCodec) {
-//                recorderSurface = mRecordingSurface;
-//            } else {
-//                recorderSurface = mMediaRecorder.getSurface();
-//            }
-//
-//            surfaces.add(recorderSurface);
-////            mPreviewBuilder.addTarget(recorderSurface);
-//
-//            onConfiguringOutputs(surfaces, false);
-//            onConfiguringRequest(mPreviewBuilder, false);
-//
-//            // Start a capture session
-//            // Once the session starts, we can update the UI and startRecording recording
-//            mCameraDevice.createCaptureSession(surfaces, new CameraCaptureSession.StateCallback() {
-//
-//                @RequiresApi(api = Build.VERSION_CODES.O)
-//                @Override
-//                public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
-//                    mPreviewSession = cameraCaptureSession;
-//                    updateFrame();
-//
-//                    final SurfaceTexture surface = new SurfaceTexture(true);
-//
-//                    getActivity().runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            // UI
-//                            mButtonVideo.setText(R.string.stop);
-//                            mIsRecordingVideo = true;
-//
-//                            // Start recording
+        if (null == mCameraDevice || !mTextureView.isAvailable() || null == mPreviewSize) {
+            return;
+        }
+        try {
+            closePreviewSession();
+            configureCamera();
+
+            SurfaceTexture texture = mTextureView.getSurfaceTexture();
+            assert texture != null;
+            texture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+
+            mPreviewBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_RECORD);
+
+            List<Surface> surfaces = new ArrayList<>();
+
+            // Set up Surface for the camera preview
+            Surface previewSurface = new Surface(texture);
+            surfaces.add(previewSurface);
+//            mPreviewBuilder.addTarget(previewSurface);
+
+            // Set up Surface for the MediaRecorder
+            Surface recorderSurface = null;
+
+            if (mUseMediaCodec) {
+                recorderSurface = mRecordingSurface.getSurface();
+            } else {
+                recorderSurface = mMediaRecorder.getSurface();
+            }
+
+            surfaces.add(recorderSurface);
+//            mPreviewBuilder.addTarget(recorderSurface);
+
+            onConfiguringOutputs(surfaces, false);
+            onConfiguringRequest(mPreviewBuilder, false);
+
+            // Start a capture session
+            // Once the session starts, we can update the UI and startRecording recording
+            mCameraDevice.createCaptureSession(surfaces, new CameraCaptureSession.StateCallback() {
+
+                @RequiresApi(api = Build.VERSION_CODES.O)
+                @Override
+                public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
+                    mPreviewSession = cameraCaptureSession;
+                    updateFrame();
+
+                    final SurfaceTexture surface = new SurfaceTexture(true);
+
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // UI
+                            mButtonVideo.setText(R.string.stop);
+                            mIsRecordingVideo = true;
+
+                            // Start recording
 //                            try {
 //                                startRecording();
 //                            } catch (IllegalStateException e) {
 //                                e.printStackTrace();
 //                            }
-//
-////                            drawFrame(mView, surface);
-//
-//                            // Setting the recording time counter
-//                            mChronometer.setBase(SystemClock.elapsedRealtime());
-//                            mChronometer.setVisibility(View.VISIBLE);
-//                            mChronometer.start();
-//                        }
-//                    });
-//                }
-//
-//                @Override
-//                public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
+
+                            encodingCycle();
+
+//                            drawFrame(mView, surface);
+
+                            // Setting the recording time counter
+                            mChronometer.setBase(SystemClock.elapsedRealtime());
+                            mChronometer.setVisibility(View.VISIBLE);
+                            mChronometer.start();
+                        }
+                    });
+                }
+
+                @Override
+                public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
 //                    Activity activity = getActivity();
 //                    if (null != activity) {
 //                        Toast.makeText(activity, "Failed", Toast.LENGTH_SHORT).show();
 //                    }
-//                }
-//            }, mRecordingHandler);
-//        } catch (CameraAccessException/* | IOException*/ e) {
-//            e.printStackTrace();
-//        }
+                }
+            }, mRecordingHandler);
+        } catch (CameraAccessException/* | IOException*/ e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -2169,7 +2186,7 @@ public class Camera2VideoFragment extends Fragment
     @Override
     public void onResume() {
         super.onResume();
-//        startBackgroundThread();
+        startBackgroundThread();
 
         if (mTextureView.isAvailable()) {
             openCamera(mTextureView.getWidth(), mTextureView.getHeight());
@@ -2181,7 +2198,7 @@ public class Camera2VideoFragment extends Fragment
     @Override
     public void onPause() {
         closeCamera();
-//        stopBackgroundThread();
+        stopBackgroundThread();
         super.onPause();
     }
 
@@ -2193,15 +2210,16 @@ public class Camera2VideoFragment extends Fragment
                     mChronometer.stop();
                     mChronometer.setVisibility(View.INVISIBLE);
 
-//                    stopCamera();
-                    closeCamera();
+                    stopCamera();
+//                    closeCamera();
                 } else {
 //                    startCamera();
-                    try {
-                        testEncodeCameraToMp4();
-                    } catch (Throwable throwable) {
-                        throwable.printStackTrace();
-                    }
+//                    try {
+//                        testEncodeCameraToMp4();
+//                    } catch (Throwable throwable) {
+//                        throwable.printStackTrace();
+//                    }
+                    encodeCameraToMpeg();
                 }
                 break;
             }
@@ -2337,10 +2355,13 @@ public class Camera2VideoFragment extends Fragment
                     width, height, mVideoSize);
 
             int orientation = getResources().getConfiguration().orientation;
+            // todo values for testing
             if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                mTextureView.setAspectRatio(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+                mTextureView.setLayoutParams(new RelativeLayout.LayoutParams(960, 720));
+//                mTextureView.setAspectRatio(mPreviewSize.getWidth(), mPreviewSize.getHeight());
             } else {
-                mTextureView.setAspectRatio(mPreviewSize.getHeight(), mPreviewSize.getWidth());
+                mTextureView.setLayoutParams(new RelativeLayout.LayoutParams(720, 960));
+//                mTextureView.setAspectRatio(mPreviewSize.getHeight(), mPreviewSize.getWidth());
             }
             configureTransform(width, height);
             mMediaRecorder = new MediaRecorder();
@@ -2390,7 +2411,7 @@ public class Camera2VideoFragment extends Fragment
     /**
      * Start the camera preview.
      */
-    public void startPreview() {
+    private void startPreview() {
         if (null == mCameraDevice || !mTextureView.isAvailable() || null == mPreviewSize) {
             return;
         }
