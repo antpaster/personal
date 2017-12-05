@@ -358,7 +358,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     protected void takePicture() {
-        if(null == mCameraDevice) {
+        if (null == mCameraDevice) {
             Log.e(TAG, "mCameraDevice is null");
             return;
         }

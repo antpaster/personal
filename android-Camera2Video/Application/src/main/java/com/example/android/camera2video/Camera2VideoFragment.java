@@ -30,10 +30,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
+import android.graphics.YuvImage;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.camera2.CameraAccessException;
@@ -43,7 +46,10 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.media.Image;
+import android.media.ImageReader;
 import android.media.MediaRecorder;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
@@ -51,6 +57,7 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Parcel;
@@ -74,7 +81,10 @@ import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -90,6 +100,8 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import javax.microedition.khronos.opengles.GL10;
+
+import static android.graphics.ImageFormat.JPEG;
 
 public class Camera2VideoFragment extends Fragment
         implements View.OnClickListener, FragmentCompat.OnRequestPermissionsResultCallback,
@@ -228,6 +240,9 @@ public class Camera2VideoFragment extends Fragment
     boolean mTorchOnFlag = false;
 
     Chronometer mChronometer;
+
+    ImageReader mImageReader;
+    private String mCapturedImagePath;
 
 //    MediaPlayer mMediaPlayer;
 
@@ -779,6 +794,38 @@ public class Camera2VideoFragment extends Fragment
         return newBitmap;
     }
 
+    private int[] decodeYUV420SP(int[] rgb, byte[] yuv420sp, int width, int height) {
+        Log.e("camera", "   decodeYUV420SP  ");
+
+        // TODO Auto-generated method stub
+        final int frameSize = width * height;
+
+        for (int j = 0, yp = 0; j < height; j++) {
+            int uvp = frameSize + (j >> 1) * width, u = 0, v = 0;
+            for (int i = 0; i < width; i++, yp++) {
+                int y = (0xff & ((int) yuv420sp[yp])) - 16;
+                if (y < 0) y = 0;
+                if ((i & 1) == 0) {
+                    v = (0xff & yuv420sp[uvp++]) - 128;
+                    u = (0xff & yuv420sp[uvp++]) - 128;
+                }
+
+                int y1192 = 1192 * y;
+                int r = (y1192 + 1634 * v);
+                int g = (y1192 - 833 * v - 400 * u);
+                int b = (y1192 + 2066 * u);
+
+                if (r < 0) r = 0; else if (r > 262143) r = 262143;
+                if (g < 0) g = 0; else if (g > 262143) g = 262143;
+                if (b < 0) b = 0; else if (b > 262143) b = 262143;
+
+                rgb[yp] = 0xff000000 | ((r << 6) & 0xff0000) | ((g >> 2) & 0xff00) | ((b >> 10) & 0xff);
+
+            }
+        }
+        return rgb;
+    }
+
     @Override
     public void startCamera() {
         if (null == mCameraDevice || !mTextureView.isAvailable() || null == mPreviewSize) {
@@ -833,6 +880,112 @@ public class Camera2VideoFragment extends Fragment
             surfaces.add(recorderSurface);
             mPreviewBuilder.addTarget(recorderSurface);
 
+            surfaces.add(mImageReader.getSurface());
+
+            final CaptureRequest.Builder captureBuilder
+                    = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+            captureBuilder.addTarget(mImageReader.getSurface());
+            captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+
+            // The date and time of capturing
+            DateFormat dateFormat = new SimpleDateFormat("ddMMyyyy_HHmmss");
+            Date nowDate = Calendar.getInstance().getTime();
+            String nowDateString = dateFormat.format(nowDate);
+
+            mCapturedImagePath = Environment.getExternalStorageDirectory() + "/" + nowDateString
+                    + "_IMG.jpg";
+            final File file = new File(mCapturedImagePath);
+
+            ImageReader.OnImageAvailableListener readerListener
+                    = new ImageReader.OnImageAvailableListener() {
+
+                @Override
+                public void onImageAvailable(ImageReader reader) {
+                    Image image = null;
+                    try {
+                        image = reader.acquireLatestImage();
+
+//                        ByteArrayOutputStream out = new ByteArrayOutputStream();
+//                        YuvImage yuvImage = new YuvImage(data, ImageFormat.NV21, width, height, null);
+//                        yuvImage.compressToJpeg(new Rect(0, 0, width, height), 50, out);
+//                        byte[] imageBytes = out.toByteArray();
+//                        Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+//                        iv.setImageBitmap(image);
+
+                        // todo deal with three YUV buffers in decodeYUV420SP function
+//                        ByteBuffer[] buffers = new ByteBuffer[3];
+//                        for (int i = 0; i < 3; i++) {
+//                            buffers[i] = image.getPlanes()[i].getBuffer();
+//                        }
+                        ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+
+                        byte[] bytes = new byte[buffer.capacity()];
+                        buffer.get(bytes);
+
+                        // Getting the Bitmap object from byte array and writing test on it
+                        Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+
+                        int rotation = getActivity().getWindowManager().getDefaultDisplay()
+                                .getRotation();
+                        if(Surface.ROTATION_0 == rotation || Surface.ROTATION_180 == rotation) {
+                            bm = rotateAndScaleBitmap(bm);
+                        }
+
+                        // The date and time of capturing
+                        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                        Date nowDate = Calendar.getInstance().getTime();
+                        String nowDateString = dateFormat.format(nowDate);
+
+                        bm = writeTextOnBitmap(bm, nowDateString);
+
+                        // Making the byte array back from the processed Bitmap object
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bm.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        byte[] outBytes = stream.toByteArray();
+
+                        save(outBytes);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        if (image != null) {
+                            image.close();
+                        }
+                    }
+                }
+
+                private void save(byte[] bytes) throws IOException {
+                    OutputStream output = null;
+                    try {
+                        output = new FileOutputStream(file);
+
+                        output.write(bytes);
+                    } finally {
+                        if (null != output) {
+                            output.close();
+                        }
+                    }
+                }
+            };
+
+            mImageReader.setOnImageAvailableListener(readerListener, mBackgroundHandler);
+
+            final CameraCaptureSession.CaptureCallback captureListener
+                    = new CameraCaptureSession.CaptureCallback() {
+
+                @RequiresApi(api = Build.VERSION_CODES.M)
+                @Override
+                public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request,
+                                               TotalCaptureResult result) {
+
+                    super.onCaptureCompleted(session, request, result);
+                    Toast.makeText(getContext(), "Saved:" + file,
+                            Toast.LENGTH_SHORT).show();
+                    startPreview();
+                }
+            };
+
             // Start a capture session
             // Once the session starts, we can update the UI and start recording
             mCameraDevice.createCaptureSession(surfaces, new CameraCaptureSession.StateCallback() {
@@ -843,7 +996,14 @@ public class Camera2VideoFragment extends Fragment
                     mPreviewSession = cameraCaptureSession;
                     updateFrame();
 
-                    final SurfaceTexture surface = new SurfaceTexture(true);
+                    try {
+                        cameraCaptureSession.capture(captureBuilder.build(), captureListener,
+                                mBackgroundHandler);
+                    } catch (CameraAccessException e) {
+                        e.printStackTrace();
+                    }
+
+//                    final SurfaceTexture surface = new SurfaceTexture(true);
 
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -852,42 +1012,42 @@ public class Camera2VideoFragment extends Fragment
                             mButtonVideo.setText(R.string.stop);
                             mIsRecordingVideo = true;
 
-                            surface.setOnFrameAvailableListener(new
-                                    SurfaceTexture.OnFrameAvailableListener() {
-                                @Override
-                                public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-
-//                                    // todo paste the image transform here!
-//                                    Parcel parcel = Parcel.obtain();
-//                                    recorderSurface.writeToParcel(parcel, 0);
-//                                    byte[] surfaceInBytes = parcel.createByteArray();
+//                            surface.setOnFrameAvailableListener(new
+//                                    SurfaceTexture.OnFrameAvailableListener() {
+//                                @Override
+//                                public void onFrameAvailable(SurfaceTexture surfaceTexture) {
 //
-//                                    // Getting the Bitmap object from byte array and writing test on it
-//                                    Bitmap bm = BitmapFactory.decodeByteArray(surfaceInBytes, 0, surfaceInBytes.length);
-//
-//                                    Activity activity = getActivity();
-//                                    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
-//                                    if(Surface.ROTATION_0 == rotation || Surface.ROTATION_180 == rotation) {
-//                                        bm = rotateAndScaleBitmap(bm);
-//                                    }
-//
-//                                    // The date and time of capturing
-//                                    DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-//                                    Date nowDate = Calendar.getInstance().getTime();
-//                                    String nowDateString = dateFormat.format(nowDate);
-//
-//                                    bm = writeTextOnBitmap(bm, nowDateString);
-//
-//                                    // Making the byte array back from the processed Bitmap object
-//                                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-//                                    bm.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-//                                    byte[] outBytes = stream.toByteArray();
-//
-//                                    parcel.unmarshall(outBytes, 0, outBytes.length);
-//
-//                                    recorderSurface.readFromParcel(parcel);
-                                }
-                            });
+////                                    // todo paste the image transform here!
+////                                    Parcel parcel = Parcel.obtain();
+////                                    recorderSurface.writeToParcel(parcel, 0);
+////                                    byte[] surfaceInBytes = parcel.createByteArray();
+////
+////                                    // Getting the Bitmap object from byte array and writing test on it
+////                                    Bitmap bm = BitmapFactory.decodeByteArray(surfaceInBytes, 0, surfaceInBytes.length);
+////
+////                                    Activity activity = getActivity();
+////                                    int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
+////                                    if(Surface.ROTATION_0 == rotation || Surface.ROTATION_180 == rotation) {
+////                                        bm = rotateAndScaleBitmap(bm);
+////                                    }
+////
+////                                    // The date and time of capturing
+////                                    DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+////                                    Date nowDate = Calendar.getInstance().getTime();
+////                                    String nowDateString = dateFormat.format(nowDate);
+////
+////                                    bm = writeTextOnBitmap(bm, nowDateString);
+////
+////                                    // Making the byte array back from the processed Bitmap object
+////                                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+////                                    bm.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+////                                    byte[] outBytes = stream.toByteArray();
+////
+////                                    parcel.unmarshall(outBytes, 0, outBytes.length);
+////
+////                                    recorderSurface.readFromParcel(parcel);
+//                                }
+//                            });
 
                             // Start recording
                             mMediaRecorder.start();
@@ -1334,6 +1494,11 @@ public class Camera2VideoFragment extends Fragment
                 mMediaRecorder.release();
                 mMediaRecorder = null;
             }
+
+            if (null != mImageReader) {
+                mImageReader.close();
+                mImageReader = null;
+            }
         } catch (InterruptedException e) {
             throw new RuntimeException("Interrupted while trying to lock camera closing.");
         } finally {
@@ -1350,6 +1515,12 @@ public class Camera2VideoFragment extends Fragment
         }
         try {
             closePreviewSession();
+
+            mImageReader = ImageReader.newInstance(mPreviewSize.getWidth(),
+                    mPreviewSize.getHeight(), ImageFormat.YUV_420_888, 1);
+//                    mPreviewSize.getHeight(), ImageFormat.JPEG, 1);
+
+
             SurfaceTexture texture = mTextureView.getSurfaceTexture();
             assert texture != null;
             texture.setDefaultBufferSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
