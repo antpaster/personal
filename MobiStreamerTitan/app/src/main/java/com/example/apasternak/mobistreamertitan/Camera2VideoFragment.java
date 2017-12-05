@@ -45,6 +45,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
+import android.media.MediaCodecList;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.media.MediaRecorder;
@@ -59,7 +60,6 @@ import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
@@ -259,6 +259,9 @@ public class Camera2VideoFragment extends Fragment
     private boolean mMuxerStarted;
     private boolean mUseMediaCodec = true;
 
+    private MediaCodecList mMediaCodecList;
+    private MediaCodecInfo[] mMediaCodecInfos;
+
 //    private volatile boolean mConfigured;
 //    private MediaCodec mDecoder;
 
@@ -314,17 +317,19 @@ public class Camera2VideoFragment extends Fragment
 
         @Override
         public void run() {
-            try {
-                mTest.encodeCameraToMpeg();
-            } catch (Throwable th) {
-                mThrowable = th;
-            }
+//            try {
+//                mTest.encodeCameraToMpeg();
+//            } catch (Throwable th) {
+//                mThrowable = th;
+//            }
+
+            mTest.encodingCycle();
         }
 
         /** Entry point. */
         public static void runTest(Camera2VideoFragment obj) throws Throwable {
             Camera2VideoFragmentWrapper wrapper = new Camera2VideoFragmentWrapper(obj);
-            Thread th = new Thread(wrapper, "codec test");
+            HandlerThread th = new HandlerThread("codec test");
             th.start();
             th.join();
             if (wrapper.mThrowable != null) {
@@ -804,7 +809,7 @@ public class Camera2VideoFragment extends Fragment
 
     /** test entry point */
     public void testEncodeCameraToMp4() throws Throwable {
-        Camera2VideoFragmentWrapper.runTest(this);
+        getActivity().runOnUiThread(new Camera2VideoFragmentWrapper(this));
     }
 
     /**
@@ -820,13 +825,13 @@ public class Camera2VideoFragment extends Fragment
         try {
 //            openCamera(encWidth, encHeight);
 //            prepareCamera(encWidth, encHeight);
-            prepareEncoder(encWidth, encHeight, mEncBitRate);
-            mRecordingSurface.makeCurrent();
-//            mCamera2VideoFragment.setRecordingSurface(mRecordingSurface);
-            mStManager = new SurfaceTextureManager();
-            SurfaceTexture surfaceTexture = mStManager.getSurfaceTexture();
-
-            mRecordingSurface.setSurface(new Surface(surfaceTexture));
+//            prepareEncoder(encWidth, encHeight, mEncBitRate);
+//            mRecordingSurface.makeCurrent();
+////            mCamera2VideoFragment.setRecordingSurface(mRecordingSurface);
+//            mStManager = new SurfaceTextureManager();
+//            SurfaceTexture surfaceTexture = mStManager.getSurfaceTexture();
+//
+//            mRecordingSurface.setSurface(new Surface(surfaceTexture));
 
 //            prepareSurfaceTexture(); // todo check out, done in startCamera()
 
@@ -904,6 +909,20 @@ public class Camera2VideoFragment extends Fragment
     private void prepareEncoder(int width, int height, int bitRate) {
         mBufferInfo = new MediaCodec.BufferInfo();
 
+        mMediaCodecList = new MediaCodecList(MediaCodecList.ALL_CODECS);
+        mMediaCodecInfos = new MediaCodecInfo[MediaCodecList.ALL_CODECS];
+        mMediaCodecInfos = mMediaCodecList.getCodecInfos();
+
+        MediaCodecInfo mediaCodecInfo = selectCodec(MIME_TYPE);
+        if (mediaCodecInfo == null) {
+            // Don't fail CTS if they don't have an AVC codec (not here, anyway).
+            Log.e(TAG, "Unable to find an appropriate codec for " + MIME_TYPE);
+            return;
+        }
+        if (VERBOSE) Log.d(TAG, "found codec: " + mediaCodecInfo.getName());
+        int colorFormat = selectColorFormat(mediaCodecInfo, MIME_TYPE);
+        if (VERBOSE) Log.d(TAG, "found colorFormat: " + colorFormat);
+
         MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, width, height);
 
         // Set some properties.  Failing to specify some of these can cause the MediaCodec
@@ -969,11 +988,68 @@ public class Camera2VideoFragment extends Fragment
             mRecordingSurface.release();
             mRecordingSurface = null;
         }
-        if (mMuxer != null) {
+        if (mMuxer != null && mMuxerStarted == true) {
             mMuxer.stop();
             mMuxer.release();
             mMuxer = null;
         }
+    }
+
+    /**
+     * Returns the first codec capable of encoding the specified MIME type, or null if no
+     * match was found.
+     */
+    private MediaCodecInfo selectCodec(String mimeType) {
+        int numCodecs = mMediaCodecInfos.length;
+        for (int i = 0; i < numCodecs; i++) {
+            if (!mMediaCodecInfos[i].isEncoder()) {
+                continue;
+            }
+
+            String[] types = mMediaCodecInfos[i].getSupportedTypes();
+            for (int j = 0; j < types.length; j++) {
+                if (types[j].equalsIgnoreCase(mimeType)) {
+                    return mMediaCodecInfos[i];
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns true if this is a color format that this test code understands (i.e. we know how
+     * to read and generate frames in this format).
+     */
+    private static boolean isRecognizedFormat(int colorFormat) {
+        switch (colorFormat) {
+            // these are the formats we know how to handle for this test
+            case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible:
+            case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV422Flexible:
+            case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV444Flexible:
+            case MediaCodecInfo.CodecCapabilities.COLOR_Format16bitRGB565:
+            case MediaCodecInfo.CodecCapabilities.COLOR_Format24bitBGR888:
+            case MediaCodecInfo.CodecCapabilities.COLOR_Format32bitABGR8888:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Returns a color format that is supported by the codec and by this test code.  If no
+     * match is found, this throws a test failure -- the set of formats known to the test
+     * should be expanded for new platforms.
+     */
+    private int selectColorFormat(MediaCodecInfo codecInfo, String mimeType) {
+        MediaCodecInfo.CodecCapabilities capabilities = codecInfo.getCapabilitiesForType(mimeType);
+        for (int i = 0; i < capabilities.colorFormats.length; i++) {
+            int colorFormat = capabilities.colorFormats[i];
+            if (isRecognizedFormat(colorFormat)) {
+                return colorFormat;
+            }
+        }
+//        fail("couldn't find a good color format for " + codecInfo.getName() + " / " + mimeType);
+        return 0;   // not reached
     }
 
     /**
@@ -1914,9 +1990,20 @@ public class Camera2VideoFragment extends Fragment
         if (null == mCameraDevice || !mTextureView.isAvailable() || null == mPreviewSize) {
             return;
         }
+
+        int encWidth = mVideoSize.getWidth();
+        int encHeight = mVideoSize.getHeight();
+
         try {
             closePreviewSession();
-            configureCamera();
+
+            prepareEncoder(encWidth, encHeight, mEncBitRate);
+
+            mRecordingSurface.makeCurrent();
+            mStManager = new SurfaceTextureManager();
+            SurfaceTexture surfaceTexture = mStManager.getSurfaceTexture();
+
+            mRecordingSurface.setSurface(new Surface(surfaceTexture));
 
             SurfaceTexture texture = mTextureView.getSurfaceTexture();
             assert texture != null;
@@ -1956,42 +2043,57 @@ public class Camera2VideoFragment extends Fragment
                     mPreviewSession = cameraCaptureSession;
                     updateFrame();
 
-                    final SurfaceTexture surface = new SurfaceTexture(true);
+//                    final SurfaceTexture surface = new SurfaceTexture(true);
+//                    surface.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
+//                        @Override
+//                        public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+////                            updateFrame();
+//
+//                            encodingCycle();
+//                        }
+//                    }, mRecordingHandler);
 
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            // UI
-                            mButtonVideo.setText(R.string.stop);
-                            mIsRecordingVideo = true;
+                    // Run in the background thread
+                    try {
+                        testEncodeCameraToMp4();
+                    } catch (Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
 
-                            // Start recording
-//                            try {
-//                                startRecording();
-//                            } catch (IllegalStateException e) {
-//                                e.printStackTrace();
-//                            }
+                    // Setting the recording time counter
+                    mChronometer.setBase(SystemClock.elapsedRealtime());
+                    mChronometer.setVisibility(View.VISIBLE);
+                    mChronometer.start();
 
-                            encodingCycle();
+//                    getActivity().runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            // UI
+//                            mButtonVideo.setText(R.string.stop);
+//                            mIsRecordingVideo = true;
+//
+//                            // Start recording
+////                            try {
+////                                startRecording();
+////                            } catch (IllegalStateException e) {
+////                                e.printStackTrace();
+////                            }
+//
+//                            encodingCycle();
 
 //                            drawFrame(mView, surface);
-
-                            // Setting the recording time counter
-                            mChronometer.setBase(SystemClock.elapsedRealtime());
-                            mChronometer.setVisibility(View.VISIBLE);
-                            mChronometer.start();
-                        }
-                    });
+//                        }
+//                    });
                 }
 
                 @Override
                 public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
-//                    Activity activity = getActivity();
-//                    if (null != activity) {
-//                        Toast.makeText(activity, "Failed", Toast.LENGTH_SHORT).show();
-//                    }
+                    Activity activity = getActivity();
+                    if (null != activity) {
+                        Toast.makeText(activity, "Failed", Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }, mRecordingHandler);
+            }, null);
         } catch (CameraAccessException/* | IOException*/ e) {
             e.printStackTrace();
         }
@@ -2033,7 +2135,7 @@ public class Camera2VideoFragment extends Fragment
             setUpCaptureRequestBuilder(mPreviewBuilder);
             HandlerThread thread = new HandlerThread("CameraPreview");
             thread.start();
-            mPreviewSession.setRepeatingRequest(mPreviewBuilder.build(), null, mRecordingHandler);
+            mPreviewSession.setRepeatingRequest(mPreviewBuilder.build(), null, null);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -2441,7 +2543,7 @@ public class Camera2VideoFragment extends Fragment
                                 Toast.makeText(activity, "Failed", Toast.LENGTH_SHORT).show();
                             }
                         }
-                    }, mRecordingHandler);
+                    }, null);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
