@@ -79,6 +79,7 @@ import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -88,9 +89,11 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -102,6 +105,7 @@ import java.util.concurrent.TimeUnit;
 import javax.microedition.khronos.opengles.GL10;
 
 import static android.graphics.ImageFormat.JPEG;
+import static android.graphics.ImageFormat.NV21;
 
 public class Camera2VideoFragment extends Fragment
         implements View.OnClickListener, FragmentCompat.OnRequestPermissionsResultCallback,
@@ -794,38 +798,110 @@ public class Camera2VideoFragment extends Fragment
         return newBitmap;
     }
 
-    private int[] decodeYUV420SP(int[] rgb, byte[] yuv420sp, int width, int height) {
+    private void decodeYUV420SP(int[] rgb, ByteBuffer yBuf, ByteBuffer cbBuf, ByteBuffer crBuf,
+                                int width, int height) {
         Log.e("camera", "   decodeYUV420SP  ");
 
         // TODO Auto-generated method stub
         final int frameSize = width * height;
 
-        for (int j = 0, yp = 0; j < height; j++) {
-            int uvp = frameSize + (j >> 1) * width, u = 0, v = 0;
-            for (int i = 0; i < width; i++, yp++) {
-                int y = (0xff & ((int) yuv420sp[yp])) - 16;
-                if (y < 0) y = 0;
-                if ((i & 1) == 0) {
-                    v = (0xff & yuv420sp[uvp++]) - 128;
-                    u = (0xff & yuv420sp[uvp++]) - 128;
-                }
+//        for (int j = 0, yp = 0; j < height; j++) {
+////            int uvp = frameSize + (j >> 1) * width, u = 0, v = 0;
+//            for (int i = 0; i < width; i++, yp++) {
+////                int y = (0xff & ((int) yuv420sp[yp])) - 16;
+////                if (y < 0) y = 0;
+////                if ((i & 1) == 0) {
+////                    v = (0xff & yuv420sp[uvp++]) - 128;
+////                    u = (0xff & yuv420sp[uvp++]) - 128;
+////                }
+        byte[] yBytes = new byte[yBuf.limit()];
+        yBuf.get(yBytes);
+        byte[] cbBytes = new byte[cbBuf.limit()];
+        cbBuf.get(cbBytes);
+        byte[] crBytes = new byte[crBuf.limit()];
+        crBuf.get(crBytes);
 
-                int y1192 = 1192 * y;
-                int r = (y1192 + 1634 * v);
-                int g = (y1192 - 833 * v - 400 * u);
-                int b = (y1192 + 2066 * u);
+        for (int i = 0; i < cbBuf.limit(); i++) {
+//            int y = 0; //yBytes[i];
+//            int u = cbBytes[i];
+//            int v = 0; //crBytes[i];
 
-                if (r < 0) r = 0; else if (r > 262143) r = 262143;
-                if (g < 0) g = 0; else if (g > 262143) g = 262143;
-                if (b < 0) b = 0; else if (b > 262143) b = 262143;
+//            int y1192 = 1192 * y;
+//            int r = (y1192 + 1634 * v);
+//            int g = (y1192 - 833 * v - 400 * u);
+//            int b = (y1192 + 2066 * u);
 
-                rgb[yp] = 0xff000000 | ((r << 6) & 0xff0000) | ((g >> 2) & 0xff00) | ((b >> 10) & 0xff);
+            int r = yBytes[i];
+            int g = cbBytes[i];
+            int b = crBytes[i];
 
-            }
+            if (r < 0) r = 0; else if (r > 262143) r = 262143;
+            if (g < 0) g = 0; else if (g > 262143) g = 262143;
+            if (b < 0) b = 0; else if (b > 262143) b = 262143;
+
+            rgb[i] = 0xff000000 | ((r << 6) & 0xff0000) | ((g >> 2) & 0xff00)
+                    | ((b >> 10) & 0xff);
+//            }
         }
-        return rgb;
     }
 
+    private byte[] getRawCopy(ByteBuffer in) {
+        ByteBuffer rawCopy = ByteBuffer.allocate(in.capacity());
+        rawCopy.put(in);
+        return rawCopy.array();
+    }
+
+    private void fastReverse(byte[] array, int offset, int length) {
+        int end = offset + length;
+        for (int i = offset; i < offset + (length / 2); i++) {
+            array[i] = (byte)(array[i] ^ array[end - i  - 1]);
+            array[end - i  - 1] = (byte)(array[i] ^ array[end - i  - 1]);
+            array[i] = (byte)(array[i] ^ array[end - i  - 1]);
+        }
+    }
+
+    private ByteBuffer convertYUV420ToN21(Image imgYUV420, boolean grayscale) {
+
+        Image.Plane yPlane = imgYUV420.getPlanes()[0];
+        byte[] yData = getRawCopy(yPlane.getBuffer());
+
+        Image.Plane uPlane = imgYUV420.getPlanes()[1];
+        byte[] uData = getRawCopy(uPlane.getBuffer());
+
+        Image.Plane vPlane = imgYUV420.getPlanes()[2];
+        byte[] vData = getRawCopy(vPlane.getBuffer());
+
+        // NV21 stores a full frame luma (y) and half frame chroma (u,v), so total size is
+        // size(y) + size(y) / 2 + size(y) / 2 = size(y) + size(y) / 2 * 2 = size(y) + size(y) = 2 * size(y)
+        int npix = imgYUV420.getWidth() * imgYUV420.getHeight();
+        byte[] nv21Image = new byte[npix * 2];
+        Arrays.fill(nv21Image, (byte)127); // 127 -> 0 chroma (luma will be overwritten in either case)
+
+        // Copy the Y-plane
+        ByteBuffer nv21Buffer = ByteBuffer.wrap(nv21Image);
+        for(int i = 0; i < imgYUV420.getHeight(); i++) {
+            nv21Buffer.put(yData, i * yPlane.getRowStride(), imgYUV420.getWidth());
+        }
+
+        // Copy the u and v planes interlaced
+        if(!grayscale) {
+            for (int row = 0; row < imgYUV420.getHeight() / 2; row++) {
+                for (int cnt = 0, upix = 0, vpix = 0; cnt < imgYUV420.getWidth() / 2;
+                     upix += uPlane.getPixelStride(), vpix += vPlane.getPixelStride(), cnt++) {
+                    nv21Buffer.put(uData[row * uPlane.getRowStride() + upix]);
+                    nv21Buffer.put(vData[row * vPlane.getRowStride() + vpix]);
+                }
+            }
+
+            fastReverse(nv21Image, npix, npix);
+        }
+
+        fastReverse(nv21Image, 0, npix);
+
+        return nv21Buffer;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void startCamera() {
         if (null == mCameraDevice || !mTextureView.isAvailable() || null == mPreviewSize) {
@@ -892,8 +968,8 @@ public class Camera2VideoFragment extends Fragment
             Date nowDate = Calendar.getInstance().getTime();
             String nowDateString = dateFormat.format(nowDate);
 
-            mCapturedImagePath = Environment.getExternalStorageDirectory() + "/" + nowDateString
-                    + "_IMG.jpg";
+            mCapturedImagePath = getContext().getExternalFilesDir(null).getAbsolutePath()
+                    + "/IMG_" + nowDateString + ".jpg";
             final File file = new File(mCapturedImagePath);
 
             ImageReader.OnImageAvailableListener readerListener
@@ -905,22 +981,35 @@ public class Camera2VideoFragment extends Fragment
                     try {
                         image = reader.acquireLatestImage();
 
-//                        ByteArrayOutputStream out = new ByteArrayOutputStream();
-//                        YuvImage yuvImage = new YuvImage(data, ImageFormat.NV21, width, height, null);
-//                        yuvImage.compressToJpeg(new Rect(0, 0, width, height), 50, out);
-//                        byte[] imageBytes = out.toByteArray();
-//                        Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-//                        iv.setImageBitmap(image);
+                        ByteBuffer imageBuffer = convertYUV420ToN21(image, false);
+//                        byte[] imageBytes = new byte[imageBuffer.limit()];
+//                        imageBuffer.get(imageBytes);
+                        byte[] imageBytes = imageBuffer.array();
 
-                        // todo deal with three YUV buffers in decodeYUV420SP function
+                        YuvImage yuvImage = new YuvImage(imageBytes, NV21, reader.getWidth(),
+                                reader.getHeight(), null);
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        yuvImage.compressToJpeg(new Rect(0, 0, yuvImage.getWidth(),
+                                yuvImage.getHeight()), 80, baos);
+
+                        byte[] bytes = baos.toByteArray();
+
 //                        ByteBuffer[] buffers = new ByteBuffer[3];
 //                        for (int i = 0; i < 3; i++) {
 //                            buffers[i] = image.getPlanes()[i].getBuffer();
 //                        }
-                        ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-
-                        byte[] bytes = new byte[buffer.capacity()];
-                        buffer.get(bytes);
+//
+//                        int[] rgbData = new int[buffers[1].limit()];
+//                        decodeYUV420SP(rgbData, buffers[0], buffers[1], buffers[2],
+//                                reader.getWidth(), reader.getHeight());
+//
+//                        ByteBuffer byteBuffer = ByteBuffer.allocate(rgbData.length * 4);
+//                        IntBuffer intBuffer = byteBuffer.asIntBuffer();
+//                        intBuffer.put(rgbData);
+//
+//                        byte[] bytes = new byte[intBuffer.limit()];
+////                        bytes = byteBuffer.array();
+//                        intBuffer.;
 
                         // Getting the Bitmap object from byte array and writing test on it
                         Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
