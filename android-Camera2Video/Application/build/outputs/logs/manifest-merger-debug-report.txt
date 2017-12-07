@@ -1,8 +1,8 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:17:1-44:12
-INJECTED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:17:1-44:12
-INJECTED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:17:1-44:12
+ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:17:1-43:12
+INJECTED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:17:1-43:12
+INJECTED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:17:1-43:12
 MERGED from [com.android.support:support-v13:26.1.0] /home/apasternak/.gradle/caches/transforms-1/files-1.1/support-v13-26.1.0.aar/e91a0482e48d9300e19aac2f42533fe4/AndroidManifest.xml:17:1-31:12
 MERGED from [com.android.support:appcompat-v7:26.1.0] /home/apasternak/.gradle/caches/transforms-1/files-1.1/appcompat-v7-26.1.0.aar/0580cc9bc6ea28fa80ede3eda0d5e098/AndroidManifest.xml:17:1-31:12
 MERGED from [com.android.support:support-v4:26.1.0] /home/apasternak/.gradle/caches/transforms-1/files-1.1/support-v4-26.1.0.aar/7721765bd2cdf08fcd1eaa47e6607e0f/AndroidManifest.xml:17:1-31:12
@@ -15,8 +15,8 @@ MERGED from [com.android.support:support-core-ui:26.1.0] /home/apasternak/.gradl
 MERGED from [com.android.support:support-vector-drawable:26.1.0] /home/apasternak/.gradle/caches/transforms-1/files-1.1/support-vector-drawable-26.1.0.aar/9e2284348cecff6ae7dc89b1e38bc471/AndroidManifest.xml:17:1-28:12
 MERGED from [com.android.support:support-compat:26.1.0] /home/apasternak/.gradle/caches/transforms-1/files-1.1/support-compat-26.1.0.aar/a2327751ada5b9ce404d6f1e8da96197/AndroidManifest.xml:17:1-31:12
 MERGED from [android.arch.lifecycle:runtime:1.0.0] /home/apasternak/.gradle/caches/transforms-1/files-1.1/runtime-1.0.0.aar/21fde9f9a2362b6a580914c1f6d18a6e/AndroidManifest.xml:17:1-30:12
-INJECTED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:17:1-44:12
-INJECTED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:17:1-44:12
+INJECTED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:17:1-43:12
+INJECTED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:17:1-43:12
 	package
 		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:18:5-47
 	android:versionName
@@ -33,20 +33,16 @@ uses-permission#android.permission.CAMERA
 ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:24:5-64
 	android:name
 		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:24:22-62
-uses-permission#android.permission.FLASHLIGHT
-ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:25:5-68
-	android:name
-		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:25:22-66
 uses-permission#android.permission.RECORD_AUDIO
-ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:26:5-70
+ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:25:5-70
 	android:name
-		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:26:22-68
+		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:25:22-68
 uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
-ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:27:5-80
+ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:26:5-80
 	android:name
-		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:27:22-78
+		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:26:22-78
 application
-ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:29:5-42:19
+ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:28:5-41:19
 MERGED from [com.android.support:support-v13:26.1.0] /home/apasternak/.gradle/caches/transforms-1/files-1.1/support-v13-26.1.0.aar/e91a0482e48d9300e19aac2f42533fe4/AndroidManifest.xml:25:5-29:19
 MERGED from [com.android.support:support-v13:26.1.0] /home/apasternak/.gradle/caches/transforms-1/files-1.1/support-v13-26.1.0.aar/e91a0482e48d9300e19aac2f42533fe4/AndroidManifest.xml:25:5-29:19
 MERGED from [com.android.support:appcompat-v7:26.1.0] /home/apasternak/.gradle/caches/transforms-1/files-1.1/appcompat-v7-26.1.0.aar/0580cc9bc6ea28fa80ede3eda0d5e098/AndroidManifest.xml:25:5-29:19
@@ -72,29 +68,29 @@ MERGED from [com.android.support:support-compat:26.1.0] /home/apasternak/.gradle
 MERGED from [android.arch.lifecycle:runtime:1.0.0] /home/apasternak/.gradle/caches/transforms-1/files-1.1/runtime-1.0.0.aar/21fde9f9a2362b6a580914c1f6d18a6e/AndroidManifest.xml:24:5-28:19
 MERGED from [android.arch.lifecycle:runtime:1.0.0] /home/apasternak/.gradle/caches/transforms-1/files-1.1/runtime-1.0.0.aar/21fde9f9a2362b6a580914c1f6d18a6e/AndroidManifest.xml:24:5-28:19
 	android:label
-		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:30:9-41
+		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:29:9-41
 	android:icon
-		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:31:9-45
+		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:30:9-45
 	android:allowBackup
-		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:29:18-44
+		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:28:18-44
 	android:theme
-		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:32:9-45
+		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:31:9-45
 activity#com.example.android.camera2video.CameraActivity
-ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:34:9-40:20
+ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:33:9-39:20
 	android:label
-		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:35:19-51
+		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:34:19-51
 	android:name
-		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:34:19-49
+		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:33:19-49
 intent-filter#android.intent.action.MAIN+android.intent.category.LAUNCHER
-ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:36:13-39:29
+ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:35:13-38:29
 action#android.intent.action.MAIN
-ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:37:17-69
+ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:36:17-69
 	android:name
-		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:37:25-66
+		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:36:25-66
 category#android.intent.category.LAUNCHER
-ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:38:17-77
+ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:37:17-77
 	android:name
-		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:38:27-74
+		ADDED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml:37:27-74
 uses-sdk
 INJECTED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /home/apasternak/AndroidStudioProjects/android-Camera2Video/Application/src/main/AndroidManifest.xml

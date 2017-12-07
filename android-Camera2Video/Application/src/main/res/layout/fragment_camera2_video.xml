@@ -24,17 +24,6 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true" />
 
-    <Chronometer
-        android:id="@+id/chronometer"
-        android:visibility="invisible"
-        android:textColor="#FF0000"
-        android:textSize="25dp"
-        android:textAlignment="center"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp"/>
-
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -42,15 +31,6 @@
         android:layout_alignParentStart="true"
         android:layout_below="@id/texture"
         android:background="#4285f4">
-
-        <ImageButton
-            android:id="@+id/flash"
-            style="@android:style/Widget.Material.Light.Button.Borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|left"
-            android:padding="20dp"
-            android:src="@mipmap/flash_on" />
 
         <Button
             android:id="@+id/video"
