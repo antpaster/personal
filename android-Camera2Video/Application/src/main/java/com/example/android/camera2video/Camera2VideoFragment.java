@@ -46,10 +46,14 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
+import android.media.MediaCodec;
+import android.media.MediaExtractor;
+import android.media.MediaFormat;
 import android.media.MediaRecorder;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
@@ -67,6 +71,8 @@ import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -77,8 +83,10 @@ import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.text.DateFormat;
@@ -391,6 +399,177 @@ public class Camera2VideoFragment extends Fragment
         return newBitmap;
     }
 
+    private void mediaRecorderPostprocessing() {
+        String mimeType = "video/avc";
+
+        MediaCodec codec = null;
+        try {
+            codec = MediaCodec.createDecoderByType(mimeType);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        MediaFormat format = MediaFormat.createVideoFormat(mimeType, 720, 480);
+        byte[] header_sps = {0, 0, 0, 1, 0x67, 0x42, 0x00, 0x1f, (byte) 0xe9, 0x01, 0x68, 0x7b, (byte) 0x20}; // sps
+        byte[] header_pps = {0, 0, 0, 1, 0x68, (byte) 0xce, 0x06, (byte) 0xf2}; // pps
+        format.setByteBuffer("csd-0", ByteBuffer.wrap(header_sps));
+        format.setByteBuffer("csd-1", ByteBuffer.wrap(header_pps));
+
+        format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 720 * 480);
+        codec.configure(format, null, null, 0);
+        codec.start();
+        boolean isCodecRecording = true;
+
+        RandomAccessFile dis = null;
+        try {
+            dis = new RandomAccessFile(mNextVideoAbsolutePath, "r");
+            byte buffer[] = new byte[4];
+            // Skip all atoms preceding mdat atom
+            while (true) {
+                while (dis.read() != 'm')
+                    ;
+                dis.read(buffer, 0, 3);
+                if (buffer[0] == 'd' &&
+                        buffer[1] == 'a' &&
+                        buffer[2] == 't')
+                    break;
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            Log.e(TAG, "Couldn't skip mp4 header :/");
+            return;
+        }
+
+        MediaExtractor extractor = new MediaExtractor();
+//                            MediaFormat format;
+        try {
+            extractor.setDataSource(mNextVideoAbsolutePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//                            int numTracks = extractor.getTrackCount();
+//                            for (int i = 0; i < numTracks; ++i) {
+//                                format = extractor.getTrackFormat(i);
+//                                String mime = format.getString(MediaFormat.KEY_MIME);
+//                                if (mime.startsWith("video/")) {
+//                                    extractor.selectTrack(i);
+//                                    break;
+//                                }
+//                            }
+
+        boolean sawInputEOS = false;
+
+        while (!sawInputEOS) {
+            int inputBufIndex = codec.dequeueInputBuffer(10000);
+            if (inputBufIndex >= 0) {
+                ByteBuffer dstBuf = codec.getInputBuffer(inputBufIndex);
+//                                int sampleSize = extractor.readSampleData(dstBuf, 0 /* offset */);
+                byte[] bt = new byte[dstBuf.capacity()];
+                dstBuf.get(bt);
+
+                byte[] sampleData = new byte[1000];
+//while loop
+                int length = 0;
+                try {
+                    length = dis.read(sampleData, 0, 4);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (length != -1) {
+                    int sampleSize = (sampleData[0] << 24)
+                            & 0xff000000 | (sampleData[1] << 16)
+                            & 0xff0000 | (sampleData[2] << 8)
+                            & 0xff00 | (sampleData[3]) & 0xff;
+                    sampleData[0] = 0;
+                    sampleData[1] = 0;
+                    sampleData[2] = 0;
+                    sampleData[3] = 1;
+                    int remainData = sampleSize;
+                    dstBuf.clear();
+                    for (int i = 0; remainData > 0; i++) {
+                        int a = ((i == 0) ? (sampleData.length - 4) : sampleData.length);
+                        int b = ((i == 0) ? 4 : 0);
+                        if (remainData < a) {
+                            try {
+                                dis.read(sampleData, b, remainData);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            dstBuf.put(sampleData, 0, remainData);
+                        } else {
+                            try {
+                                dis.read(sampleData, b, a);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            dstBuf.put(sampleData, 0, sampleData.length);
+                        }
+                        remainData = remainData - a;
+                    }
+                    codec.queueInputBuffer(
+                            inputBufIndex,
+                            0 /* offset */,
+                            sampleSize + 4,
+                            0,
+                            sawInputEOS ? MediaCodec.BUFFER_FLAG_END_OF_STREAM
+                                    : 0);
+                } else {
+                    Log.d(TAG, "saw sawInputEOS");
+                    sawInputEOS = true;
+                }
+
+                dstBuf.clear();
+                String s = "";
+                for (int i = 0; i < 6; i++) {
+                    s += "0x" + Integer.toHexString(bt[i]) + " ";
+                }
+                Log.d(TAG, "input: " + dstBuf + ", " + /*sampleSize + */", " + s);
+            }
+        }
+    }
+
+    private int[] decodeYUV420SPsingleBuf(byte[] yuv420p, int width, int height) {
+
+        final int frameSize = width * height;
+        int[] myPixels = new int[width * height];
+        for (int j = 0, yp = 0; j < height; j++) {
+            int u = 0, v = 0, uIndex = 0, vIndex = 0;
+
+            for (int i = 0; i < width; i++, yp++) {
+                int y = (0xff & ((int) yuv420p[yp])) - 16;
+                if (y < 0) y = 0;
+                if ((i & 1) == 0) {
+                    uIndex = frameSize + ((width >> 1) * (j >> 1)) + (i >> 1);
+                    vIndex = uIndex + (frameSize >> 2);
+                    u = (0xff & yuv420p[uIndex]) - 128;
+                    v = (0xff & yuv420p[vIndex]) - 128;
+                }
+                int y1192 = 1192 * y;
+                int r = (y1192 + 1634 * v);
+                int g = (y1192 - 833 * v - 400 * u);
+                int b = (y1192 + 2066 * u);
+
+                if (r < 0)
+                    r = 0;
+                else if (r > 262143)
+                    r = 262143;
+                if (g < 0)
+                    g = 0;
+                else if (g > 262143)
+                    g = 262143;
+                if (b < 0)
+                    b = 0;
+                else if (b > 262143)
+                    b = 262143;
+
+                myPixels[yp] = 0xff000000 | ((r << 6) & 0xff0000)
+                        | ((g >> 2) & 0xff00) | ((b >> 10) & 0xff);
+            }
+        }
+        return myPixels;
+    }
+
     private void decodeYUV420SP(int[] rgb, ByteBuffer yBuf, ByteBuffer cbBuf, ByteBuffer crBuf,
                                 int width, int height) {
         Log.e("camera", "   decodeYUV420SP  ");
@@ -535,6 +714,136 @@ public class Camera2VideoFragment extends Fragment
         }
     }
 
+    private class DrawThread extends Thread {
+        private boolean runFlag = false;
+        private SurfaceHolder surfaceHolder;
+        private Bitmap picture;
+        private Matrix matrix;
+        private long prevTime;
+
+        public DrawThread(SurfaceHolder surfaceHolder) {
+            this.surfaceHolder = surfaceHolder;
+
+            // загружаем картинку, которую будем отрисовывать
+            picture = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+//            picture = savePixels(mVideoSize.getWidth(), mVideoSize.getHeight());
+
+            // формируем матрицу преобразований для картинки
+            matrix = new Matrix();
+            matrix.postScale(3.0f, 3.0f);
+            matrix.postTranslate(100.0f, 100.0f);
+
+            // сохраняем текущее время
+            prevTime = System.currentTimeMillis();
+        }
+
+        public void setRunning(boolean run) {
+            runFlag = run;
+        }
+
+        @Override
+        public void run() {
+            Canvas canvas;
+            while (runFlag) {
+                // получаем текущее время и вычисляем разницу с предыдущим
+                // сохраненным моментом времени
+                long now = System.currentTimeMillis();
+                long elapsedTime = now - prevTime;
+                if (elapsedTime > 30){
+                    // если прошло больше 30 миллисекунд - сохраним текущее время
+                    // и повернем картинку на 2 градуса.
+                    // точка вращения - центр картинки
+                    prevTime = now;
+                    matrix.preRotate(2.0f, picture.getWidth() / 2, picture.getHeight() / 2);
+                }
+                canvas = null;
+                try {
+                    // получаем объект Canvas и выполняем отрисовку
+                    canvas = surfaceHolder.lockCanvas(null);
+                    synchronized (surfaceHolder) {
+                        canvas.drawColor(Color.BLACK);
+                        canvas.drawBitmap(picture, matrix, null);
+                    }
+                }
+                finally {
+                    if (canvas != null) {
+                        // отрисовка выполнена. выводим результат на экран
+                        surfaceHolder.unlockCanvasAndPost(canvas);
+                    }
+                }
+            }
+        }
+    }
+
+    private class SingleFrame extends SurfaceView implements SurfaceHolder.Callback {
+        private DrawThread mDrawThread;
+        private SurfaceHolder mSurfaceHolder;
+
+//        public void setSurfaceTexture(SurfaceTexture surfaceTexture) {
+//            mSurfaceTexture = surfaceTexture;
+//        }
+
+//        private SurfaceTexture mSurfaceTexture;
+//        private Surface mSurface;
+
+        public SingleFrame(Context context) {
+            super(context);
+            mSurfaceHolder = getHolder();
+            mSurfaceHolder.addCallback(this);
+        }
+
+        @Override
+        public void surfaceCreated(SurfaceHolder holder) {
+            mDrawThread = new DrawThread(getHolder());
+            mDrawThread.setRunning(true);
+            mDrawThread.start();
+
+//            mSurfaceHolder = holder;
+////            mSurface = holder.getSurface();
+//
+//            Canvas canvas = mSurfaceHolder.lockCanvas();
+//
+//            // Draw the text
+//            Paint textPaint = new Paint();
+//            float textSizePx = 100;
+//            textPaint.setTextSize(textSizePx);
+//            textPaint.setStyle(Paint.Style.FILL);
+//            textPaint.setAntiAlias(true);
+//            textPaint.setColor(Color.RED);
+//
+//            // The date and time of capturing
+//            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+//            Date nowDate = Calendar.getInstance().getTime();
+//            String nowDateString = dateFormat.format(nowDate);
+//
+//            // Draw the text at the upper left corner
+//            canvas.drawText(nowDateString, 0,textSizePx, textPaint);
+//
+//            mSurfaceHolder.unlockCanvasAndPost(canvas);
+        }
+
+        @Override
+        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
+        }
+
+        @Override
+        public void surfaceDestroyed(SurfaceHolder holder) {
+            boolean retry = true;
+            // завершаем работу потока
+            mDrawThread.setRunning(false);
+            while (retry) {
+                try {
+                    mDrawThread.join();
+                    retry = false;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    // если не получилось, то будем пытаться еще и еще
+                }
+            }
+        }
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void startCamera() {
@@ -675,9 +984,10 @@ public class Camera2VideoFragment extends Fragment
                                                TotalCaptureResult result) {
 
                     super.onCaptureCompleted(session, request, result);
-                    Toast.makeText(getContext(), "Saved:" + file,
-                            Toast.LENGTH_SHORT).show();
-                    startPreview();
+
+//                    Toast.makeText(getContext(), "Saved:" + file,
+//                            Toast.LENGTH_SHORT).show();
+//                    startPreview();
                 }
             };
 
@@ -722,7 +1032,7 @@ public class Camera2VideoFragment extends Fragment
 //                                            SurfaceTexture auxSf = new SurfaceTexture(mTextures[0]);
 //                                            surfaceTexture = auxSf;
 
-                                            surfaceTexture.attachToGLContext(mTextures[1]);
+                                            surfaceTexture.attachToGLContext(mTextures[0]);
 
                                             saveImage(savePixels(mVideoSize.getWidth(),
                                                     mVideoSize.getHeight()));
@@ -777,26 +1087,26 @@ public class Camera2VideoFragment extends Fragment
                             mChronometer.setVisibility(View.VISIBLE);
                             mChronometer.start();
 
-                            Canvas canvas = surfaces.get(0).lockCanvas(new Rect(0, 0,
-                                    mVideoSize.getWidth(), mVideoSize.getHeight()));
-
-                            // Draw the text
-                            Paint textPaint = new Paint();
-                            float textSizePx = 100;
-                            textPaint.setTextSize(textSizePx);
-                            textPaint.setStyle(Paint.Style.FILL);
-                            textPaint.setAntiAlias(true);
-                            textPaint.setColor(Color.RED);
-
-                            // The date and time of capturing
-                            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                            Date nowDate = Calendar.getInstance().getTime();
-                            String nowDateString = dateFormat.format(nowDate);
-
-                            // Draw the text at the upper left corner
-                            canvas.drawText(nowDateString, 0,textSizePx, textPaint);
-
-                            surfaces.get(0).unlockCanvasAndPost(canvas);
+//                            Canvas canvas = surfaces.get(0).lockCanvas(new Rect(0, 0,
+//                                    mVideoSize.getWidth(), mVideoSize.getHeight()));
+//
+//                            // Draw the text
+//                            Paint textPaint = new Paint();
+//                            float textSizePx = 100;
+//                            textPaint.setTextSize(textSizePx);
+//                            textPaint.setStyle(Paint.Style.FILL);
+//                            textPaint.setAntiAlias(true);
+//                            textPaint.setColor(Color.RED);
+//
+//                            // The date and time of capturing
+//                            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+//                            Date nowDate = Calendar.getInstance().getTime();
+//                            String nowDateString = dateFormat.format(nowDate);
+//
+//                            // Draw the text at the upper left corner
+//                            canvas.drawText(nowDateString, 0,textSizePx, textPaint);
+//
+//                            surfaces.get(0).unlockCanvasAndPost(canvas);
                         }
                     });
                 }
@@ -816,6 +1126,8 @@ public class Camera2VideoFragment extends Fragment
 
     @Override
     public void stopCamera() {
+        mediaRecorderPostprocessing();
+
         // UI
         mIsRecordingVideo = false;
         mButtonVideo.setText(R.string.record);
@@ -993,12 +1305,16 @@ public class Camera2VideoFragment extends Fragment
     @Override
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         mTextureView = view.findViewById(R.id.texture);
+
+//        mSingleFrame = new SingleFrame(getContext());
+//        mSingleFrame = (SurfaceView) view.findViewById(R.id.glTexture);
+
         mButtonVideo = view.findViewById(R.id.video);
         mButtonVideo.setOnClickListener(this);
         view.findViewById(R.id.info).setOnClickListener(this);
 
-//        mToggleFlashButton = view.findViewById(R.id.flash);
-        mToggleFlashButton.setOnClickListener(this);
+//        mToggleFlashButton = view.findViewById(R.id.flash_off);
+//        mToggleFlashButton.setOnClickListener(this);
 
         mChronometer = view.findViewById(R.id.chronometer);
     }

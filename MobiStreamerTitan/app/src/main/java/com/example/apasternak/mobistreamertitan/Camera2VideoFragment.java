@@ -27,6 +27,7 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -298,45 +299,44 @@ public class Camera2VideoFragment extends Fragment
 
     private HandlerThread mRecordingThread;
     private Handler mRecordingHandler;
-    private Thread mBackgroundThread;
 
-    /**
-     * Wraps encodeCameraToMpeg().  This is necessary because SurfaceTexture will try to use
-     * the looper in the current thread if one exists, and the CTS tests create one on the
-     * test thread.
-     *
-     * The wrapper propagates exceptions thrown by the worker thread back to the caller.
-     */
-    private static class Camera2VideoFragmentWrapper implements Runnable {
-        private Throwable mThrowable;
-        private Camera2VideoFragment mTest;
-
-        private Camera2VideoFragmentWrapper(Camera2VideoFragment test) {
-            mTest = test;
-        }
-
-        @Override
-        public void run() {
-//            try {
-//                mTest.encodeCameraToMpeg();
-//            } catch (Throwable th) {
-//                mThrowable = th;
+//    /**
+//     * Wraps encodeCameraToMpeg().  This is necessary because SurfaceTexture will try to use
+//     * the looper in the current thread if one exists, and the CTS tests create one on the
+//     * test thread.
+//     *
+//     * The wrapper propagates exceptions thrown by the worker thread back to the caller.
+//     */
+//    private static class Camera2VideoFragmentWrapper implements Runnable {
+//        private Throwable mThrowable;
+//        private Camera2VideoFragment mTest;
+//
+//        private Camera2VideoFragmentWrapper(Camera2VideoFragment test) {
+//            mTest = test;
+//        }
+//
+//        @Override
+//        public void run() {
+////            try {
+////                mTest.encodeCameraToMpeg();
+////            } catch (Throwable th) {
+////                mThrowable = th;
+////            }
+//
+//            mTest.encodingCycle();
+//        }
+//
+//        /** Entry point. */
+//        public static void runTest(Camera2VideoFragment obj) throws Throwable {
+//            Camera2VideoFragmentWrapper wrapper = new Camera2VideoFragmentWrapper(obj);
+//            HandlerThread th = new HandlerThread("codec test");
+//            th.start();
+//            th.join();
+//            if (wrapper.mThrowable != null) {
+//                throw wrapper.mThrowable;
 //            }
-
-            mTest.encodingCycle();
-        }
-
-        /** Entry point. */
-        public static void runTest(Camera2VideoFragment obj) throws Throwable {
-            Camera2VideoFragmentWrapper wrapper = new Camera2VideoFragmentWrapper(obj);
-            HandlerThread th = new HandlerThread("codec test");
-            th.start();
-            th.join();
-            if (wrapper.mThrowable != null) {
-                throw wrapper.mThrowable;
-            }
-        }
-    }
+//        }
+//    }
 
     /**
      * Holds state associated with a Surface used for MediaCodec encoder input.
@@ -807,54 +807,56 @@ public class Camera2VideoFragment extends Fragment
         }
     }
 
-    /** test entry point */
-    public void testEncodeCameraToMp4() throws Throwable {
-        getActivity().runOnUiThread(new Camera2VideoFragmentWrapper(this));
-    }
+//    /** test entry point */
+//    public void testEncodeCameraToMp4() throws Throwable {
+//        getActivity().runOnUiThread(new Camera2VideoFragmentWrapper(this));
+//    }
 
-    /**
-     * Tests encoding of AVC video from Camera input.  The output is saved as an MP4 file.
-     */
-    private void encodeCameraToMpeg() {
-        // arbitrary but popular values
-        int encWidth = mVideoSize.getWidth();
-        int encHeight = mVideoSize.getHeight();
-//        int encBitRate = 6000000;      // Mbps
-        Log.d(TAG, MIME_TYPE + " output " + encWidth + "x" + encHeight + " @" + mEncBitRate);
-
-        try {
-//            openCamera(encWidth, encHeight);
-//            prepareCamera(encWidth, encHeight);
-//            prepareEncoder(encWidth, encHeight, mEncBitRate);
-//            mRecordingSurface.makeCurrent();
-////            mCamera2VideoFragment.setRecordingSurface(mRecordingSurface);
-//            mStManager = new SurfaceTextureManager();
-//            SurfaceTexture surfaceTexture = mStManager.getSurfaceTexture();
+//    /**
+//     * Tests encoding of AVC video from Camera input.  The output is saved as an MP4 file.
+//     */
+//    private void encodeCameraToMpeg() {
+//        // arbitrary but popular values
+//        int encWidth = mVideoSize.getWidth();
+//        int encHeight = mVideoSize.getHeight();
+////        int encBitRate = 6000000;      // Mbps
+//        Log.d(TAG, MIME_TYPE + " output " + encWidth + "x" + encHeight + " @" + mEncBitRate);
 //
-//            mRecordingSurface.setSurface(new Surface(surfaceTexture));
-
-//            prepareSurfaceTexture(); // todo check out, done in startCamera()
-
-//            mCamera.startPreview();
-//            startPreview();
-
-            startCamera();
-
-//            encodingCycle();
-        } finally {
-            // release everything we grabbed
-//            releaseCamera(); // todo done in closeCamera()
-            releaseEncoder();
-//            releaseSurfaceTexture(); // todo done in closeCamera()
-            closeCamera();
-        }
-    }
+//        try {
+////            openCamera(encWidth, encHeight);
+////            prepareCamera(encWidth, encHeight);
+////            prepareEncoder(encWidth, encHeight, mEncBitRate);
+////            mRecordingSurface.makeCurrent();
+//////            mCamera2VideoFragment.setRecordingSurface(mRecordingSurface);
+////            mStManager = new SurfaceTextureManager();
+////            SurfaceTexture surfaceTexture = mStManager.getSurfaceTexture();
+////
+////            mRecordingSurface.setSurface(new Surface(surfaceTexture));
+//
+////            prepareSurfaceTexture(); // todo check out, done in startCamera()
+//
+////            mCamera.startPreview();
+////            startPreview();
+//
+//            startCamera();
+//
+////            encodingCycle();
+//        } finally {
+//            // release everything we grabbed
+////            releaseCamera(); // todo done in closeCamera()
+//            releaseEncoder();
+////            releaseSurfaceTexture(); // todo done in closeCamera()
+//            closeCamera();
+//        }
+//    }
 
     private void encodingCycle() {
         long startWhen = System.nanoTime();
         long desiredEnd = startWhen + DURATION_SEC * 1000000000L;
         SurfaceTexture st = mStManager.getSurfaceTexture();
         int frameCount = 0;
+
+//        prepareEncoder(mVideoSize.getWidth(), mVideoSize.getHeight(), mEncBitRate);
 
         while (System.nanoTime() < desiredEnd) {
             // Feed any pending encoder output into the muxer.
@@ -909,9 +911,9 @@ public class Camera2VideoFragment extends Fragment
     private void prepareEncoder(int width, int height, int bitRate) {
         mBufferInfo = new MediaCodec.BufferInfo();
 
-        mMediaCodecList = new MediaCodecList(MediaCodecList.ALL_CODECS);
-        mMediaCodecInfos = new MediaCodecInfo[MediaCodecList.ALL_CODECS];
-        mMediaCodecInfos = mMediaCodecList.getCodecInfos();
+//        mMediaCodecList = new MediaCodecList(MediaCodecList.ALL_CODECS);
+//        mMediaCodecInfos = new MediaCodecInfo[MediaCodecList.ALL_CODECS];
+//        mMediaCodecInfos = mMediaCodecList.getCodecInfos();
 
         MediaCodecInfo mediaCodecInfo = selectCodec(MIME_TYPE);
         if (mediaCodecInfo == null) {
@@ -950,7 +952,6 @@ public class Camera2VideoFragment extends Fragment
 
         mEncoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
         mRecordingSurface = new CodecInputSurface(mEncoder.createInputSurface());
-        mEncoder.start();
 
         // Output filename.  Ideally this would use Context.getFilesDir() rather than a
         // hard-coded output directory.
@@ -2019,15 +2020,21 @@ public class Camera2VideoFragment extends Fragment
 //            mPreviewBuilder.addTarget(previewSurface);
 
             // Set up Surface for the MediaRecorder
-            Surface recorderSurface = null;
+            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_info);
+            setGlTexture(bitmap);
 
-            if (mUseMediaCodec) {
-                recorderSurface = mRecordingSurface.getSurface();
-            } else {
-                recorderSurface = mMediaRecorder.getSurface();
-            }
+            SurfaceTexture sf = new SurfaceTexture(mTextures[0]);
+            Surface recorderSurface = new Surface(sf); //mEncoder.createInputSurface();
+            mRecordingSurface.setSurface(recorderSurface);
+//            recorderSurface = previewSurface;
 
-            surfaces.add(recorderSurface);
+//            if (mUseMediaCodec) {
+//                recorderSurface = mRecordingSurface.getSurface();
+//            } else {
+//                recorderSurface = mMediaRecorder.getSurface();
+//            }
+
+            surfaces.add(mEncoder.createInputSurface());
 //            mPreviewBuilder.addTarget(recorderSurface);
 
             onConfiguringOutputs(surfaces, false);
@@ -2053,37 +2060,30 @@ public class Camera2VideoFragment extends Fragment
 //                        }
 //                    }, mRecordingHandler);
 
-                    // Run in the background thread
-                    try {
-                        testEncodeCameraToMp4();
-                    } catch (Throwable throwable) {
-                        throwable.printStackTrace();
-                    }
+//                    // Run in the background thread
+//                    try {
+//                        testEncodeCameraToMp4();
+//                    } catch (Throwable throwable) {
+//                        throwable.printStackTrace();
+//                    }
 
-                    // Setting the recording time counter
-                    mChronometer.setBase(SystemClock.elapsedRealtime());
-                    mChronometer.setVisibility(View.VISIBLE);
-                    mChronometer.start();
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // UI
+                            mButtonVideo.setText(R.string.stop);
+                            mIsRecordingVideo = true;
 
-//                    getActivity().runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            // UI
-//                            mButtonVideo.setText(R.string.stop);
-//                            mIsRecordingVideo = true;
-//
-//                            // Start recording
-////                            try {
-////                                startRecording();
-////                            } catch (IllegalStateException e) {
-////                                e.printStackTrace();
-////                            }
-//
-//                            encodingCycle();
+                            mEncoder.start();
+//                            drainEncoder(false);
+                            encodingCycle();
 
-//                            drawFrame(mView, surface);
-//                        }
-//                    });
+                            // Setting the recording time counter
+                            mChronometer.setBase(SystemClock.elapsedRealtime());
+                            mChronometer.setVisibility(View.VISIBLE);
+                            mChronometer.start();
+                        }
+                    });
                 }
 
                 @Override
@@ -2101,21 +2101,22 @@ public class Camera2VideoFragment extends Fragment
 
     @Override
     public void stopCamera() {
-//        // UI
-//        mIsRecordingVideo = false;
-//        mButtonVideo.setText(R.string.record);
-//
-//        // Stop recording
-//        stopEncoding();
-//
-//        Activity activity = getActivity();
-//        if (null != activity) {
-//            Toast.makeText(activity, "Video saved: " + mNextVideoFullFileName,
-//                    Toast.LENGTH_SHORT).show();
-//            Log.d(TAG, "Video saved: " + mNextVideoFullFileName);
-//        }
+        // UI
+        mIsRecordingVideo = false;
+        mButtonVideo.setText(R.string.record);
+
+        // Stop recording
+        mEncoder.stop();
+        mEncoder.reset();
+
+        Activity activity = getActivity();
+        if (null != activity) {
+            Toast.makeText(activity, "Video saved: " + getOutputMediaFileName(),
+                    Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "Video saved: " + getOutputMediaFileName());
+        }
 //        mNextVideoFullFileName = null;
-//        startPreview();
+        startPreview();
     }
 
     @Override
@@ -2135,7 +2136,7 @@ public class Camera2VideoFragment extends Fragment
             setUpCaptureRequestBuilder(mPreviewBuilder);
             HandlerThread thread = new HandlerThread("CameraPreview");
             thread.start();
-            mPreviewSession.setRepeatingRequest(mPreviewBuilder.build(), null, null);
+            mPreviewSession.setRepeatingRequest(mPreviewBuilder.build(), null, mRecordingHandler);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -2315,13 +2316,13 @@ public class Camera2VideoFragment extends Fragment
                     stopCamera();
 //                    closeCamera();
                 } else {
-//                    startCamera();
+                    startCamera();
 //                    try {
 //                        testEncodeCameraToMp4();
 //                    } catch (Throwable throwable) {
 //                        throwable.printStackTrace();
 //                    }
-                    encodeCameraToMpeg();
+//                    encodeCameraToMpeg();
                 }
                 break;
             }
@@ -2543,7 +2544,7 @@ public class Camera2VideoFragment extends Fragment
                                 Toast.makeText(activity, "Failed", Toast.LENGTH_SHORT).show();
                             }
                         }
-                    }, null);
+                    }, mRecordingHandler);
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
