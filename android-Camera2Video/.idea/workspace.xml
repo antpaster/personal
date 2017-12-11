@@ -10,32 +10,48 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ff331db6-5103-4dfa-87e2-980fc441df08" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/delete_file-web.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/flash_off-web.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/flash_on-web.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-hdpi/delete_file.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-hdpi/delete_file_foreground.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-hdpi/delete_file_round.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-hdpi/flash_off.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-hdpi/flash_off_foreground.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-hdpi/flash_off_round.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-hdpi/flash_on.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-hdpi/flash_on_foreground.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-hdpi/flash_on_round.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-mdpi/delete_file.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-mdpi/delete_file_foreground.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-mdpi/delete_file_round.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-mdpi/flash_off.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-mdpi/flash_off_foreground.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-mdpi/flash_off_round.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-mdpi/flash_on.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-mdpi/flash_on_foreground.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-mdpi/flash_on_round.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xhdpi/delete_file.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xhdpi/delete_file_foreground.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xhdpi/delete_file_round.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xhdpi/flash_off.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xhdpi/flash_off_foreground.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xhdpi/flash_off_round.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xhdpi/flash_on.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xhdpi/flash_on_foreground.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xhdpi/flash_on_round.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xxhdpi/delete_file.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xxhdpi/delete_file_foreground.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xxhdpi/delete_file_round.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xxhdpi/flash_off.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xxhdpi/flash_off_foreground.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xxhdpi/flash_off_round.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xxhdpi/flash_on.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xxhdpi/flash_on_foreground.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xxhdpi/flash_on_round.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xxxhdpi/delete_file.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xxxhdpi/delete_file_foreground.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xxxhdpi/delete_file_round.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xxxhdpi/flash_off.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xxxhdpi/flash_off_foreground.png" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-xxxhdpi/flash_off_round.png" />
@@ -64,10 +80,13 @@
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/Application.iml" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/java/com/example/android/camera2video/MobiServiceable.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-anydpi-v26/delete_file.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-anydpi-v26/delete_file_round.xml" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-anydpi-v26/flash_off.xml" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-anydpi-v26/flash_off_round.xml" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-anydpi-v26/flash_on.xml" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/mipmap-anydpi-v26/flash_on_round.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/values/delete_file_background.xml" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/values/flash_off_background.xml" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Application/src/main/res/values/flash_on_background.xml" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/local.properties" />
@@ -104,32 +123,32 @@
       <file leaf-file-name="Camera2VideoFragment.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Application/src/main/java/com/example/android/camera2video/Camera2VideoFragment.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="172">
-              <caret line="1089" column="0" lean-forward="false" selection-start-line="1089" selection-start-column="2" selection-end-line="1108" selection-end-column="74" />
+            <state relative-caret-position="265">
+              <caret line="1379" column="84" lean-forward="false" selection-start-line="1379" selection-start-column="84" selection-end-line="1379" selection-end-column="84" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#32514#36492#0" expanded="true" />
-                <element signature="e#36491#36492#0" expanded="true" />
-                <element signature="e#36679#37255#0" expanded="true" />
-                <element signature="e#37254#37255#0" expanded="true" />
-                <element signature="e#38099#43690#0" expanded="true" />
-                <element signature="e#38277#38290#0" expanded="true" />
-                <element signature="e#38924#41673#0" expanded="true" />
-                <element signature="e#41672#41673#0" expanded="true" />
-                <element signature="e#43689#43690#0" expanded="true" />
-                <element signature="e#44375#44390#0" expanded="true" />
-                <element signature="e#51594#51616#0" expanded="true" />
-                <element signature="e#54957#54995#0" expanded="true" />
-                <element signature="e#55212#55250#0" expanded="true" />
-                <element signature="e#55904#55942#0" expanded="true" />
-                <element signature="e#58323#58355#0" expanded="true" />
-                <element signature="e#64571#64825#0" expanded="true" />
-                <element signature="e#64824#64825#0" expanded="true" />
-                <element signature="e#65176#65203#0" expanded="true" />
-                <element signature="e#65265#65620#0" expanded="true" />
-                <element signature="e#65619#65620#0" expanded="true" />
-                <element signature="e#65714#66015#0" expanded="true" />
-                <element signature="e#66014#66015#0" expanded="true" />
+                <element signature="e#32572#36550#0" expanded="true" />
+                <element signature="e#36549#36550#0" expanded="true" />
+                <element signature="e#36737#37313#0" expanded="true" />
+                <element signature="e#37312#37313#0" expanded="true" />
+                <element signature="e#38157#43748#0" expanded="true" />
+                <element signature="e#38335#38348#0" expanded="true" />
+                <element signature="e#38982#41731#0" expanded="true" />
+                <element signature="e#41730#41731#0" expanded="true" />
+                <element signature="e#43747#43748#0" expanded="true" />
+                <element signature="e#44435#44450#0" expanded="true" />
+                <element signature="e#51870#51892#0" expanded="true" />
+                <element signature="e#55901#55939#0" expanded="true" />
+                <element signature="e#56156#56194#0" expanded="true" />
+                <element signature="e#56848#56886#0" expanded="true" />
+                <element signature="e#59267#59299#0" expanded="true" />
+                <element signature="e#65572#65826#0" expanded="true" />
+                <element signature="e#65825#65826#0" expanded="true" />
+                <element signature="e#66177#66204#0" expanded="true" />
+                <element signature="e#66266#66621#0" expanded="true" />
+                <element signature="e#66620#66621#0" expanded="true" />
+                <element signature="e#66715#67016#0" expanded="true" />
+                <element signature="e#67015#67016#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -154,8 +173,23 @@
             <state />
           </provider>
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-198">
-              <caret line="19" column="56" lean-forward="false" selection-start-line="19" selection-start-column="56" selection-end-line="19" selection-end-column="56" />
+            <state relative-caret-position="305">
+              <caret line="48" column="12" lean-forward="false" selection-start-line="48" selection-start-column="12" selection-end-line="48" selection-end-column="42" />
+              <folding>
+                <element signature="e#2480#2506#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="fragment_camera2_video.xml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Application/src/main/res/layout-land/fragment_camera2_video.xml">
+          <provider editor-type-id="android-designer2">
+            <state />
+          </provider>
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="449">
+              <caret line="52" column="42" lean-forward="false" selection-start-line="52" selection-start-column="42" selection-end-line="52" selection-end-column="42" />
               <folding />
             </state>
           </provider>
@@ -166,7 +200,10 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="576">
               <caret line="53" column="43" lean-forward="false" selection-start-line="53" selection-start-column="43" selection-end-line="53" selection-end-column="43" />
-              <folding />
+              <folding>
+                <element signature="e#0#2128#0" expanded="false" />
+                <element signature="imports" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -174,8 +211,8 @@
       <file leaf-file-name="strings.xml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Application/src/main/res/values/strings.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+            <state relative-caret-position="54">
+              <caret line="3" column="37" lean-forward="false" selection-start-line="3" selection-start-column="37" selection-end-line="3" selection-end-column="37" />
               <folding />
             </state>
           </provider>
@@ -224,6 +261,9 @@
       <find>chronometer</find>
       <find>video</find>
       <find>mVideoFolderPath</find>
+      <find>mNextVideoAbsolutePath</find>
+      <find>mRecordedVideoAbsolutePath</find>
+      <find>mRecordedVideoFileName</find>
     </findStrings>
     <replaceStrings>
       <replace>GLES20</replace>
@@ -1897,18 +1937,19 @@
         <option value="$PROJECT_DIR$/local.properties" />
         <option value="$PROJECT_DIR$/Application/build.gradle" />
         <option value="$PROJECT_DIR$/Application/src/main/res/layout/activity_camera.xml" />
-        <option value="$PROJECT_DIR$/Application/src/main/res/layout-land/fragment_camera2_video.xml" />
-        <option value="$PROJECT_DIR$/Application/src/main/res/layout/fragment_camera2_video.xml" />
         <option value="$PROJECT_DIR$/Application/src/main/java/com/example/android/camera2video/CameraActivity.java" />
+        <option value="$PROJECT_DIR$/Application/src/main/res/values/strings.xml" />
+        <option value="$PROJECT_DIR$/Application/src/main/res/layout/fragment_camera2_video.xml" />
+        <option value="$PROJECT_DIR$/Application/src/main/res/layout-land/fragment_camera2_video.xml" />
         <option value="$PROJECT_DIR$/Application/src/main/java/com/example/android/camera2video/Camera2VideoFragment.java" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="64" />
-    <option name="y" value="-11" />
-    <option name="width" value="1857" />
-    <option name="height" value="1092" />
+    <option name="x" value="65" />
+    <option name="y" value="-4" />
+    <option name="width" value="1855" />
+    <option name="height" value="1084" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
@@ -1928,8 +1969,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
-      <pane id="PackagesPane" />
       <pane id="AndroidView">
         <subPane>
           <PATH>
@@ -1970,7 +2009,29 @@
               <option name="myItemType" value="com.android.tools.idea.navigator.nodes.android.AndroidResFolderNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="mipmap" />
+              <option name="myItemId" value="layout" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.android.AndroidResFolderTypeNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="fragment_camera2_video.xml" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.android.AndroidResGroupNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="android-Camera2Video" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Application" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.android.AndroidModuleNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="res" />
+              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.android.AndroidResFolderNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="layout" />
               <option name="myItemType" value="com.android.tools.idea.navigator.nodes.android.AndroidResFolderTypeNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1986,7 +2047,7 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -2001,12 +2062,14 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scratches" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="android.sdk.path" value="$USER_HOME$/Android/Sdk" />
     <property name="settings.editor.selected.configurable" value="preferences.general" />
-    <property name="last_opened_file_path" value="$USER_HOME$/AndroidStudioProjects/android-Camera2Video" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="device.picker.selection" value="2e3596e97cf4" />
   </component>
   <component name="RecentsManager">
@@ -2097,7 +2160,7 @@
       <option name="ACTIVITY_CLASS" value="" />
       <method>
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
-        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1512739826643" />
+        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1512975328153" />
       </method>
     </configuration>
     <configuration default="true" type="AndroidTestRunConfigurationType" factoryName="Android Instrumented Tests">
@@ -2145,7 +2208,7 @@
       </Profilers>
       <method>
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
-        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1512739826643" />
+        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1512975328153" />
       </method>
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
@@ -2177,6 +2240,27 @@
         </option>
         <option name="vmOptions" />
       </ExternalSystemSettings>
+      <method />
+    </configuration>
+    <configuration default="true" type="JUnit" factoryName="JUnit">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <envs />
+      <patterns />
       <method />
     </configuration>
     <configuration default="true" type="JarApplication" factoryName="JAR Application">
@@ -2307,7 +2391,7 @@
       <option name="ACTIVITY_CLASS" value="" />
       <method>
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
-        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1512739826647" />
+        <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1512975328161" />
       </method>
     </configuration>
     <list size="1">
@@ -2346,32 +2430,33 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="64" y="-11" width="1857" height="1092" extended-state="6" />
+    <frame x="65" y="-4" width="1855" height="1084" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Android Profiler" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32903227" sideWeight="0.49585405" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32903227" sideWeight="0.5041459" order="13" side_tool="true" content_ui="tabs" />
+      <window_info id="Logcat" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32903227" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2498618" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Device File Explorer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32903227" sideWeight="0.49585405" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32903227" sideWeight="0.5041459" order="13" side_tool="true" content_ui="tabs" />
+      <window_info id="Documentation" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="FLOATING" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" x="165" y="96" width="1655" height="884" />
       <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Logcat" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32903227" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Captures" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="12" side_tool="true" content_ui="tabs" />
-      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25262576" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25262576" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2498618" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Device File Explorer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -2379,7 +2464,6 @@
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="combo" />
       <window_info id="Dynamic Properties" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Documentation" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="FLOATING" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" x="165" y="96" width="1655" height="884" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
@@ -2392,17 +2476,23 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/Application/src/main/java/com/example/android/camera2video/Camera2VideoFragment.java</url>
-          <line>1034</line>
+          <line>1036</line>
           <properties />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/Application/src/main/java/com/example/android/camera2video/Camera2VideoFragment.java</url>
-          <line>1301</line>
+          <line>1305</line>
           <properties />
           <option name="timeStamp" value="3" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/Application/src/main/java/com/example/android/camera2video/Camera2VideoFragment.java</url>
+          <line>1376</line>
+          <properties />
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
       </breakpoints>
-      <option name="time" value="4" />
+      <option name="time" value="6" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -2413,28 +2503,28 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#32514#36492#0" expanded="true" />
-            <element signature="e#36491#36492#0" expanded="true" />
-            <element signature="e#36679#37255#0" expanded="true" />
-            <element signature="e#37254#37255#0" expanded="true" />
-            <element signature="e#38099#43690#0" expanded="true" />
-            <element signature="e#38277#38290#0" expanded="true" />
-            <element signature="e#38924#41673#0" expanded="true" />
-            <element signature="e#41672#41673#0" expanded="true" />
-            <element signature="e#43689#43690#0" expanded="true" />
-            <element signature="e#44375#44390#0" expanded="true" />
-            <element signature="e#51594#51616#0" expanded="true" />
-            <element signature="e#54957#54995#0" expanded="true" />
-            <element signature="e#55212#55250#0" expanded="true" />
-            <element signature="e#55904#55942#0" expanded="true" />
-            <element signature="e#58323#58355#0" expanded="true" />
-            <element signature="e#64571#64825#0" expanded="true" />
-            <element signature="e#64824#64825#0" expanded="true" />
-            <element signature="e#65176#65203#0" expanded="true" />
-            <element signature="e#65265#65620#0" expanded="true" />
-            <element signature="e#65619#65620#0" expanded="true" />
-            <element signature="e#65714#66015#0" expanded="true" />
-            <element signature="e#66014#66015#0" expanded="true" />
+            <element signature="e#32572#36550#0" expanded="true" />
+            <element signature="e#36549#36550#0" expanded="true" />
+            <element signature="e#36737#37313#0" expanded="true" />
+            <element signature="e#37312#37313#0" expanded="true" />
+            <element signature="e#38157#43748#0" expanded="true" />
+            <element signature="e#38335#38348#0" expanded="true" />
+            <element signature="e#38982#41731#0" expanded="true" />
+            <element signature="e#41730#41731#0" expanded="true" />
+            <element signature="e#43747#43748#0" expanded="true" />
+            <element signature="e#44435#44450#0" expanded="true" />
+            <element signature="e#51870#51892#0" expanded="true" />
+            <element signature="e#55901#55939#0" expanded="true" />
+            <element signature="e#56156#56194#0" expanded="true" />
+            <element signature="e#56848#56886#0" expanded="true" />
+            <element signature="e#59267#59299#0" expanded="true" />
+            <element signature="e#65572#65826#0" expanded="true" />
+            <element signature="e#65825#65826#0" expanded="true" />
+            <element signature="e#66177#66204#0" expanded="true" />
+            <element signature="e#66266#66621#0" expanded="true" />
+            <element signature="e#66620#66621#0" expanded="true" />
+            <element signature="e#66715#67016#0" expanded="true" />
+            <element signature="e#67015#67016#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -2457,7 +2547,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="342">
           <caret line="19" column="56" lean-forward="false" selection-start-line="19" selection-start-column="56" selection-end-line="19" selection-end-column="56" />
-          <folding />
+          <folding>
+            <element signature="e#2480#2506#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -2465,7 +2557,10 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="576">
           <caret line="53" column="43" lean-forward="false" selection-start-line="53" selection-start-column="43" selection-end-line="53" selection-end-column="43" />
-          <folding />
+          <folding>
+            <element signature="e#0#2128#0" expanded="false" />
+            <element signature="imports" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -2499,28 +2594,28 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#32514#36492#0" expanded="true" />
-            <element signature="e#36491#36492#0" expanded="true" />
-            <element signature="e#36679#37255#0" expanded="true" />
-            <element signature="e#37254#37255#0" expanded="true" />
-            <element signature="e#38099#43690#0" expanded="true" />
-            <element signature="e#38277#38290#0" expanded="true" />
-            <element signature="e#38924#41673#0" expanded="true" />
-            <element signature="e#41672#41673#0" expanded="true" />
-            <element signature="e#43689#43690#0" expanded="true" />
-            <element signature="e#44375#44390#0" expanded="true" />
-            <element signature="e#51594#51616#0" expanded="true" />
-            <element signature="e#54957#54995#0" expanded="true" />
-            <element signature="e#55212#55250#0" expanded="true" />
-            <element signature="e#55904#55942#0" expanded="true" />
-            <element signature="e#58323#58355#0" expanded="true" />
-            <element signature="e#64571#64825#0" expanded="true" />
-            <element signature="e#64824#64825#0" expanded="true" />
-            <element signature="e#65176#65203#0" expanded="true" />
-            <element signature="e#65265#65620#0" expanded="true" />
-            <element signature="e#65619#65620#0" expanded="true" />
-            <element signature="e#65714#66015#0" expanded="true" />
-            <element signature="e#66014#66015#0" expanded="true" />
+            <element signature="e#32572#36550#0" expanded="true" />
+            <element signature="e#36549#36550#0" expanded="true" />
+            <element signature="e#36737#37313#0" expanded="true" />
+            <element signature="e#37312#37313#0" expanded="true" />
+            <element signature="e#38157#43748#0" expanded="true" />
+            <element signature="e#38335#38348#0" expanded="true" />
+            <element signature="e#38982#41731#0" expanded="true" />
+            <element signature="e#41730#41731#0" expanded="true" />
+            <element signature="e#43747#43748#0" expanded="true" />
+            <element signature="e#44435#44450#0" expanded="true" />
+            <element signature="e#51870#51892#0" expanded="true" />
+            <element signature="e#55901#55939#0" expanded="true" />
+            <element signature="e#56156#56194#0" expanded="true" />
+            <element signature="e#56848#56886#0" expanded="true" />
+            <element signature="e#59267#59299#0" expanded="true" />
+            <element signature="e#65572#65826#0" expanded="true" />
+            <element signature="e#65825#65826#0" expanded="true" />
+            <element signature="e#66177#66204#0" expanded="true" />
+            <element signature="e#66266#66621#0" expanded="true" />
+            <element signature="e#66620#66621#0" expanded="true" />
+            <element signature="e#66715#67016#0" expanded="true" />
+            <element signature="e#67015#67016#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -2543,7 +2638,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="342">
           <caret line="19" column="56" lean-forward="false" selection-start-line="19" selection-start-column="56" selection-end-line="19" selection-end-column="56" />
-          <folding />
+          <folding>
+            <element signature="e#2480#2506#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -2551,7 +2648,10 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="576">
           <caret line="53" column="43" lean-forward="false" selection-start-line="53" selection-start-column="43" selection-end-line="53" selection-end-column="43" />
-          <folding />
+          <folding>
+            <element signature="e#0#2128#0" expanded="false" />
+            <element signature="imports" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -2585,28 +2685,28 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#32514#36492#0" expanded="true" />
-            <element signature="e#36491#36492#0" expanded="true" />
-            <element signature="e#36679#37255#0" expanded="true" />
-            <element signature="e#37254#37255#0" expanded="true" />
-            <element signature="e#38099#43690#0" expanded="true" />
-            <element signature="e#38277#38290#0" expanded="true" />
-            <element signature="e#38924#41673#0" expanded="true" />
-            <element signature="e#41672#41673#0" expanded="true" />
-            <element signature="e#43689#43690#0" expanded="true" />
-            <element signature="e#44375#44390#0" expanded="true" />
-            <element signature="e#51594#51616#0" expanded="true" />
-            <element signature="e#54957#54995#0" expanded="true" />
-            <element signature="e#55212#55250#0" expanded="true" />
-            <element signature="e#55904#55942#0" expanded="true" />
-            <element signature="e#58323#58355#0" expanded="true" />
-            <element signature="e#64571#64825#0" expanded="true" />
-            <element signature="e#64824#64825#0" expanded="true" />
-            <element signature="e#65176#65203#0" expanded="true" />
-            <element signature="e#65265#65620#0" expanded="true" />
-            <element signature="e#65619#65620#0" expanded="true" />
-            <element signature="e#65714#66015#0" expanded="true" />
-            <element signature="e#66014#66015#0" expanded="true" />
+            <element signature="e#32572#36550#0" expanded="true" />
+            <element signature="e#36549#36550#0" expanded="true" />
+            <element signature="e#36737#37313#0" expanded="true" />
+            <element signature="e#37312#37313#0" expanded="true" />
+            <element signature="e#38157#43748#0" expanded="true" />
+            <element signature="e#38335#38348#0" expanded="true" />
+            <element signature="e#38982#41731#0" expanded="true" />
+            <element signature="e#41730#41731#0" expanded="true" />
+            <element signature="e#43747#43748#0" expanded="true" />
+            <element signature="e#44435#44450#0" expanded="true" />
+            <element signature="e#51870#51892#0" expanded="true" />
+            <element signature="e#55901#55939#0" expanded="true" />
+            <element signature="e#56156#56194#0" expanded="true" />
+            <element signature="e#56848#56886#0" expanded="true" />
+            <element signature="e#59267#59299#0" expanded="true" />
+            <element signature="e#65572#65826#0" expanded="true" />
+            <element signature="e#65825#65826#0" expanded="true" />
+            <element signature="e#66177#66204#0" expanded="true" />
+            <element signature="e#66266#66621#0" expanded="true" />
+            <element signature="e#66620#66621#0" expanded="true" />
+            <element signature="e#66715#67016#0" expanded="true" />
+            <element signature="e#67015#67016#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -2629,7 +2729,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="342">
           <caret line="19" column="56" lean-forward="false" selection-start-line="19" selection-start-column="56" selection-end-line="19" selection-end-column="56" />
-          <folding />
+          <folding>
+            <element signature="e#2480#2506#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -2637,7 +2739,101 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="576">
           <caret line="53" column="43" lean-forward="false" selection-start-line="53" selection-start-column="43" selection-end-line="53" selection-end-column="43" />
+          <folding>
+            <element signature="e#0#2128#0" expanded="false" />
+            <element signature="imports" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Application/src/main/res/values/strings.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Application/src/main/res/values/styles.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Application/src/main/AndroidManifest.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Application/src/main/java/com/example/android/camera2video/Camera2VideoFragment.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#32572#36550#0" expanded="true" />
+            <element signature="e#36549#36550#0" expanded="true" />
+            <element signature="e#36737#37313#0" expanded="true" />
+            <element signature="e#37312#37313#0" expanded="true" />
+            <element signature="e#38157#43748#0" expanded="true" />
+            <element signature="e#38335#38348#0" expanded="true" />
+            <element signature="e#38982#41731#0" expanded="true" />
+            <element signature="e#41730#41731#0" expanded="true" />
+            <element signature="e#43747#43748#0" expanded="true" />
+            <element signature="e#44435#44450#0" expanded="true" />
+            <element signature="e#51870#51892#0" expanded="true" />
+            <element signature="e#55901#55939#0" expanded="true" />
+            <element signature="e#56156#56194#0" expanded="true" />
+            <element signature="e#56848#56886#0" expanded="true" />
+            <element signature="e#59267#59299#0" expanded="true" />
+            <element signature="e#65572#65826#0" expanded="true" />
+            <element signature="e#65825#65826#0" expanded="true" />
+            <element signature="e#66177#66204#0" expanded="true" />
+            <element signature="e#66266#66621#0" expanded="true" />
+            <element signature="e#66620#66621#0" expanded="true" />
+            <element signature="e#66715#67016#0" expanded="true" />
+            <element signature="e#67015#67016#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Application/src/main/res/layout/activity_camera.xml">
+      <provider editor-type-id="android-designer2">
+        <state />
+      </provider>
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="21" column="66" lean-forward="false" selection-start-line="21" selection-start-column="66" selection-end-line="21" selection-end-column="66" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Application/src/main/res/layout/fragment_camera2_video.xml">
+      <provider editor-type-id="android-designer2">
+        <state />
+      </provider>
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="342">
+          <caret line="19" column="56" lean-forward="false" selection-start-line="19" selection-start-column="56" selection-end-line="19" selection-end-column="56" />
+          <folding>
+            <element signature="e#2480#2506#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Application/src/main/java/com/example/android/camera2video/CameraActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="576">
+          <caret line="53" column="43" lean-forward="false" selection-start-line="53" selection-start-column="43" selection-end-line="53" selection-end-column="43" />
+          <folding>
+            <element signature="e#0#2128#0" expanded="false" />
+            <element signature="imports" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -2728,25 +2924,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Application/src/main/res/layout-land/fragment_camera2_video.xml">
-      <provider editor-type-id="android-designer2">
-        <state />
-      </provider>
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="684">
-          <caret line="47" column="45" lean-forward="false" selection-start-line="47" selection-start-column="45" selection-end-line="47" selection-end-column="45" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Application/src/main/res/values/strings.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Application/src/main/res/values/styles.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -2756,10 +2933,10 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Application/src/main/res/drawable-hdpi/tile.9.png">
-      <provider selected="true" editor-type-id="ninepatcheditor">
+      <provider editor-type-id="images">
         <state />
       </provider>
-      <provider editor-type-id="images">
+      <provider selected="true" editor-type-id="ninepatcheditor">
         <state />
       </provider>
     </entry>
@@ -2790,13 +2967,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/Android/Sdk/sources/android-25/android/app/Fragment.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="177">
-          <caret line="2352" column="0" lean-forward="false" selection-start-line="2352" selection-start-column="0" selection-end-line="2352" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/Android/Sdk/sources/android-25/android/app/ActivityThread.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="204">
@@ -2804,17 +2974,21 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/Android/Sdk/sources/android-25/android/app/FragmentManager.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="447">
-          <caret line="1009" column="0" lean-forward="false" selection-start-line="1009" selection-start-column="0" selection-end-line="1009" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Application/src/main/java/com/example/android/camera2video/CameraActivity.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="576">
           <caret line="53" column="43" lean-forward="false" selection-start-line="53" selection-start-column="43" selection-end-line="53" selection-end-column="43" />
+          <folding>
+            <element signature="e#0#2128#0" expanded="false" />
+            <element signature="imports" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Application/src/main/res/values/strings.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="54">
+          <caret line="3" column="37" lean-forward="false" selection-start-line="3" selection-start-column="37" selection-end-line="3" selection-end-column="37" />
           <folding />
         </state>
       </provider>
@@ -2824,40 +2998,69 @@
         <state />
       </provider>
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-198">
-          <caret line="19" column="56" lean-forward="false" selection-start-line="19" selection-start-column="56" selection-end-line="19" selection-end-column="56" />
+        <state relative-caret-position="305">
+          <caret line="48" column="12" lean-forward="false" selection-start-line="48" selection-start-column="12" selection-end-line="48" selection-end-column="42" />
+          <folding>
+            <element signature="e#2480#2506#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Application/src/main/res/layout-land/fragment_camera2_video.xml">
+      <provider editor-type-id="android-designer2">
+        <state />
+      </provider>
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="449">
+          <caret line="52" column="42" lean-forward="false" selection-start-line="52" selection-start-column="42" selection-end-line="52" selection-end-column="42" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Android/Sdk/sources/android-25/android/app/Fragment.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="177">
+          <caret line="2352" column="0" lean-forward="false" selection-start-line="2352" selection-start-column="0" selection-end-line="2352" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Android/Sdk/sources/android-25/android/app/FragmentManager.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="231">
+          <caret line="997" column="0" lean-forward="false" selection-start-line="997" selection-start-column="0" selection-end-line="997" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Application/src/main/java/com/example/android/camera2video/Camera2VideoFragment.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="172">
-          <caret line="1089" column="0" lean-forward="false" selection-start-line="1089" selection-start-column="2" selection-end-line="1108" selection-end-column="74" />
+        <state relative-caret-position="265">
+          <caret line="1379" column="84" lean-forward="false" selection-start-line="1379" selection-start-column="84" selection-end-line="1379" selection-end-column="84" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#32514#36492#0" expanded="true" />
-            <element signature="e#36491#36492#0" expanded="true" />
-            <element signature="e#36679#37255#0" expanded="true" />
-            <element signature="e#37254#37255#0" expanded="true" />
-            <element signature="e#38099#43690#0" expanded="true" />
-            <element signature="e#38277#38290#0" expanded="true" />
-            <element signature="e#38924#41673#0" expanded="true" />
-            <element signature="e#41672#41673#0" expanded="true" />
-            <element signature="e#43689#43690#0" expanded="true" />
-            <element signature="e#44375#44390#0" expanded="true" />
-            <element signature="e#51594#51616#0" expanded="true" />
-            <element signature="e#54957#54995#0" expanded="true" />
-            <element signature="e#55212#55250#0" expanded="true" />
-            <element signature="e#55904#55942#0" expanded="true" />
-            <element signature="e#58323#58355#0" expanded="true" />
-            <element signature="e#64571#64825#0" expanded="true" />
-            <element signature="e#64824#64825#0" expanded="true" />
-            <element signature="e#65176#65203#0" expanded="true" />
-            <element signature="e#65265#65620#0" expanded="true" />
-            <element signature="e#65619#65620#0" expanded="true" />
-            <element signature="e#65714#66015#0" expanded="true" />
-            <element signature="e#66014#66015#0" expanded="true" />
+            <element signature="e#32572#36550#0" expanded="true" />
+            <element signature="e#36549#36550#0" expanded="true" />
+            <element signature="e#36737#37313#0" expanded="true" />
+            <element signature="e#37312#37313#0" expanded="true" />
+            <element signature="e#38157#43748#0" expanded="true" />
+            <element signature="e#38335#38348#0" expanded="true" />
+            <element signature="e#38982#41731#0" expanded="true" />
+            <element signature="e#41730#41731#0" expanded="true" />
+            <element signature="e#43747#43748#0" expanded="true" />
+            <element signature="e#44435#44450#0" expanded="true" />
+            <element signature="e#51870#51892#0" expanded="true" />
+            <element signature="e#55901#55939#0" expanded="true" />
+            <element signature="e#56156#56194#0" expanded="true" />
+            <element signature="e#56848#56886#0" expanded="true" />
+            <element signature="e#59267#59299#0" expanded="true" />
+            <element signature="e#65572#65826#0" expanded="true" />
+            <element signature="e#65825#65826#0" expanded="true" />
+            <element signature="e#66177#66204#0" expanded="true" />
+            <element signature="e#66266#66621#0" expanded="true" />
+            <element signature="e#66620#66621#0" expanded="true" />
+            <element signature="e#66715#67016#0" expanded="true" />
+            <element signature="e#67015#67016#0" expanded="true" />
           </folding>
         </state>
       </provider>

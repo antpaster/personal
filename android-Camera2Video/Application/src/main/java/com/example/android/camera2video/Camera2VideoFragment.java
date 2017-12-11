@@ -46,7 +46,6 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
@@ -147,6 +146,8 @@ public class Camera2VideoFragment extends Fragment
      * Button to record video
      */
     private Button mButtonVideo;
+
+    private ImageButton mDeleteFileButton;
 
     /**
      * A reference to the opened {@link CameraDevice}.
@@ -276,6 +277,7 @@ public class Camera2VideoFragment extends Fragment
         mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         if (mNextVideoAbsolutePath == null || mNextVideoAbsolutePath.isEmpty()) {
             mNextVideoAbsolutePath = getVideoFilePath(getActivity());
+            mDeleteFileButton.setVisibility(View.INVISIBLE);
         }
         mMediaRecorder.setOutputFile(mNextVideoAbsolutePath);
         mMediaRecorder.setVideoEncodingBitRate(10000000);
@@ -1126,7 +1128,7 @@ public class Camera2VideoFragment extends Fragment
 
     @Override
     public void stopCamera() {
-        mediaRecorderPostprocessing();
+//        mediaRecorderPostprocessing();
 
         // UI
         mIsRecordingVideo = false;
@@ -1141,6 +1143,7 @@ public class Camera2VideoFragment extends Fragment
                     Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Video saved: " + mNextVideoAbsolutePath);
         }
+        mDeleteFileButton.setVisibility(View.VISIBLE);
         mNextVideoAbsolutePath = null;
         startPreview();
     }
@@ -1237,6 +1240,7 @@ public class Camera2VideoFragment extends Fragment
     };
     private Integer mSensorOrientation;
     private String mNextVideoAbsolutePath;
+    private String mRecordedVideoFileName;
     private CaptureRequest.Builder mPreviewBuilder;
 
     public Camera2VideoFragment() {
@@ -1311,7 +1315,11 @@ public class Camera2VideoFragment extends Fragment
 
         mButtonVideo = view.findViewById(R.id.video);
         mButtonVideo.setOnClickListener(this);
+
         view.findViewById(R.id.info).setOnClickListener(this);
+
+        mDeleteFileButton = view.findViewById(R.id.deleteFile);
+        mDeleteFileButton.setOnClickListener(this);
 
 //        mToggleFlashButton = view.findViewById(R.id.flash_off);
 //        mToggleFlashButton.setOnClickListener(this);
@@ -1360,6 +1368,20 @@ public class Camera2VideoFragment extends Fragment
                             .setMessage(R.string.intro_message)
                             .setPositiveButton(android.R.string.ok, null)
                             .show();
+                }
+                break;
+            }
+
+            case R.id.deleteFile: {
+                if (null != mRecordedVideoFileName) {
+                    File recordedFile = new File(mVideoFolderPath, mRecordedVideoFileName);
+                    boolean isFileDeleted = recordedFile.delete();
+                    if (isFileDeleted) {
+                        Toast.makeText(getContext(), "File " + mVideoFolderPath + "/"
+                                + mRecordedVideoFileName + " has been deleted!",
+                                Toast.LENGTH_SHORT).show();
+                        mDeleteFileButton.setVisibility(View.INVISIBLE);
+                    }
                 }
                 break;
             }
@@ -1632,9 +1654,10 @@ public class Camera2VideoFragment extends Fragment
 
     private String getVideoFilePath(Context context) {
         mVideoFolderPath = getContext().getExternalFilesDir(null).getAbsolutePath();
+        mRecordedVideoFileName = System.currentTimeMillis() + ".mp4";
         final File dir = context.getExternalFilesDir(null);
         return (dir == null ? "" : (mVideoFolderPath + "/"))
-                + System.currentTimeMillis() + ".mp4";
+                + mRecordedVideoFileName;
     }
 
     private void closePreviewSession() {
