@@ -120,13 +120,13 @@ public class Camera2VideoFragment extends Fragment
 //    private static final SparseIntArray INVERSE_ORIENTATIONS = new SparseIntArray();
 
     private static final String TAG = "Camera2VideoFragment";
-//    private static final int REQUEST_VIDEO_PERMISSIONS = 1;
-//    private static final String FRAGMENT_DIALOG = "dialog";
+    private static final int REQUEST_VIDEO_PERMISSIONS = 1;
+    private static final String FRAGMENT_DIALOG = "dialog";
 
-//    private static final String[] VIDEO_PERMISSIONS = {
-//            Manifest.permission.CAMERA,
-//            Manifest.permission.RECORD_AUDIO,
-//    };
+    private static final String[] VIDEO_PERMISSIONS = {
+            Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO,
+    };
 
 //    static {
 //        DEFAULT_ORIENTATIONS.append(Surface.ROTATION_0, 90);
@@ -141,18 +141,6 @@ public class Camera2VideoFragment extends Fragment
 //        INVERSE_ORIENTATIONS.append(Surface.ROTATION_180, 90);
 //        INVERSE_ORIENTATIONS.append(Surface.ROTATION_270, 0);
 //    }
-
-    /**
-     * An {@link AutoFitTextureView} for camera preview.
-     */
-    private AutoFitTextureView mTextureView;
-
-    /**
-     * Button to record video
-     */
-    private Button mButtonVideo;
-
-    private ImageButton mDeleteFileButton;
 
 //    /**
 //     * A reference to the opened {@link CameraDevice}.
@@ -216,10 +204,10 @@ public class Camera2VideoFragment extends Fragment
      */
     private boolean mIsRecordingVideo;
 
-    /**
-     * An additional thread for running tasks that shouldn't block the UI.
-     */
-    private HandlerThread mBackgroundThread;
+//    /**
+//     * An additional thread for running tasks that shouldn't block the UI.
+//     */
+//    private HandlerThread mBackgroundThread;
 
 //    /**
 //     * A {@link Handler} for running tasks in the background.
@@ -233,8 +221,6 @@ public class Camera2VideoFragment extends Fragment
 
     private String mCameraId;
 
-    private ImageButton mToggleFlashButton;
-
     public void setTorchFlag(boolean torchFlag) {
         mTorchFlag = torchFlag;
     }
@@ -243,13 +229,12 @@ public class Camera2VideoFragment extends Fragment
 
     boolean mTorchOnFlag = false;
 
-    private Chronometer mChronometer;
-
     private ImageReader mImageReader;
     private Image mCurrentFrame;
 
     private String mCapturedImagePath;
     private String mVideoFolderPath;
+    private String mRecordedVideoFileName;
 
     private RecorderService mRecorderService;
     private Intent mRecordingIntent;
@@ -259,6 +244,24 @@ public class Camera2VideoFragment extends Fragment
 
     private Activity mActivity;
     private Context mContext;
+
+    // UI section
+
+    /**
+     * An {@link AutoFitTextureView} for camera preview.
+     */
+    private AutoFitTextureView mTextureView;
+
+    /**
+     * Button to record video
+     */
+    private Button mButtonVideo;
+
+    private ImageButton mDeleteFileButton;
+
+    private ImageButton mToggleFlashButton;
+
+    private Chronometer mChronometer;
 
     public static Camera2VideoFragment newInstance() {
         return new Camera2VideoFragment();
@@ -1345,7 +1348,7 @@ public class Camera2VideoFragment extends Fragment
     @Override
     public void onResume() {
         super.onResume();
-        startBackgroundThread();
+//        startBackgroundThread(); // todo find out where to place it
         if (mTextureView.isAvailable()) {
             openCamera(mTextureView.getWidth(), mTextureView.getHeight());
         } else {
@@ -1356,7 +1359,7 @@ public class Camera2VideoFragment extends Fragment
     @Override
     public void onPause() {
         closeCamera();
-        stopBackgroundThread();
+//        stopBackgroundThread();  // todo find out where to place it
         super.onPause();
     }
 
@@ -1429,28 +1432,28 @@ public class Camera2VideoFragment extends Fragment
         }
     }
 
-    /**
-     * Starts a background thread and its {@link Handler}.
-     */
-    private void startBackgroundThread() {
-        mBackgroundThread = new HandlerThread("CameraBackground");
-        mBackgroundThread.start();
-        mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
-    }
-
-    /**
-     * Stops the background thread and its {@link Handler}.
-     */
-    private void stopBackgroundThread() {
-        mBackgroundThread.quitSafely();
-        try {
-            mBackgroundThread.join();
-            mBackgroundThread = null;
-            mBackgroundHandler = null;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+//    /**
+//     * Starts a background thread and its {@link Handler}.
+//     */
+//    private void startBackgroundThread() {
+//        mBackgroundThread = new HandlerThread("CameraBackground");
+//        mBackgroundThread.start();
+//        mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
+//    }
+//
+//    /**
+//     * Stops the background thread and its {@link Handler}.
+//     */
+//    private void stopBackgroundThread() {
+//        mBackgroundThread.quitSafely();
+//        try {
+//            mBackgroundThread.join();
+//            mBackgroundThread = null;
+//            mBackgroundHandler = null;
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
 //    /**
 //     * Gets whether you should show UI with rationale for requesting permissions.

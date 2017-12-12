@@ -143,14 +143,17 @@ public class RecorderService extends Service {
     public GLES20 getGles20() {
         return mGles20;
     }
-
     GLES20 mGles20 = new GLES20();
 
     public int[] getTextures() {
         return mTextures;
     }
-
     int[] mTextures = new int[10];
+
+    /**
+     * An additional thread for running tasks that shouldn't block the UI.
+     */
+    private HandlerThread mBackgroundThread;
 
     /**
      * A {@link Handler} for running tasks in the background.
@@ -296,6 +299,29 @@ public class RecorderService extends Service {
             }
         }
         return true;
+    }
+
+    /**
+     * Starts a background thread and its {@link Handler}.
+     */
+    private void startBackgroundThread() {
+        mBackgroundThread = new HandlerThread("CameraBackground");
+        mBackgroundThread.start();
+        mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
+    }
+
+    /**
+     * Stops the background thread and its {@link Handler}.
+     */
+    private void stopBackgroundThread() {
+        mBackgroundThread.quitSafely();
+        try {
+            mBackgroundThread.join();
+            mBackgroundThread = null;
+            mBackgroundHandler = null;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
