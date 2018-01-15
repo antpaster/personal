@@ -1,15 +1,16 @@
 #include <iostream>
 #include <math.h>
+#include <vector>
 
 using namespace std;
 
-struct ReliableDouble {
-    double data;
-    bool valid;
+struct TimeSeriesValue {
+    double value;
+    double time;
 
-    void operator=(const ReliableDouble rd) {
-        this->data = rd.data;
-        this->valid = rd.valid;
+    void operator=(const TimeSeriesValue tsv) {
+        this->value = tsv.value;
+        this->time = tsv.time;
     }
 };
 
@@ -32,34 +33,25 @@ double getNextEstDispersion(const double currEstDispersion, const unsigned int c
             * (nextVal - nextEstExpectedValue)) / count;
 }
 
-int oneStepExponentialForecast(ReliableDouble *signalArr, ReliableDouble *fullSignalArr,
-        const unsigned int size) {
-    unsigned int validDataCount = 0;
-    for (int i = 0; i < size; i++) {
-        if (signalArr[i].valid) {
-            validDataCount++;
-        }
-    }
-
-    if (validDataCount) {
+int oneStepExponentialForecast(vector<TimeSeriesValue> *signalArr,
+        vector<TimeSeriesValue> *fullSignalArr) {
+    if (nullptr != signalArr && nullptr != fullSignalArr) {
         double *squareDeviations = new double[validDataCount];
         squareDeviations[0] = 0;
 
         int j = 0, k = 0;
         int errorIndex = 0;
-        while (!signalArr[j].valid) {
-            j++;
-        }
 
-        if (j < size - 1) {
-            double expectedValue = signalArr[j].data;
-            double avgSquareDeviation = 0;
-            double smoothCoeffSigmaArr[10];
-            double forecastValue = signalArr[j].data;
-            double smoothingCoeff = 0.5; //cSmoothingAdjustStep;
+        double lastSignalValue;
 
-            for (int i = j + 1; i < size; i++) {
-                if (!signalArr[i].valid) {
+        double expectedValue = signalArr[0].data()->value;
+        double avgSquareDeviation = 0;
+        double smoothCoeffSigmaArr[10];
+        double forecastValue = signalArr[0].data()->value;
+        double smoothingCoeff = 0.5; //cSmoothingAdjustStep;
+
+        for (int i = 1; i < 24; i++) {
+            if ((signalArr[j].data()->time - i) > 1) {
 //                    while (smoothingCoeff < 1) {
 //                        forecastValue = getExponentialForecastValue(signalArr[i - 1].data,
 //                                smoothingCoeff, forecastValue);
@@ -89,24 +81,19 @@ int oneStepExponentialForecast(ReliableDouble *signalArr, ReliableDouble *fullSi
 
 //                    k = 0;
 
-                    forecastValue = getExponentialForecastValue(signalArr[i - 1].data,
-                            smoothingCoeff, forecastValue);
+                forecastValue = getExponentialForecastValue(signalArr[i - 1].data()->value,
+                        smoothingCoeff, forecastValue);
 
-                    fullSignalArr[i].data = forecastValue;
-                    fullSignalArr[i].valid = true;
+                fullSignalArr->push_back({forecastValue, i});
 
 //                    if (!signalArr[i + 1].valid) {
 //                        signalArr[i] = fullSignalArr[i];
 //                    }
-                }
             }
-
-            delete [] squareDeviations;
-            return 0;
         }
 
         delete [] squareDeviations;
-        return 1;
+        return 0;
     }
 
     return 2;
@@ -131,43 +118,34 @@ double getMinMaxArrayElem(const double *array, const unsigned int size, const bo
 
 int main()
 {
-    ReliableDouble tsCiscoSwitch03[24];
-    ReliableDouble fullTsCiscoSwitch03[24];
-    double timeArray[24];
+    vector<TimeSeriesValue> *tsCiscoSwitch03 = new vector<TimeSeriesValue>;
+    vector<TimeSeriesValue> *fullTsCiscoSwitch03 = new vector<TimeSeriesValue>;
 
-    for (int i = 0; i < 24; i++) {
-        timeArray[i] = i;
-        tsCiscoSwitch03[i].data = 0;
-        tsCiscoSwitch03[i].valid = false;
-    }
+    tsCiscoSwitch03->push_back({7, 0});
+    tsCiscoSwitch03->push_back({9, 6});
+    tsCiscoSwitch03->push_back({11, 7});
+    tsCiscoSwitch03->push_back({7, 8});
+    tsCiscoSwitch03->push_back({39.5, 10});
+    tsCiscoSwitch03->push_back({11, 11});
+//    tsCiscoSwitch03[13] = {7, 13};
+//    tsCiscoSwitch03[14] = {6, 14};
+//    tsCiscoSwitch03[15] = {7, 15};
+//    tsCiscoSwitch03[17] = {7, 17};
+    tsCiscoSwitch03->push_back({7, 18});
+    tsCiscoSwitch03->push_back({7, 19});
+    tsCiscoSwitch03->push_back({6.5, 20});
+    tsCiscoSwitch03->push_back({14, 21});
+    tsCiscoSwitch03->push_back({10, 22});
+    tsCiscoSwitch03->push_back({8.5, 23});
 
-    tsCiscoSwitch03[0] = {7, true};
-    tsCiscoSwitch03[6] = {9, true};
-    tsCiscoSwitch03[7] = {11, true};
-    tsCiscoSwitch03[8] = {7, true};
-    tsCiscoSwitch03[10] = {39.5, true};
-    tsCiscoSwitch03[11] = {11, true};
-    tsCiscoSwitch03[13] = {7, false};
-    tsCiscoSwitch03[14] = {6, false};
-    tsCiscoSwitch03[15] = {7, false};
-    tsCiscoSwitch03[17] = {7, false};
-    tsCiscoSwitch03[18] = {7, true};
-    tsCiscoSwitch03[19] = {7, true};
-    tsCiscoSwitch03[20] = {6.5, true};
-    tsCiscoSwitch03[21] = {14, true};
-    tsCiscoSwitch03[22] = {10, true};
-    tsCiscoSwitch03[23] = {8.5, true};
+    fullTsCiscoSwitch03 = tsCiscoSwitch03;
 
-    for (int i = 0; i < 24; i++) {
-        fullTsCiscoSwitch03[i] = tsCiscoSwitch03[i];
-    }
+    oneStepExponentialForecast(tsCiscoSwitch03, fullTsCiscoSwitch03);
 
-    oneStepExponentialForecast(tsCiscoSwitch03, fullTsCiscoSwitch03, 24);
-
-    for (int i = 0; i < 24; i++) {
-        cout << boolalpha << i << "\t(" << tsCiscoSwitch03[i].data << ", "
-             << tsCiscoSwitch03[i].valid << ")\t(" << fullTsCiscoSwitch03[i].data << ", "
-             << fullTsCiscoSwitch03[i].valid << ')' << endl;
+    for (int i = 0; i < fullTsCiscoSwitch03->size(); i++) {
+        cout << boolalpha << i << "\t(" << tsCiscoSwitch03[i].value << ", "
+             << tsCiscoSwitch03[i].time << ")\t(" << fullTsCiscoSwitch03[i].value << ", "
+             << fullTsCiscoSwitch03[i].time << ')' << endl;
     }
     cout << endl;
 
