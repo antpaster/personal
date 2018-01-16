@@ -25,6 +25,23 @@ double getExponentialForecastValue(const double forecastData, const double smoot
     return smoothingCoeff * forecastData + (1 - smoothingCoeff) * forecastVal;
 }
 
+/*! Smoothing coefficient formula depending on the averaging window size */
+double getSmoothingCoefficient(const unsigned int averagingWindowSize) {
+    return (double) 2 / (double) (averagingWindowSize + 1);
+}
+
+unsigned int calculateWindowSize(const double existingDataRatio, const double lowerRationBound,
+        const double upperRatioBound) {
+    if (existingDataRatio < lowerRationBound) {
+        return 10;
+    } else if (existingDataRatio >= lowerRationBound && existingDataRatio < upperRatioBound) {
+        return 3 + (unsigned int) (7 * (existingDataRatio - lowerRationBound)
+                / (upperRatioBound - lowerRationBound));
+    } else {
+        return 3;
+    }
+}
+
 double getNextEstExpectedValue(const double currEstExpectedValue, const unsigned int count,
         const double nextVal) {
     return (count * currEstExpectedValue + nextVal) / (count + 1);
@@ -53,151 +70,183 @@ double getMinMaxArrayElem(const double *array, const unsigned int size, const bo
     return result;
 }
 
-int fullTsExponentialForecast(const vector<TimeSeriesValue> signalArr,
-        vector<TimeSeriesValue> &fullSignalArr, vector<double> &smoothingCoeffArr,
-        const double maxTime) {
-    double squareDeviations[cBaseDataWindowSize];
-    for (auto& x: squareDeviations) {
-        x = 0;
-    }
-    double avgSquareDeviation = 0;
+//int fullTsExponentialForecast(const vector<TimeSeriesValue> signalArr,
+//        vector<TimeSeriesValue> &fullSignalArr, vector<double> &smoothingCoeffArr,
+//        const double maxTime) {
+//    double squareDeviations[cBaseDataWindowSize];
+//    for (auto& x: squareDeviations) {
+//        x = 0;
+//    }
+//    double avgSquareDeviation = 0;
 
-    double smoothingCoeffSigmaArr[cBaseDataWindowSize];
-    unsigned int smoothAdjustSigmaIndex = 0;
+//    double smoothingCoeffSigmaArr[cBaseDataWindowSize];
+//    unsigned int smoothAdjustSigmaIndex = 0;
 
-    unsigned int j = 1; // Existed values index
+//    unsigned int j = 1; // Existed values index
+//    unsigned int currWindowSize;
 
-    double forecastValue = signalArr[0].value;
-    double prevForecastValue = forecastValue;
-    fullSignalArr.push_back({forecastValue, 0});
+//    double forecastValue = signalArr[0].value;
+//    double prevForecastValue = forecastValue;
+//    fullSignalArr.push_back({forecastValue, 0});
 
-    double smoothingCoeff = cSmoothingStep;
-    smoothingCoeffArr.push_back(smoothingCoeff);
+//    double forecastWindow[cBaseDataWindowSize];
+//    for (auto& x: forecastWindow) {
+//        x = 0;
+//    }
+//    forecastWindow[0] = forecastValue;
 
-    for (unsigned int i = 1; i < (unsigned int) maxTime; i++) {
-        if ((signalArr[j].time - i) < 1)  {
-            // We have a data for adjusting smoothing coefficient
-            smoothingCoeff = cSmoothingStep;
-            while (smoothingCoeff <= 1) {
-                forecastValue = getExponentialForecastValue(signalArr[j - 1].value,
-                        smoothingCoeff, prevForecastValue);
+//    double smoothingCoeff = cSmoothingStep;
+//    smoothingCoeffArr.push_back(smoothingCoeff);
 
-                for (unsigned int p = 0; p < (((j + 1) < cBaseDataWindowSize) ? (j + 1)
-                        : cBaseDataWindowSize); p++) {
-                    squareDeviations[p] = (signalArr[j - p].value - forecastValue)
-                            * (signalArr[j - p].value - forecastValue) / forecastValue
-                            / forecastValue;
-                    avgSquareDeviation += squareDeviations[p];
-                }
+//    for (unsigned int i = 1; i < (unsigned int) maxTime; i++) {
+//        if ((signalArr[j].time - i) < 1)  {
+//            // We have a data for adjusting smoothing coefficient
+//            smoothingCoeff = 0.05;
+//            for (int k = 0; k < 10; k++) {
+//                forecastValue = getExponentialForecastValue(signalArr[j].value,
+//                        smoothingCoeff, prevForecastValue);
 
-                avgSquareDeviation /= ((j + 1) < cBaseDataWindowSize) ? (j + 1)
-                        : cBaseDataWindowSize;
+//                if (j < cBaseDataWindowSize) {
+//                    forecastWindow[j] = forecastValue;
+//                } else {
+//                    if (!smoothAdjustSigmaIndex) {
+//                        for (unsigned int p = 0; p < cBaseDataWindowSize - 1; p++) {
+//                            forecastWindow[p] = forecastWindow[p + 1];
+//                        }
+//                    }
+//                    forecastWindow[cBaseDataWindowSize - 1] = forecastValue;
+//                }
 
-                smoothingCoeffSigmaArr[smoothAdjustSigmaIndex] = avgSquareDeviation;
+//                currWindowSize = ((j + 1) < cBaseDataWindowSize) ? (j + 1) : cBaseDataWindowSize;
+//                for (unsigned int p = 0; p < currWindowSize; p++) {
+//                    squareDeviations[currWindowSize - p - 1] = (signalArr[j - p].value
+//                            - forecastWindow[currWindowSize - p - 1]) * (signalArr[j - p].value
+//                            - forecastWindow[currWindowSize - p - 1])
+//                            / forecastWindow[currWindowSize - p - 1]
+//                            / forecastWindow[currWindowSize - p - 1];
+//                    avgSquareDeviation += squareDeviations[currWindowSize - p - 1];
+//                }
 
-                smoothingCoeff += cSmoothingStep;
-                smoothAdjustSigmaIndex++;
-            }
+//                avgSquareDeviation /= currWindowSize;
 
-            for (unsigned int p = 0; p < smoothAdjustSigmaIndex; p++) {
-                if (smoothingCoeffSigmaArr[p] == getMinMaxArrayElem(smoothingCoeffSigmaArr,
-                        smoothAdjustSigmaIndex, false)) {
-                    smoothingCoeff = cSmoothingStep * (p + 1);
-                    break;
-                }
-            }
-            smoothAdjustSigmaIndex = 0;
+//                smoothingCoeffSigmaArr[smoothAdjustSigmaIndex] = avgSquareDeviation;
 
-            j++;
-        }
+//                smoothingCoeff += cSmoothingStep;
+//                smoothAdjustSigmaIndex++;
+//            }
 
-        forecastValue = getExponentialForecastValue(signalArr[j - 1].value,
-                smoothingCoeff, prevForecastValue);
+//            if (smoothingCoeff > 1) {
+//                smoothingCoeff -= cSmoothingStep;
+//            }
 
-        fullSignalArr.push_back({forecastValue, i});
-        smoothingCoeffArr.push_back(smoothingCoeff);
+//            for (unsigned int p = 0; p < smoothAdjustSigmaIndex; p++) {
+//                if (smoothingCoeffSigmaArr[p] == getMinMaxArrayElem(smoothingCoeffSigmaArr,
+//                        smoothAdjustSigmaIndex, false)) {
+//                    smoothingCoeff = 0.05 + cSmoothingStep * p;
+//                    break;
+//                }
+//            }
 
-        prevForecastValue = forecastValue;
-    }
+//            smoothAdjustSigmaIndex = 0;
+//            j++;
+//        }
 
-    return 0;
-}
+//        forecastValue = getExponentialForecastValue(signalArr[j - 1].value,
+//                smoothingCoeff, prevForecastValue);
 
-double oneStepExponentialForecast(vector<double> &adjustWindowArr, double &smoothingCoeff,
-        const double currTime, const unsigned int lastExistedValueIndex,
-        const TimeSeriesValue lastTsValue, double &prevForecastValue,
-        const unsigned int baseDataWindowSize) {
-    double forecastValue;
+////        if ((j - 1) < cBaseDataWindowSize) {
+////            forecastWindow[j - 1] = forecastValue;
+////        } else {
+////            for (unsigned int p = 0; p < cBaseDataWindowSize - 1; p++) {
+////                forecastWindow[p] = forecastWindow[p + 1];
+////            }
+////            forecastWindow[cBaseDataWindowSize - 1] = forecastValue;
+////        }
 
-    double *squareDeviations = new double[baseDataWindowSize];
-    for (int i = 0; i < baseDataWindowSize; i++) {
-        squareDeviations[i] = 0;
-    }
-    double avgSquareDeviation = 0;
+//        fullSignalArr.push_back({forecastValue, i});
+//        smoothingCoeffArr.push_back(smoothingCoeff);
 
-    double *smoothingCoeffSigmaArr = new double[baseDataWindowSize];
-    unsigned int smoothAdjustSigmaIndex = 0;
-
-    // todo: refactor
-    unsigned int j = lastExistedValueIndex; // (unsigned int) lastTsValue.time; // Existed values index
-
-//    // todo: for debugging
-//    double adjustWindowArr[cBaseDataWindowSize];
-//    for (int i = 0; i < cBaseDataWindowSize; i++) {
-//        adjustWindowArr[i] = adjustWindowArr1[i];
+//        prevForecastValue = forecastValue;
 //    }
 
-    if (j < baseDataWindowSize) {
-        if ((lastTsValue.time - currTime) < 1) {
-            adjustWindowArr.push_back(lastTsValue.value);
-        }
-    } else {
-        for (int i = 0; i < baseDataWindowSize - 1; i++) {
-            adjustWindowArr[i] = adjustWindowArr[i + 1];
-        }
-        adjustWindowArr[baseDataWindowSize - 1] = lastTsValue.value;
-    }
+//    return 0;
+//}
 
-    if ((lastTsValue.time - currTime) < 1)  {
-        // We have a data for adjusting smoothing coefficient
-        smoothingCoeff = cSmoothingStep;
-        while (smoothingCoeff <= 1) {
-            forecastValue = getExponentialForecastValue(adjustWindowArr[j - 1],
-                    smoothingCoeff, prevForecastValue);
+//double oneStepExponentialForecast(vector<double> &adjustWindowArr, double &smoothingCoeff,
+//        const double currTime, const unsigned int lastExistedValueIndex,
+//        const TimeSeriesValue lastTsValue, double &prevForecastValue,
+//        const unsigned int baseDataWindowSize) {
+//    double forecastValue;
 
-            for (int p = 0; p < (((j + 1) < baseDataWindowSize) ? (j + 1) : baseDataWindowSize); p++) {
-                squareDeviations[p] = (adjustWindowArr[j - p] - forecastValue)
-                        * (adjustWindowArr[j - p] - forecastValue)
-                        / forecastValue / forecastValue;
-                avgSquareDeviation += squareDeviations[p];
-            }
+//    double *squareDeviations = new double[baseDataWindowSize];
+//    for (int i = 0; i < baseDataWindowSize; i++) {
+//        squareDeviations[i] = 0;
+//    }
+//    double avgSquareDeviation = 0;
 
-            avgSquareDeviation /= ((j + 1) < baseDataWindowSize) ? (j + 1)
-                    : baseDataWindowSize;
+//    double *smoothingCoeffSigmaArr = new double[baseDataWindowSize];
+//    unsigned int smoothAdjustSigmaIndex = 0;
 
-            smoothingCoeffSigmaArr[smoothAdjustSigmaIndex] = avgSquareDeviation;
+//    // todo: refactor
+//    unsigned int j = lastExistedValueIndex; // (unsigned int) lastTsValue.time; // Existed values index
 
-            smoothingCoeff += cSmoothingStep;
-            smoothAdjustSigmaIndex++;
-        }
+////    // todo: for debugging
+////    double adjustWindowArr[cBaseDataWindowSize];
+////    for (int i = 0; i < cBaseDataWindowSize; i++) {
+////        adjustWindowArr[i] = adjustWindowArr1[i];
+////    }
 
-        for (int p = 0; p < smoothAdjustSigmaIndex; p++) {
-            if (smoothingCoeffSigmaArr[p] == getMinMaxArrayElem(smoothingCoeffSigmaArr,
-                    smoothAdjustSigmaIndex, false)) {
-                smoothingCoeff = cSmoothingStep * (p + 1);
-                break;
-            }
-        }
-    }
+//    if (j < baseDataWindowSize) {
+//        if ((lastTsValue.time - currTime) < 1) {
+//            adjustWindowArr.push_back(lastTsValue.value);
+//        }
+//    } else {
+//        for (int i = 0; i < baseDataWindowSize - 1; i++) {
+//            adjustWindowArr[i] = adjustWindowArr[i + 1];
+//        }
+//        adjustWindowArr[baseDataWindowSize - 1] = lastTsValue.value;
+//    }
 
-    forecastValue = getExponentialForecastValue(adjustWindowArr[j - 1],
-            smoothingCoeff, prevForecastValue);
+//    if ((lastTsValue.time - currTime) < 1)  {
+//        // We have a data for adjusting smoothing coefficient
+//        smoothingCoeff = cSmoothingStep;
+//        while (smoothingCoeff <= 1) {
+//            forecastValue = getExponentialForecastValue(adjustWindowArr[j - 1],
+//                    smoothingCoeff, prevForecastValue);
 
-    delete [] squareDeviations;
-    delete [] smoothingCoeffSigmaArr;
+//            for (int p = 0; p < (((j + 1) < baseDataWindowSize) ? (j + 1) : baseDataWindowSize); p++) {
+//                squareDeviations[p] = (adjustWindowArr[j - p] - forecastValue)
+//                        * (adjustWindowArr[j - p] - forecastValue)
+//                        / forecastValue / forecastValue;
+//                avgSquareDeviation += squareDeviations[p];
+//            }
 
-    return forecastValue;
-}
+//            avgSquareDeviation /= ((j + 1) < baseDataWindowSize) ? (j + 1)
+//                    : baseDataWindowSize;
+
+//            smoothingCoeffSigmaArr[smoothAdjustSigmaIndex] = avgSquareDeviation;
+
+//            smoothingCoeff += cSmoothingStep;
+//            smoothAdjustSigmaIndex++;
+//        }
+
+//        for (int p = 0; p < smoothAdjustSigmaIndex; p++) {
+//            if (smoothingCoeffSigmaArr[p] == getMinMaxArrayElem(smoothingCoeffSigmaArr,
+//                    smoothAdjustSigmaIndex, false)) {
+//                smoothingCoeff = cSmoothingStep * (p + 1);
+//                break;
+//            }
+//        }
+//    }
+
+//    forecastValue = getExponentialForecastValue(adjustWindowArr[j - 1],
+//            smoothingCoeff, prevForecastValue);
+
+//    delete [] squareDeviations;
+//    delete [] smoothingCoeffSigmaArr;
+
+//    return forecastValue;
+//}
 
 int main()
 {
@@ -241,39 +290,45 @@ int main()
     tsCiscoSwitch03.push_back({10, 46});
     tsCiscoSwitch03.push_back({8.5, 49});
 
-    fullTsExponentialForecast(tsCiscoSwitch03, fullTsCiscoSwitch03, smoothingCoefficients, 50);
+    int j = 1;
+    fullTsCiscoSwitch03.push_back(tsCiscoSwitch03[0]);
 
-//    int j = 1;
-//    double smoothingCoeff = 0.1;
-//    fullTsCiscoSwitch03.push_back(tsCiscoSwitch03[0]);
+    unsigned int measureCount = 10; // For counting the existing data within
+    unsigned int lastIntervalDataCount = 0;
+    unsigned int *windowSizes = new unsigned int[50 / measureCount];
 
-//    unsigned int windowSize = 10;
-////    double *adjustWindow = new double[windowSize];
-////    for (int i = 1; i < windowSize; i++) {
-////        adjustWindow[i] = 0;
-////    }
-////    adjustWindow[0] = tsCiscoSwitch03[0].value;
+    for (int i = 1; i < 50; i++) {
+        if ((tsCiscoSwitch03[j].time - i) < 1) {
+            j++;
+        }
 
-////    double adjustWindowArr[cBaseDataWindowSize];
+        if (!((i + 1) % measureCount)) {
+            lastIntervalDataCount = j - lastIntervalDataCount;
+            windowSizes[i / measureCount] = calculateWindowSize((double) lastIntervalDataCount
+                    / (double) measureCount, 0.2, 0.8);
+        }
+    }
 
-//    vector<double> adjustWindow;
-//    adjustWindow.push_back(tsCiscoSwitch03[0].value);
+    double smoothingCoefficient;
 
-//    for (int i = 1; i < 50; i++) {
-//        fullTsCiscoSwitch03.push_back({oneStepExponentialForecast(adjustWindow,
-//                smoothingCoeff, i, j, tsCiscoSwitch03[j], fullTsCiscoSwitch03[i - 1].value,
-//                windowSize), i});
-//        smoothingCoefficients.push_back(smoothingCoeff);
+//    vector<double> dataWindow;
+//    dataWindow.push_back(tsCiscoSwitch03[0].value);
 
-////        // todo: for debugging
-////        for (int i = 0; i < cBaseDataWindowSize; i++) {
-////            adjustWindowArr[i] = adjustWindow[i];
-////        }
+//    vector<double> forecastWindow;
+//    forecastWindow.push_back(tsCiscoSwitch03[0].value);
 
-//        if ((tsCiscoSwitch03[j].time - i) < 1) {
-//            j++;
+    for (int i = 1; i < 50; i++) {
+        if ((tsCiscoSwitch03[j].time - i) < 1) {
+            j++;
+        }
+
+//        if (!((i + 1) % measureCount)) {
+            smoothingCoefficient = getSmoothingCoefficient(windowSizes[i / measureCount]);
 //        }
-//    }
+
+        fullTsCiscoSwitch03.push_back({getExponentialForecastValue(tsCiscoSwitch03[j - 1].value,
+                smoothingCoefficient, fullTsCiscoSwitch03[i - 1].value), i});
+    }
 
 //    int j = 0;
 //    for (int i = 0; i < fullTsCiscoSwitch03.size(); i++) {
@@ -291,9 +346,9 @@ int main()
 
     for (int i = 0; i < fullTsCiscoSwitch03.size(); i++) {
         cout << i << "\t("<< fullTsCiscoSwitch03[i].time << ", " << fullTsCiscoSwitch03[i].value
-             << ")\tsmoothing coefficient " << smoothingCoefficients[i] << "\n";
+             << ")\twindow size " << windowSizes[i / 10] << "\n";
     }
-    cout << endl;
+    cout /*<< "k = " << smoothingCoefficient << endl*/ << endl;
 
     for (int i = 0; i < tsCiscoSwitch03.size(); i++) {
         cout << i << "\t("<< tsCiscoSwitch03[i].time << ", " << tsCiscoSwitch03[i].value << ")\n";
