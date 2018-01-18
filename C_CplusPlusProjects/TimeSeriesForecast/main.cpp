@@ -76,67 +76,62 @@ double getMinMaxArrayElem(const double *array, const unsigned int size, const bo
     return result;
 }
 
-double weightedRound(const vector<TimeSeriesValue> data, const double timeMean) {
+double weightedRound(const vector<TimeSeriesValue> data, const double timeMean,
+        const double timeInterval) {
     double result = 0;
     double weight;
     for (int i = 0; i < data.size(); i++) {
-        weight = 1 - fabs(data[i].time - timeMean); // Weight on the edge is 0.5
+        weight = 1 - fabs(data[i].time - timeMean) / timeInterval; // Weight on the edge is 0.5
         result += data[i].value * ((fabs(data[i].time - timeMean) > cMinDouble) ? weight : 1);
     }
 
     return result / data.size();
 }
 
-int makeWholeTimed(vector<TimeSeriesValue> &signal) {
+int makeWholeTimed(vector<TimeSeriesValue> &signal, const double timeInterval) {
     if (!signal.empty()) {
-        vector<TimeSeriesValue> resultSignal;
-        vector<TimeSeriesValue> oneValueData; // vector for weighted rounding around one time value
-        int iExistData = 0; // indexes of the existing data
-        double timeMean; // central value for rounding
-
-        double rightIntervalValue = 0.5;
-
-        for (int i = 0; i < signal.size(); i++) {
-            // todo: last right interval value!
-            if ((signal.back().time - floor(signal.back().time)) < 1) {
-                rightIntervalValue = signal.back().time - floor(signal.back().time);
+        double timeSample = signal[1].time - signal[0].time;
+        double minTimeSample = timeSample;
+        for (int i = 1; i < signal.size() - 1; i++) {
+            timeSample = signal[i + 1].time - signal[i].time;
+            if (minTimeSample > timeSample) {
+                minTimeSample = timeSample;
             }
-
-            while (signal[iExistData].time < i + rightIntervalValue) {
-                timeMean = i;
-//                if (!i) {
-//                    lowTimeBound = 0;
-//                    highTimeBound = 0.5;
-//                } else if (i == (signal.size() - 1)) {
-//                    lowTimeBound = i - 0.5;
-//                    highTimeBound = i + 0.5;
-//                } else {
-//                    lowTimeBound = i - 0.5;
-//                    highTimeBound = signal[i].time;
-//                }
-
-//                while (signal[iExistData].time < highTimeBound) {
-                    oneValueData.push_back(signal[iExistData]);
-                    iExistData++;
-//                }
-
-
-            }
-
-//            iExistData--;
-            if (oneValueData.size() > 1) {
-                resultSignal.push_back({weightedRound(oneValueData, timeMean), i});
-                oneValueData.clear();
-            } else if (1 == oneValueData.size()) {
-                resultSignal.push_back({signal[iExistData - 1].value, i});
-                oneValueData.clear();
-            } /*else {
-                iExistData++;
-            }*/
         }
 
-//        signal.clear();
-        signal = resultSignal;
+        if (minTimeSample < timeInterval) {
+            // Signal is needed to be modified
+            vector<TimeSeriesValue> resultSignal;
+            vector<TimeSeriesValue> oneValueData; // vector for weighted rounding around one time value
+            int iExistData = 0; // indexes of the existing data
+            double timeMean; // central value for rounding
+
+            double rightIntervalValue = 0.5 * timeInterval;
+            double rightLoopBorder = signal.back().time;
+
+            for (double i = signal[0].time; i <= rightLoopBorder; i += timeInterval) {
+            // todo: move the rest data from the end of the ts to the next buffer
+
+                while (signal[iExistData].time <= i + rightIntervalValue) {
+                    timeMean = i;
+
+                    oneValueData.push_back(signal[iExistData]);
+
+                    iExistData++;
+                    if (iExistData == signal.size()){
+                        break;
+                    }
+                }
+
+                if (!oneValueData.empty()) {
+                    resultSignal.push_back({weightedRound(oneValueData, timeMean, timeInterval),
+                            i});
+                    oneValueData.clear();
+                }
+            }
+
+            signal = resultSignal;
+        }
 
         return 0;
     }
@@ -273,11 +268,9 @@ int makeWholeTimed(vector<TimeSeriesValue> &signal) {
 
 int main()
 {
-//    vector<TimeSeriesValue> *tsCiscoSwitch03 = new vector<TimeSeriesValue>;
-//    vector<TimeSeriesValue> *fullTsCiscoSwitch03 = new vector<TimeSeriesValue>;
     vector<TimeSeriesValue> tsCiscoSwitch03;
     vector<TimeSeriesValue> fullTsCiscoSwitch03;
-    vector<double> smoothingCoefficients;
+    vector<TimeSeriesValue> linearInterpolatedTsCiscoSwitch03;
 
     tsCiscoSwitch03.push_back({7, 0});
     tsCiscoSwitch03.push_back({9, 6});
@@ -313,65 +306,87 @@ int main()
     tsCiscoSwitch03.push_back({10, 46});
     tsCiscoSwitch03.push_back({8.5, 49});
 
-    vector<TimeSeriesValue> wholeTimeExTs;
-    wholeTimeExTs.push_back({3, 0.1});
-    wholeTimeExTs.push_back({9, 0.5});
-    wholeTimeExTs.push_back({11, 0.6});
-    wholeTimeExTs.push_back({7, 1});
-    wholeTimeExTs.push_back({49.5, 1.2});
-    wholeTimeExTs.push_back({11, 4});
-    wholeTimeExTs.push_back({7, 4.5});
-    wholeTimeExTs.push_back({6, 5});
-    wholeTimeExTs.push_back({11, 5.1});
-    wholeTimeExTs.push_back({8, 5.8});
+    /* Input incomplete time series ***************************************************************/
+    for (unsigned int i = 0; i < tsCiscoSwitch03.size(); i++) {
+        cout << i << "\t("<< tsCiscoSwitch03[i].time << ", " << tsCiscoSwitch03[i].value << ")\n";
+    }
+    cout << endl;
 
-    makeWholeTimed(wholeTimeExTs);
+    double minimumSampleTime = 1;
 
-    int j = 1;
     fullTsCiscoSwitch03.push_back(tsCiscoSwitch03[0]);
 
-    unsigned int measureCount = 10; // For counting the existing data within
+    unsigned int measureCount = 10 / minimumSampleTime; // For counting the existing data within
     unsigned int lastIntervalDataCount = 0;
     unsigned int totalDataCount = 0;
-    unsigned int *windowSizes = new unsigned int[50 / measureCount];
 
-    for (int i = 1; i < 50; i++) {
-        if ((tsCiscoSwitch03[j].time - i) < 1) {
-            j++;
+    /* Input incomplete time series with grouped samples ******************************************/
+    makeWholeTimed(tsCiscoSwitch03, minimumSampleTime);
+
+    for (unsigned int i = 0; i < tsCiscoSwitch03.size(); i++) {
+        cout << i << "\t("<< tsCiscoSwitch03[i].time << ", " << tsCiscoSwitch03[i].value << ")\n";
+    }
+    cout << endl;
+
+    /* Completing time series using EMA forecast and linear interpolation *************************/
+    unsigned int finalTimeMeasuresCount = (minimumSampleTime <= 1)
+            ? (unsigned int) ((tsCiscoSwitch03.back().time + 1) / minimumSampleTime)
+            : (unsigned int) floor(tsCiscoSwitch03.back().time  / minimumSampleTime) + 1;
+
+    double j = minimumSampleTime;
+    unsigned int wholeJ;
+
+    vector<double> smoothingCoefficients;
+    unsigned int sampleCounter = 1;
+    for (double i = minimumSampleTime; i < finalTimeMeasuresCount * minimumSampleTime;
+            i += minimumSampleTime) {
+        wholeJ = (unsigned int) (j / minimumSampleTime);
+
+        if ((tsCiscoSwitch03[wholeJ].time - i) < minimumSampleTime) {
+            j += minimumSampleTime;
         }
 
-        if (!((i + 1) % measureCount)) {
-            lastIntervalDataCount = j - totalDataCount;
+        if (!((sampleCounter + 1) % measureCount)
+                || (finalTimeMeasuresCount - smoothingCoefficients.size() * measureCount
+                < measureCount)) {
+            lastIntervalDataCount = wholeJ - totalDataCount;
             totalDataCount += lastIntervalDataCount;
-            windowSizes[i / measureCount] = calculateWindowSize((double) lastIntervalDataCount
-                    / (double) measureCount, 0.2, 0.8);
+            smoothingCoefficients.push_back(getSmoothingCoefficient(calculateWindowSize(
+                    (double) lastIntervalDataCount / (double) measureCount, 0.2, 0.8)));
         }
+
+        sampleCounter++;
     }
 
-    double smoothingCoefficient;
+    j = minimumSampleTime;
+    unsigned int wholeI;
+    for (double i = minimumSampleTime; i < finalTimeMeasuresCount * minimumSampleTime;
+            i += minimumSampleTime) {
+        wholeI = (unsigned int) (i / minimumSampleTime);
+        wholeJ = (unsigned int) (j / minimumSampleTime);
 
-//    vector<double> dataWindow;
-//    dataWindow.push_back(tsCiscoSwitch03[0].value);
-
-//    vector<double> forecastWindow;
-//    forecastWindow.push_back(tsCiscoSwitch03[0].value);
-
-    j = 1;
-    for (int i = 1; i < 50; i++) {
-        if ((tsCiscoSwitch03[j].time - i) < 1) {
-            j++;
+        if ((tsCiscoSwitch03[wholeJ].time - i) < minimumSampleTime) {
+            j += minimumSampleTime;
         }
-//        smoothingCoefficient = getSmoothingCoefficient(/*windowSizes[i / measureCount]*/
-//                                                       10);
 
-//        fullTsCiscoSwitch03.push_back({getExponentialForecastValue(tsCiscoSwitch03[j - 1].value,
-//                smoothingCoefficient, fullTsCiscoSwitch03[i - 1].value), (double) i});
+        // Making full time series using EMA with adaptive window
+        fullTsCiscoSwitch03.push_back({getExponentialForecastValue(
+                tsCiscoSwitch03[wholeJ - 1].value, smoothingCoefficients[wholeI / measureCount],
+                fullTsCiscoSwitch03[wholeI - 1].value), i});
 
-        fullTsCiscoSwitch03.push_back({linearInterpolation(tsCiscoSwitch03[j - 1].time,
-                tsCiscoSwitch03[j - 1].value, tsCiscoSwitch03[j].time, tsCiscoSwitch03[j].value,
-                i), i});
+        // Making full time series using simple linear interpolation of the missing data
+        linearInterpolatedTsCiscoSwitch03.push_back({linearInterpolation(
+                tsCiscoSwitch03[wholeJ - 1].time, tsCiscoSwitch03[wholeJ - 1].value,
+                tsCiscoSwitch03[wholeJ].time, tsCiscoSwitch03[wholeJ].value, i), i});
     }
 
+    for (unsigned int i = 0; i < fullTsCiscoSwitch03.size(); i++) {
+        cout << i << "\t("<< fullTsCiscoSwitch03[i].time << ", " << fullTsCiscoSwitch03[i].value
+                << ")\tsmooth coeff " << smoothingCoefficients[i / measureCount] << "\n";
+    }
+    cout << endl;
+
+    /* Signal downsampling ************************************************************************/
     vector<TimeSeriesValue> downsampledTsCiscoSwitch03;
     downsampledTsCiscoSwitch03.push_back(fullTsCiscoSwitch03[0]);
 
@@ -387,45 +402,13 @@ int main()
         downsampledTsCiscoSwitch03.push_back(fullTsCiscoSwitch03.back());
     }
 
-//    int j = 0;
-//    for (int i = 0; i < fullTsCiscoSwitch03.size(); i++) {
-//        if (tsCiscoSwitch03[j].time == fullTsCiscoSwitch03[i].time) {
-//            cout << i << "\t(" << setw(8) << fullTsCiscoSwitch03[i].value << ", " << setw(4)
-//                 << fullTsCiscoSwitch03[i].time << ")\t(" << tsCiscoSwitch03[i].value << ", "
-//                 << tsCiscoSwitch03[i].time << ")\n";
-//            j++;
-//        } else {
-//            cout << i << "\t(" << setw(8) << fullTsCiscoSwitch03[i].value << ", " << setw(4)
-//                 << fullTsCiscoSwitch03[i].time << ")\n";
-//        }
-//    }
-//    cout << endl;
-
-    for (unsigned int i = 0; i < fullTsCiscoSwitch03.size(); i++) {
-        cout << i << "\t("<< fullTsCiscoSwitch03[i].time << ", " << fullTsCiscoSwitch03[i].value
-                << ")\twindow size " << windowSizes[i / 10] << "\n";
-    }
-    cout /*<< "k = " << smoothingCoefficient << endl*/ << endl;
-
-    for (unsigned int i = 0; i < tsCiscoSwitch03.size(); i++) {
-        cout << i << "\t("<< tsCiscoSwitch03[i].time << ", " << tsCiscoSwitch03[i].value << ")\n";
-    }
-    cout << endl;
-
     for (unsigned int i = 0; i < downsampledTsCiscoSwitch03.size(); i++) {
         cout << i << "\t("<< downsampledTsCiscoSwitch03[i].time << ", "
                 << downsampledTsCiscoSwitch03[i].value << ")\n";
     }
     cout << endl;
 
-    vector<TimeSeriesValue> weightExampleVector;
-    weightExampleVector.push_back({3, 4.7});
-    weightExampleVector.push_back({4, 5});
-    weightExampleVector.push_back({6, 5.5});
-
-    cout << weightedRound(weightExampleVector, 5) << endl;
-
-    delete [] windowSizes;
+    /* Reaction of EMA on the solitary pulse ******************************************************/
 
     return 0;
 }
