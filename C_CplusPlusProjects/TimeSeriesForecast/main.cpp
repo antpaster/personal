@@ -312,9 +312,10 @@ int main()
     }
     cout << endl;
 
-    double minimumSampleTime = 1;
+    double minimumSampleTime = 0.5;
 
     fullTsCiscoSwitch03.push_back(tsCiscoSwitch03[0]);
+    linearInterpolatedTsCiscoSwitch03.push_back(tsCiscoSwitch03[0]);
 
     unsigned int measureCount = 10 / minimumSampleTime; // For counting the existing data within
     unsigned int lastIntervalDataCount = 0;
@@ -333,17 +334,14 @@ int main()
             ? (unsigned int) ((tsCiscoSwitch03.back().time + 1) / minimumSampleTime)
             : (unsigned int) floor(tsCiscoSwitch03.back().time  / minimumSampleTime) + 1;
 
-    double j = minimumSampleTime;
-    unsigned int wholeJ;
+    unsigned int wholeJ = 1;
 
     vector<double> smoothingCoefficients;
     unsigned int sampleCounter = 1;
     for (double i = minimumSampleTime; i < finalTimeMeasuresCount * minimumSampleTime;
             i += minimumSampleTime) {
-        wholeJ = (unsigned int) (j / minimumSampleTime);
-
         if ((tsCiscoSwitch03[wholeJ].time - i) < minimumSampleTime) {
-            j += minimumSampleTime;
+            wholeJ++;
         }
 
         if (!((sampleCounter + 1) % measureCount)
@@ -358,15 +356,12 @@ int main()
         sampleCounter++;
     }
 
-    j = minimumSampleTime;
-    unsigned int wholeI;
+    wholeJ = 1;
+    unsigned int wholeI = 1;
     for (double i = minimumSampleTime; i < finalTimeMeasuresCount * minimumSampleTime;
             i += minimumSampleTime) {
-        wholeI = (unsigned int) (i / minimumSampleTime);
-        wholeJ = (unsigned int) (j / minimumSampleTime);
-
         if ((tsCiscoSwitch03[wholeJ].time - i) < minimumSampleTime) {
-            j += minimumSampleTime;
+            wholeJ++;
         }
 
         // Making full time series using EMA with adaptive window
@@ -378,6 +373,8 @@ int main()
         linearInterpolatedTsCiscoSwitch03.push_back({linearInterpolation(
                 tsCiscoSwitch03[wholeJ - 1].time, tsCiscoSwitch03[wholeJ - 1].value,
                 tsCiscoSwitch03[wholeJ].time, tsCiscoSwitch03[wholeJ].value, i), i});
+
+        wholeI++;
     }
 
     for (unsigned int i = 0; i < fullTsCiscoSwitch03.size(); i++) {
@@ -387,28 +384,115 @@ int main()
     cout << endl;
 
     /* Signal downsampling ************************************************************************/
-    vector<TimeSeriesValue> downsampledTsCiscoSwitch03;
-    downsampledTsCiscoSwitch03.push_back(fullTsCiscoSwitch03[0]);
+    vector<TimeSeriesValue> downsampledFullTsCiscoSwitch03;
+    downsampledFullTsCiscoSwitch03.push_back(fullTsCiscoSwitch03[0]);
 
     unsigned int downsamplingCoeff = 5;
 //    signalResampling(downsampledTsCiscoSwitch03, fullTsCiscoSwitch03, 1, 10);
 
     for (unsigned int i = downsamplingCoeff - 1; i < fullTsCiscoSwitch03.size();
         i += downsamplingCoeff) {
-        downsampledTsCiscoSwitch03.push_back(fullTsCiscoSwitch03[i]);
+        downsampledFullTsCiscoSwitch03.push_back(fullTsCiscoSwitch03[i]);
     }
 
     if (fullTsCiscoSwitch03.size() % downsamplingCoeff) {
-        downsampledTsCiscoSwitch03.push_back(fullTsCiscoSwitch03.back());
+        downsampledFullTsCiscoSwitch03.push_back(fullTsCiscoSwitch03.back());
     }
 
-    for (unsigned int i = 0; i < downsampledTsCiscoSwitch03.size(); i++) {
-        cout << i << "\t("<< downsampledTsCiscoSwitch03[i].time << ", "
-                << downsampledTsCiscoSwitch03[i].value << ")\n";
+    for (unsigned int i = 0; i < downsampledFullTsCiscoSwitch03.size(); i++) {
+        cout << i << "\t("<< downsampledFullTsCiscoSwitch03[i].time << ", "
+                << downsampledFullTsCiscoSwitch03[i].value << ")\n";
     }
     cout << endl;
 
+    vector<TimeSeriesValue> downsampledLinIntTsCiscoSwirch03;
+    downsampledLinIntTsCiscoSwirch03.push_back(linearInterpolatedTsCiscoSwitch03[0]);
+
+    for (unsigned int i = downsamplingCoeff - 1; i < linearInterpolatedTsCiscoSwitch03.size();
+        i += downsamplingCoeff) {
+        downsampledLinIntTsCiscoSwirch03.push_back(linearInterpolatedTsCiscoSwitch03[i]);
+    }
+
+    if (linearInterpolatedTsCiscoSwitch03.size() % downsamplingCoeff) {
+        downsampledLinIntTsCiscoSwirch03.push_back(linearInterpolatedTsCiscoSwitch03.back());
+    }
+
+//    /* Writing results to files for plotting ******************************************************/
+//    FILE *timesFile = fopen("times.txt", "w");
+//    if (nullptr != timesFile) {
+//        fprintf(timesFile, "Whole timed incomlete time series\n");
+//        for (unsigned int i = 0; i < tsCiscoSwitch03.size(); i++) {
+//            fprintf(timesFile, "%f\n", tsCiscoSwitch03[i].time);
+//        }
+
+//        fprintf(timesFile, "\nFull time series after EMA\n");
+//        for (unsigned int i = 0; i < fullTsCiscoSwitch03.size(); i++) {
+//            fprintf(timesFile, "%f\n", fullTsCiscoSwitch03[i].time);
+//        }
+
+//        fprintf(timesFile, "\nFull time series after linear interpolation\n");
+//        for (unsigned int i = 0; i < linearInterpolatedTsCiscoSwitch03.size(); i++) {
+//            fprintf(timesFile, "%f\n", linearInterpolatedTsCiscoSwitch03[i].time);
+//        }
+
+//        fprintf(timesFile, "\nDownsampled EMA time series\n");
+//        for (unsigned int i = 0; i < downsampledFullTsCiscoSwitch03.size(); i++) {
+//            fprintf(timesFile, "%f\n", downsampledFullTsCiscoSwitch03[i].time);
+//        }
+//    }
+
+//    FILE *tsValuesFile = fopen("values.txt", "w");
+//    if (nullptr != tsValuesFile) {
+//        fprintf(tsValuesFile, "Whole timed incomlete time series\n");
+//        wholeJ = 0;
+//        for (unsigned int i = 0; i < finalTimeMeasuresCount; i++) {
+//            if (fabs(tsCiscoSwitch03[wholeJ].time - i * minimumSampleTime) < cMinDouble) {
+//                fprintf(tsValuesFile, "%f", tsCiscoSwitch03[wholeJ].value);
+//                wholeJ++;
+//            }
+//            fprintf(tsValuesFile, "\n");
+//        }
+
+//        fprintf(tsValuesFile, "\nFull time series after EMA\n");
+//        for (unsigned int i = 0; i < fullTsCiscoSwitch03.size(); i++) {
+//            fprintf(tsValuesFile, "%f\n", fullTsCiscoSwitch03[i].value);
+//        }
+
+//        fprintf(tsValuesFile, "\nFull time series after linear interpolation\n");
+//        for (unsigned int i = 0; i < linearInterpolatedTsCiscoSwitch03.size(); i++) {
+//            fprintf(tsValuesFile, "%f\n", linearInterpolatedTsCiscoSwitch03[i].value);
+//        }
+
+//        fprintf(tsValuesFile, "\nDownsampled EMA time series\n");
+//        for (unsigned int i = 0; i < downsampledFullTsCiscoSwitch03.size(); i++) {
+//            fprintf(tsValuesFile, "%f\n", downsampledFullTsCiscoSwitch03[i].value);
+//        }
+
+//        fprintf(tsValuesFile, "\nDownsampled linear interpolated time series\n");
+//        for (unsigned int i = 0; i < downsampledLinIntTsCiscoSwirch03.size(); i++) {
+//            fprintf(tsValuesFile, "%f\n", downsampledLinIntTsCiscoSwirch03[i].value);
+//        }
+//    }
+
+//    fclose(timesFile);
+//    fclose(tsValuesFile);
+
     /* Reaction of EMA on the solitary pulse ******************************************************/
+    vector<TimeSeriesValue> solitaryPulseAffectedEMA;
+    solitaryPulseAffectedEMA.push_back({1, 0});
+
+    double smoothingCoefficient = getSmoothingCoefficient(1);
+    for (int i = 1; i < 10; i++) {
+        solitaryPulseAffectedEMA.push_back({getExponentialForecastValue(0, smoothingCoefficient,
+                solitaryPulseAffectedEMA[i - 1].value), i});
+    }
+
+    for (unsigned int i = 0; i < solitaryPulseAffectedEMA.size(); i++) {
+        cout << i << "\t("<< solitaryPulseAffectedEMA[i].time << ", "
+                << solitaryPulseAffectedEMA[i].value << ")\tsmooth coeff " << smoothingCoefficient
+                << "\n";
+    }
+    cout << endl;
 
     return 0;
 }
