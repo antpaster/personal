@@ -27,6 +27,52 @@ double getExponentialForecastValue(const double forecastData, const double smoot
     return smoothingCoeff * forecastData + (1 - smoothingCoeff) * forecastVal;
 }
 
+double getSmaForecastValue(const double lastData, const double firstData, const double prevSma,
+        unsigned int windowSize) {
+    return prevSma + (lastData - firstData) / (double) windowSize;
+}
+
+int smaSmoothing(vector<TimeSeriesValue> &incompleteTs, const double minSampleTime,
+        const unsigned int windowSize) {
+    if (!incompleteTs.empty()) {
+        vector<TimeSeriesValue> fullSmaTimeSeries;
+        vector<double> windowValues;
+
+        fullSmaTimeSeries.push_back(incompleteTs[0]);
+        windowValues.push_back(incompleteTs[0].value);
+
+        unsigned int iData = 1;
+        double smaValue = incompleteTs[0].value;
+
+        for (unsigned int i = 1; i <= incompleteTs.back().time / minSampleTime; i++) {
+            if (incompleteTs[iData].time - i * minSampleTime < minSampleTime) {
+                if (windowValues.size() >= windowSize) {
+                    for (unsigned int j = 0; j < windowSize - 1; j++) {
+                        windowValues[j] = windowValues[j + 1];
+                    }
+                    windowValues[windowSize - 1] = incompleteTs[iData].value;
+                } else {
+                    windowValues.push_back(incompleteTs[iData].value);
+                }
+
+                iData++;
+            }
+
+            smaValue = getSmaForecastValue(windowValues.back(), windowValues[0], smaValue,
+                    windowValues.size());
+
+            fullSmaTimeSeries.push_back({smaValue, i * minSampleTime});
+        }
+
+        incompleteTs.clear();
+        incompleteTs = fullSmaTimeSeries;
+
+        return 0;
+    }
+
+    return 1;
+}
+
 /*! Smoothing coefficient formula depending on the averaging window size */
 double getSmoothingCoefficient(const unsigned int averagingWindowSize) {
     return (double) 2 / (double) (averagingWindowSize + 1);
@@ -77,19 +123,19 @@ double getMinMaxArrayElem(const double *array, const unsigned int size, const bo
     return result;
 }
 
-// For now mean values are calculated as a cumulative, weights are square distances from mean
+// For now mean values are calculated as a simple maen of the neighbours
 double weightedRound(const vector<TimeSeriesValue> data, const double timeMean,
         const double timeInterval) {
     double result = 0;
-    double weight;
-    for (int i = 0; i < data.size(); i++) {
+//    double weight;
+    for (unsigned int i = 0; i < data.size(); i++) {
 //        weight = 1 - fabs(data[i].time - timeMean) / timeInterval; // Weight on the edge is 0.5
-        weight = (1 - fabs(data[i].time - timeMean) / timeInterval)
-                * (1 - fabs(data[i].time - timeMean) / timeInterval); // Weight on the edge is 0.25
-        result += data[i].value * ((fabs(data[i].time - timeMean) > cMinDouble) ? weight : 1);
+//        weight = (1 - fabs(data[i].time - timeMean) / timeInterval)
+//                * (1 - fabs(data[i].time - timeMean) / timeInterval); // Weight on the edge is 0.25
+        result += data[i].value; // * ((fabs(data[i].time - timeMean) > cMinDouble) ? weight : 1);
     }
 
-    return result/* / data.size()*/;
+    return result / data.size();
 }
 
 int makeWholeTimed(vector<TimeSeriesValue> &signal, const double timeInterval) {
@@ -107,7 +153,7 @@ int makeWholeTimed(vector<TimeSeriesValue> &signal, const double timeInterval) {
 //            // Signal is needed to be modified
             vector<TimeSeriesValue> resultSignal;
             vector<TimeSeriesValue> oneValueData; // vector for weighted rounding around one time value
-            int iExistData = 0; // indexes of the existing data
+            unsigned int iExistData = 0; // indexes of the existing data
             double timeMean; // central value for rounding
 
             double rightIntervalValue = 0.5 * timeInterval;
@@ -143,100 +189,100 @@ int makeWholeTimed(vector<TimeSeriesValue> &signal, const double timeInterval) {
     return 1;
 }
 
-//enum InterpolationType {
-//    LAGRANGE,
-//    ERMIT_SPLINE
-//};
+enum InterpolationType {
+    LAGRANGE,
+    ERMIT_SPLINE
+};
 
-//double gornerPolynomialValue(const double *coeffArr, const double argVal,
-//        const unsigned int order) {
-//    double result = coeffArr[order];
-//    for (unsigned int i = 1; i < order + 1; i++) {
-//        result *= argVal;
-//        result += coeffArr[order - i];
-//    }
+double gornerPolynomialValue(const double *coeffArr, const double argVal,
+        const unsigned int order) {
+    double result = coeffArr[order];
+    for (unsigned int i = 1; i < order + 1; i++) {
+        result *= argVal;
+        result += coeffArr[order - i];
+    }
 
-//    return result;
-//}
+    return result;
+}
 
-//int interpolationCoeffsCalc(double *a, const vector<TimeSeriesValue> inputSignal,
-//        const unsigned int inSize, const int n, const InterpolationType it) {
-//    if (nullptr != a && !inputSignal.empty()) {
-//        switch (it) {
-//        case LAGRANGE:
-//            a[0] = (n < 1) ? inputSignal[0].value : inputSignal[n - 1].value;
+int interpolationCoeffsCalc(double *a, const vector<TimeSeriesValue> inputSignal,
+        const unsigned int inSize, const int n, const InterpolationType it) {
+    if (nullptr != a && !inputSignal.empty()) {
+        switch (it) {
+        case LAGRANGE:
+            a[0] = (n < 1) ? inputSignal[0].value : inputSignal[n - 1].value;
 
-//            if (n < 0) {
-//                a[3] = 0;
-//            } else {
-//                if (n < 3) {
-//                    a[3] = (inputSignal[n].value - inputSignal[0].value) / 6 + (inputSignal[0].value
-//                            - inputSignal[n - 1].value) * 0.5;
-//                } else {
-//                    if (n < inSize) {
-//                        a[3] = (inputSignal[n].value - inputSignal[n - 3].value) / 6
-//                                + (inputSignal[n - 2].value - inputSignal[n - 1].value) * 0.5;
-//                    } else {
-//                        a[3] = (inputSignal[inSize - 1].value - inputSignal[n - 3].value) / 6
-//                                + (inputSignal[n - 2].value - inputSignal[n - 1].value) * 0.5;
-//                    }
-//                }
-//            }
+            if (n < 0) {
+                a[3] = 0;
+            } else {
+                if (n < 3) {
+                    a[3] = (inputSignal[n].value - inputSignal[0].value) / 6 + (inputSignal[0].value
+                            - inputSignal[n - 1].value) * 0.5;
+                } else {
+                    if (n < inSize) {
+                        a[3] = (inputSignal[n].value - inputSignal[n - 3].value) / 6
+                                + (inputSignal[n - 2].value - inputSignal[n - 1].value) * 0.5;
+                    } else {
+                        a[3] = (inputSignal[inSize - 1].value - inputSignal[n - 3].value) / 6
+                                + (inputSignal[n - 2].value - inputSignal[n - 1].value) * 0.5;
+                    }
+                }
+            }
 
-//            a[1] = -a[3];
-//            if (n >= 2 && n < inSize) {
-//                a[1] += (inputSignal[n].value - inputSignal[n - 2].value) * 0.5;
-//            } else if (n >= inSize) {
-//                a[1] += (inputSignal[inSize - 1].value - inputSignal[n - 2].value) * 0.5;
-//            }
+            a[1] = -a[3];
+            if (n >= 2 && n < inSize) {
+                a[1] += (inputSignal[n].value - inputSignal[n - 2].value) * 0.5;
+            } else if (n >= inSize) {
+                a[1] += (inputSignal[inSize - 1].value - inputSignal[n - 2].value) * 0.5;
+            }
 
-//            a[2] = -a[1] - a[3];
-//            if (n >= 1 && n < inSize) {
-//                a[2] += inputSignal[n].value - inputSignal[n - 1].value;
-//            } else if (n >= inSize) {
-//                a[2] += inputSignal[inSize - 1].value - inputSignal[n - 1].value;
-//            }
+            a[2] = -a[1] - a[3];
+            if (n >= 1 && n < inSize) {
+                a[2] += inputSignal[n].value - inputSignal[n - 1].value;
+            } else if (n >= inSize) {
+                a[2] += inputSignal[inSize - 1].value - inputSignal[n - 1].value;
+            }
 
-//            break;
+            break;
 
-//        case ERMIT_SPLINE:
-//            a[0] = (n < 1) ? inputSignal[0].value : inputSignal[n - 1].value;
+        case ERMIT_SPLINE:
+            a[0] = (n < 1) ? inputSignal[0].value : inputSignal[n - 1].value;
 
-//            if (n < 0) {
-//                a[1] = 0;
-//            } else {
-//                if (n < 2) {
-//                    a[1] = (inputSignal[1].value - inputSignal[0].value) * 0.5;
-//                } else {
-//                    if (n < inSize) {
-//                        a[1] = (inputSignal[n].value - inputSignal[n - 2].value) * 0.5;
-//                    } else {
-//                        a[1] = (inputSignal[inSize - 1].value - inputSignal[n - 2].value) * 0.5;
-//                    }
-//                }
-//            }
+            if (n < 0) {
+                a[1] = 0;
+            } else {
+                if (n < 2) {
+                    a[1] = (inputSignal[1].value - inputSignal[0].value) * 0.5;
+                } else {
+                    if (n < inSize) {
+                        a[1] = (inputSignal[n].value - inputSignal[n - 2].value) * 0.5;
+                    } else {
+                        a[1] = (inputSignal[inSize - 1].value - inputSignal[n - 2].value) * 0.5;
+                    }
+                }
+            }
 
-//            a[3] = a[1];
-//            if (n >= 1 && n < 3) {
-//                a[3] += ((inputSignal[0].value - inputSignal[n - 1].value) * 2);
-//                a[3] += ((inputSignal[n - 1].value - inputSignal[0].value) * 0.5);
-//            } else if (n >= 3) {
-//                a[3] += ((inputSignal[n - 2].value - inputSignal[n - 1].value) * 2);
-//                a[3] += ((inputSignal[n - 1].value - inputSignal[n - 3].value) * 0.5);
-//            }
+            a[3] = a[1];
+            if (n >= 1 && n < 3) {
+                a[3] += ((inputSignal[0].value - inputSignal[n - 1].value) * 2);
+                a[3] += ((inputSignal[n - 1].value - inputSignal[0].value) * 0.5);
+            } else if (n >= 3) {
+                a[3] += ((inputSignal[n - 2].value - inputSignal[n - 1].value) * 2);
+                a[3] += ((inputSignal[n - 1].value - inputSignal[n - 3].value) * 0.5);
+            }
 
-//            a[2] = a[3] + a[1];
-//            if (n >= 2) {
-//                a[2] += inputSignal[n - 2].value - inputSignal[n - 1].value;
-//            }
-//            break;
-//        }
+            a[2] = a[3] + a[1];
+            if (n >= 2) {
+                a[2] += inputSignal[n - 2].value - inputSignal[n - 1].value;
+            }
+            break;
+        }
 
-//        return 0;
-//    }
+        return 0;
+    }
 
-//    return 1;
-//}
+    return 1;
+}
 
 //int signalResampling(vector<TimeSeriesValue> &outputSignal,
 //        const vector<TimeSeriesValue> inputSignal, const unsigned int upsampleCoeff,
@@ -270,11 +316,14 @@ int makeWholeTimed(vector<TimeSeriesValue> &signal, const double timeInterval) {
 //    return 1;
 //}
 
+// Amplitude frequency response function
 double squareAmplitudeVal(const double k, const double omega) {
     return (k * k - 2 * k * k * (1 - k) * cos(omega) + k * k * (1 - k) * (1 - k))
             / pow(2 * (1 - k) * (1 - cos(omega)) + k * k, 2.0) - 0.5;
 }
 
+// Solve the equation by binary search in the interval where function definitely intersects the
+// X axis
 int dichotomy(double &result, double leftIntervalVal, double rightIntervalVal, const double k,
         const double eps) {
     if (squareAmplitudeVal(k, leftIntervalVal) * squareAmplitudeVal(k, rightIntervalVal) <= 0) {
@@ -307,49 +356,49 @@ int main()
 {
     vector<TimeSeriesValue> tsCiscoSwitch03;
 
-//    tsCiscoSwitch03.push_back({7, 0});
-//    tsCiscoSwitch03.push_back({9, 6});
-//    tsCiscoSwitch03.push_back({11, 7});
-//    tsCiscoSwitch03.push_back({7, 8});
-//    tsCiscoSwitch03.push_back({39.5, 10});
-//    tsCiscoSwitch03.push_back({11, 11});
-//    tsCiscoSwitch03.push_back({7, 13});
-//    tsCiscoSwitch03.push_back({6, 14});
-//    tsCiscoSwitch03.push_back({7, 15});
-//    tsCiscoSwitch03.push_back({7, 17});
-//    tsCiscoSwitch03.push_back({7, 18});
-//    tsCiscoSwitch03.push_back({7, 19});
-//    tsCiscoSwitch03.push_back({6.5, 20});
-//    tsCiscoSwitch03.push_back({14, 21});
-//    tsCiscoSwitch03.push_back({10, 22});
-//    tsCiscoSwitch03.push_back({8.5, 23});
+    tsCiscoSwitch03.push_back({7, 0});
+    tsCiscoSwitch03.push_back({9, 6});
+    tsCiscoSwitch03.push_back({11, 7});
+    tsCiscoSwitch03.push_back({7, 8});
+    tsCiscoSwitch03.push_back({39.5, 10});
+    tsCiscoSwitch03.push_back({11, 11});
+    tsCiscoSwitch03.push_back({7, 13});
+    tsCiscoSwitch03.push_back({6, 14});
+    tsCiscoSwitch03.push_back({7, 15});
+    tsCiscoSwitch03.push_back({7, 17});
+    tsCiscoSwitch03.push_back({7, 18});
+    tsCiscoSwitch03.push_back({7, 19});
+    tsCiscoSwitch03.push_back({6.5, 20});
+    tsCiscoSwitch03.push_back({14, 21});
+    tsCiscoSwitch03.push_back({10, 22});
+    tsCiscoSwitch03.push_back({8.5, 23});
 
-//    tsCiscoSwitch03.push_back({3, 25});
-//    tsCiscoSwitch03.push_back({9, 27});
-//    tsCiscoSwitch03.push_back({11, 28});
-//    tsCiscoSwitch03.push_back({7, 30});
-//    tsCiscoSwitch03.push_back({49.5, 31});
-//    tsCiscoSwitch03.push_back({11, 32});
-//    tsCiscoSwitch03.push_back({7, 33});
-//    tsCiscoSwitch03.push_back({6, 34});
-//    tsCiscoSwitch03.push_back({11, 37});
-//    tsCiscoSwitch03.push_back({8, 38});
-//    tsCiscoSwitch03.push_back({8, 41});
-//    tsCiscoSwitch03.push_back({7, 43});
-//    tsCiscoSwitch03.push_back({56.5, 44});
-//    tsCiscoSwitch03.push_back({24, 45});
-//    tsCiscoSwitch03.push_back({10, 46});
-//    tsCiscoSwitch03.push_back({8.5, 49});
+    tsCiscoSwitch03.push_back({3, 25});
+    tsCiscoSwitch03.push_back({9, 27});
+    tsCiscoSwitch03.push_back({11, 28});
+    tsCiscoSwitch03.push_back({7, 30});
+    tsCiscoSwitch03.push_back({49.5, 31});
+    tsCiscoSwitch03.push_back({11, 32});
+    tsCiscoSwitch03.push_back({7, 33});
+    tsCiscoSwitch03.push_back({6, 34});
+    tsCiscoSwitch03.push_back({11, 37});
+    tsCiscoSwitch03.push_back({8, 38});
+    tsCiscoSwitch03.push_back({8, 41});
+    tsCiscoSwitch03.push_back({7, 43});
+    tsCiscoSwitch03.push_back({56.5, 44});
+    tsCiscoSwitch03.push_back({24, 45});
+    tsCiscoSwitch03.push_back({10, 46});
+    tsCiscoSwitch03.push_back({8.5, 49});
 
-    // Time series with random values generation
-    unsigned int fullDataCount = 100;
-    double randomTime = 0;
-    srand(time(NULL));
-    for (unsigned int i = 0; i < fullDataCount; i++) {
-        tsCiscoSwitch03.push_back({/*sin(0.1 * (i + 1)) / (i + 1) + 1*/ sqrt(0.1 * i)
-                + (double) (rand() % 5) * 0.5, randomTime});
-        randomTime += (double) (1 + rand() % 5);
-    }
+//    // Time series with random values generation
+//    unsigned int fullDataCount = 100;
+//    double randomTime = 0;
+//    srand(time(NULL));
+//    for (unsigned int i = 0; i < fullDataCount; i++) {
+//        tsCiscoSwitch03.push_back({/*sin(0.1 * (i + 1)) / (i + 1) + 1*/ sqrt(0.1 * i)
+//                + (double) (rand() % 5) * 0.5, randomTime});
+//        randomTime += (double) (1 + rand() % 5);
+//    }
 
     /* Input incomplete time series ***************************************************************/
     for (unsigned int i = 0; i < tsCiscoSwitch03.size(); i++) {
@@ -366,6 +415,10 @@ int main()
             minimumSampleTime = timeSample;
         }
     }
+
+//    minimumSampleTime = 2;
+
+    smaSmoothing(tsCiscoSwitch03, minimumSampleTime, 5);
 
     makeWholeTimed(tsCiscoSwitch03, minimumSampleTime);
 
@@ -404,15 +457,18 @@ int main()
             iData++;
         }
 
-        if (!(i % measureCount)
-                || (finalTimeMeasuresCount - smoothingCoefficients.size() * measureCount
-                < measureCount)) {
+        if (!(i % measureCount)) {
             lastIntervalDataCount = iData - totalDataCount;
             totalDataCount += lastIntervalDataCount;
             smoothingCoefficients.push_back(getSmoothingCoefficient(calculateWindowSize(
                     (double) lastIntervalDataCount / (double) measureCount, 0.2, 0.8)));
         }
     }
+
+    lastIntervalDataCount = iData - totalDataCount;
+    smoothingCoefficients.push_back(getSmoothingCoefficient(calculateWindowSize(
+            (double) lastIntervalDataCount / (double) (tsCiscoSwitch03.size() - totalDataCount),
+            0.2, 0.8)));
 
     iData = 1;
     for (unsigned int i = 1; i < finalTimeMeasuresCount; i++) {
@@ -500,71 +556,71 @@ int main()
         downsampledLinIntTsCiscoSwirch03.push_back(linearInterpolatedTsCiscoSwitch03.back());
     }
 
-//    /* Writing results to files for plotting ******************************************************/
-//    FILE *timesFile = fopen("times.txt", "w");
-//    if (nullptr != timesFile) {
-//        fprintf(timesFile, "Whole timed incomlete time series\n");
-//        for (unsigned int i = 0; i < tsCiscoSwitch03.size(); i++) {
-//            fprintf(timesFile, "%f\n", tsCiscoSwitch03[i].time);
-//        }
+    /* Writing results to files for plotting ******************************************************/
+    FILE *timesFile = fopen("times.txt", "w");
+    if (nullptr != timesFile) {
+        fprintf(timesFile, "Whole timed incomlete time series\n");
+        for (unsigned int i = 0; i < tsCiscoSwitch03.size(); i++) {
+            fprintf(timesFile, "%f\n", tsCiscoSwitch03[i].time);
+        }
 
-//        fprintf(timesFile, "\nFull time series after EMA\n");
-//        for (unsigned int i = 0; i < forwardEmaCiscoSwitch03.size(); i++) {
-//            fprintf(timesFile, "%f\n", forwardEmaCiscoSwitch03[i].time);
-//        }
+        fprintf(timesFile, "\nFull time series after EMA\n");
+        for (unsigned int i = 0; i < forwardEmaCiscoSwitch03.size(); i++) {
+            fprintf(timesFile, "%f\n", forwardEmaCiscoSwitch03[i].time);
+        }
 
-//        fprintf(timesFile, "\nFull time series after linear interpolation\n");
-//        for (unsigned int i = 0; i < linearInterpolatedTsCiscoSwitch03.size(); i++) {
-//            fprintf(timesFile, "%f\n", linearInterpolatedTsCiscoSwitch03[i].time);
-//        }
+        fprintf(timesFile, "\nFull time series after linear interpolation\n");
+        for (unsigned int i = 0; i < linearInterpolatedTsCiscoSwitch03.size(); i++) {
+            fprintf(timesFile, "%f\n", linearInterpolatedTsCiscoSwitch03[i].time);
+        }
 
-//        fprintf(timesFile, "\nDownsampled EMA time series\n");
-//        for (unsigned int i = 0; i < downsampledFullTsCiscoSwitch03.size(); i++) {
-//            fprintf(timesFile, "%f\n", downsampledFullTsCiscoSwitch03[i].time);
-//        }
-//    }
+        fprintf(timesFile, "\nDownsampled EMA time series\n");
+        for (unsigned int i = 0; i < downsampledFullTsCiscoSwitch03.size(); i++) {
+            fprintf(timesFile, "%f\n", downsampledFullTsCiscoSwitch03[i].time);
+        }
+    }
 
-//    FILE *tsValuesFile = fopen("values.txt", "w");
-//    if (nullptr != tsValuesFile) {
-//        fprintf(tsValuesFile, "Whole timed incomlete time series\n");
-//        iData = 0;
-//        for (unsigned int i = 0; i < finalTimeMeasuresCount; i++) {
-//            if (fabs(tsCiscoSwitch03[iData].time - i * minimumSampleTime) < cMinDouble) {
-//                fprintf(tsValuesFile, "%f", tsCiscoSwitch03[iData].value);
-//                iData++;
-//            }
-//            fprintf(tsValuesFile, "\n");
-//        }
+    FILE *tsValuesFile = fopen("values.txt", "w");
+    if (nullptr != tsValuesFile) {
+        fprintf(tsValuesFile, "Whole timed incomlete time series\n");
+        iData = 0;
+        for (unsigned int i = 0; i < finalTimeMeasuresCount; i++) {
+            if (fabs(tsCiscoSwitch03[iData].time - i * minimumSampleTime) < cMinDouble) {
+                fprintf(tsValuesFile, "%f", tsCiscoSwitch03[iData].value);
+                iData++;
+            }
+            fprintf(tsValuesFile, "\n");
+        }
 
-//        fprintf(tsValuesFile, "\nFull time series after EMA\n");
-//        for (unsigned int i = 0; i < forwardEmaCiscoSwitch03.size(); i++) {
-//            fprintf(tsValuesFile, "%f\n", forwardEmaCiscoSwitch03[i].value);
-//        }
+        fprintf(tsValuesFile, "\nFull time series after EMA\n");
+        for (unsigned int i = 0; i < forwardEmaCiscoSwitch03.size(); i++) {
+            fprintf(tsValuesFile, "%f\n", forwardEmaCiscoSwitch03[i].value);
+        }
 
-//        fprintf(tsValuesFile, "\nZero phase time series after second EMA\n");
-//        for (unsigned int i = 0; i < backwardEmaCiscoSwitch03.size(); i++) {
-//            fprintf(tsValuesFile, "%f\n", backwardEmaCiscoSwitch03[backwardEmaCiscoSwitch03.size()
-//                    - i - 1].value);
-//        }
+        fprintf(tsValuesFile, "\nZero phase time series after second EMA\n");
+        for (unsigned int i = 0; i < backwardEmaCiscoSwitch03.size(); i++) {
+            fprintf(tsValuesFile, "%f\n", backwardEmaCiscoSwitch03[backwardEmaCiscoSwitch03.size()
+                    - i - 1].value);
+        }
 
-//        fprintf(tsValuesFile, "\nFull time series after linear interpolation\n");
-//        for (unsigned int i = 0; i < linearInterpolatedTsCiscoSwitch03.size(); i++) {
-//            fprintf(tsValuesFile, "%f\n", linearInterpolatedTsCiscoSwitch03[i].value);
-//        }
+        fprintf(tsValuesFile, "\nFull time series after linear interpolation\n");
+        for (unsigned int i = 0; i < linearInterpolatedTsCiscoSwitch03.size(); i++) {
+            fprintf(tsValuesFile, "%f\n", linearInterpolatedTsCiscoSwitch03[i].value);
+        }
 
-//        fprintf(tsValuesFile, "\nDownsampled EMA time series\n");
-//        for (unsigned int i = 0; i < downsampledFullTsCiscoSwitch03.size(); i++) {
-//            fprintf(tsValuesFile, "%f\n", downsampledFullTsCiscoSwitch03[i].value);
-//        }
+        fprintf(tsValuesFile, "\nDownsampled EMA time series\n");
+        for (unsigned int i = 0; i < downsampledFullTsCiscoSwitch03.size(); i++) {
+            fprintf(tsValuesFile, "%f\n", downsampledFullTsCiscoSwitch03[i].value);
+        }
 
-//        fprintf(tsValuesFile, "\nDownsampled linear interpolated time series\n");
-//        for (unsigned int i = 0; i < downsampledLinIntTsCiscoSwirch03.size(); i++) {
-//            fprintf(tsValuesFile, "%f\n", downsampledLinIntTsCiscoSwirch03[i].value);
-//        }
-//    }
+        fprintf(tsValuesFile, "\nDownsampled linear interpolated time series\n");
+        for (unsigned int i = 0; i < downsampledLinIntTsCiscoSwirch03.size(); i++) {
+            fprintf(tsValuesFile, "%f\n", downsampledLinIntTsCiscoSwirch03[i].value);
+        }
+    }
 
-//    fclose(timesFile);
-//    fclose(tsValuesFile);
+    fclose(timesFile);
+    fclose(tsValuesFile);
 
     /* Reaction of EMA on the solitary pulse ******************************************************/
     vector<TimeSeriesValue> solitaryPulseAffectedEma;
@@ -613,9 +669,26 @@ int main()
     */
 
     double cutFreq;
-    if (!dichotomy(cutFreq, 0, M_PI, 0.1, 0.001)) {
+    smoothingCoefficient = getSmoothingCoefficient(3);
+    if (!dichotomy(cutFreq, 0, M_PI, smoothingCoefficient, 0.001)) {
         cout << "Cyclic cut frequency: " << cutFreq << ", cut frequency: " << 2 * M_PI * cutFreq
-                << endl;
+             << ", smooth coeff: " << smoothingCoefficient << endl;
+    } else {
+        cout << "Function has no roots on the given interval\n";
+    }
+
+    smoothingCoefficient = getSmoothingCoefficient(7);
+    if (!dichotomy(cutFreq, 0, M_PI, smoothingCoefficient, 0.001)) {
+        cout << "Cyclic cut frequency: " << cutFreq << ", cut frequency: " << 2 * M_PI * cutFreq
+             << ", smooth coeff: " << smoothingCoefficient << endl;
+    } else {
+        cout << "Function has no roots on the given interval\n";
+    }
+
+    smoothingCoefficient = getSmoothingCoefficient(10);
+    if (!dichotomy(cutFreq, 0, M_PI, smoothingCoefficient, 0.001)) {
+        cout << "Cyclic cut frequency: " << cutFreq << ", cut frequency: " << 2 * M_PI * cutFreq
+             << ", smooth coeff: " << smoothingCoefficient << endl;
     } else {
         cout << "Function has no roots on the given interval\n";
     }
