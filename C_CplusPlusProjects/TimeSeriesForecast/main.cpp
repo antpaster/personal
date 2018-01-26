@@ -1,359 +1,16 @@
 #include <iostream>
-#include <iomanip>
 #include <math.h>
 #include <stdlib.h>
 #include <vector>
 
+#include "commontsdata.h"
+#include "ema.h"
+#include "sma.h"
+#include "resampling.h"
+
 using namespace std;
 
-const double cSmoothingStep = 0.1;
-const unsigned int cBaseDataWindowSize = 10;
-const double cMinDouble = 1e-10;
-
-
-struct TimeSeriesValue {
-    double value;
-    double time;
-
-    void operator=(const TimeSeriesValue tsv) {
-        this->value = tsv.value;
-        this->time = tsv.time;
-    }
-};
-
-/*! Exponential forecast formula */
-double getExponentialForecastValue(const double forecastData, const double smoothingCoeff,
-        const double forecastVal) {
-    return smoothingCoeff * forecastData + (1 - smoothingCoeff) * forecastVal;
-}
-
-double getSmaForecastValue(const double lastData, const double firstData, const double prevSma,
-        unsigned int windowSize) {
-    return prevSma + (lastData - firstData) / (double) windowSize;
-}
-
-int smaSmoothing(vector<TimeSeriesValue> &incompleteTs, const double minSampleTime,
-        const unsigned int windowSize) {
-    if (!incompleteTs.empty()) {
-        vector<TimeSeriesValue> fullSmaTimeSeries;
-        vector<double> windowValues;
-
-        fullSmaTimeSeries.push_back(incompleteTs[0]);
-        windowValues.push_back(incompleteTs[0].value);
-
-        unsigned int iData = 1;
-        double smaValue = incompleteTs[0].value;
-
-        for (unsigned int i = 1; i <= incompleteTs.back().time / minSampleTime; i++) {
-            if (incompleteTs[iData].time - i * minSampleTime < minSampleTime) {
-                if (windowValues.size() >= windowSize) {
-                    for (unsigned int j = 0; j < windowSize - 1; j++) {
-                        windowValues[j] = windowValues[j + 1];
-                    }
-                    windowValues[windowSize - 1] = incompleteTs[iData].value;
-                } else {
-                    windowValues.push_back(incompleteTs[iData].value);
-                }
-
-                iData++;
-            }
-
-            smaValue = getSmaForecastValue(windowValues.back(), windowValues[0], smaValue,
-                    windowValues.size());
-
-            fullSmaTimeSeries.push_back({smaValue, i * minSampleTime});
-        }
-
-        incompleteTs.clear();
-        incompleteTs = fullSmaTimeSeries;
-
-        return 0;
-    }
-
-    return 1;
-}
-
-/*! Smoothing coefficient formula depending on the averaging window size */
-double getSmoothingCoefficient(const unsigned int averagingWindowSize) {
-    return (double) 2 / (double) (averagingWindowSize + 1);
-}
-
-double linearInterpolation(const double x0, const double y0, const double x1, const double y1,
-            double x) {
-    return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
-}
-
-unsigned int calculateWindowSize(const double existingDataRatio, const double lowerRationBound,
-        const double upperRatioBound) {
-    // The rarer data comes, the less the smoothing (seems logical)
-    if (existingDataRatio < lowerRationBound) {
-        return 3;
-    } else if (existingDataRatio >= lowerRationBound && existingDataRatio < upperRatioBound) {
-        return linearInterpolation(lowerRationBound, 3, upperRatioBound, 10, existingDataRatio);
-    } else {
-        return 10;
-    }
-}
-
-double getNextEstExpectedValue(const double currEstExpectedValue, const unsigned int count,
-        const double nextVal) {
-    return (count * currEstExpectedValue + nextVal) / (count + 1);
-}
-
-double getNextEstDispersion(const double currEstDispersion, const unsigned int count,
-        const double nextVal, const double nextEstExpectedValue) {
-    return ((count - 1) * currEstDispersion + (nextVal - nextEstExpectedValue)
-            * (nextVal - nextEstExpectedValue)) / count;
-}
-
-double getMinMaxArrayElem(const double *array, const unsigned int size, const bool isMax) {
-    double result = array[0];
-    for (unsigned int i = 1; i < size; i++) {
-        if (isMax) {
-            if (result < array[i]) {
-                result = array[i];
-            }
-        } else {
-            if (result > array[i]) {
-                result = array[i];
-            }
-        }
-    }
-
-    return result;
-}
-
-// For now mean values are calculated as a simple maen of the neighbours
-double weightedRound(const vector<TimeSeriesValue> data, const double timeMean,
-        const double timeInterval) {
-    double result = 0;
-//    double weight;
-    for (unsigned int i = 0; i < data.size(); i++) {
-//        weight = 1 - fabs(data[i].time - timeMean) / timeInterval; // Weight on the edge is 0.5
-//        weight = (1 - fabs(data[i].time - timeMean) / timeInterval)
-//                * (1 - fabs(data[i].time - timeMean) / timeInterval); // Weight on the edge is 0.25
-        result += data[i].value; // * ((fabs(data[i].time - timeMean) > cMinDouble) ? weight : 1);
-    }
-
-    return result / data.size();
-}
-
-int makeWholeTimed(vector<TimeSeriesValue> &signal, const double timeInterval) {
-    if (!signal.empty()) {
-//        double timeSample = signal[1].time - signal[0].time;
-//        double minTimeSample = timeSample;
-//        for (int i = 1; i < signal.size() - 1; i++) {
-//            timeSample = signal[i + 1].time - signal[i].time;
-//            if (minTimeSample > timeSample) {
-//                minTimeSample = timeSample;
-//            }
-//        }
-
-//        if (minTimeSample < timeInterval) {
-//            // Signal is needed to be modified
-            vector<TimeSeriesValue> resultSignal;
-            vector<TimeSeriesValue> oneValueData; // vector for weighted rounding around one time value
-            unsigned int iExistData = 0; // indexes of the existing data
-            double timeMean; // central value for rounding
-
-            double rightIntervalValue = 0.5 * timeInterval;
-            double rightLoopBorder = signal.back().time;
-
-            for (double i = signal[0].time; i <= rightLoopBorder; i += timeInterval) {
-            // todo: move the rest data from the end of the ts to the next buffer
-
-                while (signal[iExistData].time <= i + rightIntervalValue) {
-                    timeMean = i;
-
-                    oneValueData.push_back(signal[iExistData]);
-
-                    iExistData++;
-                    if (iExistData == signal.size()){
-                        break;
-                    }
-                }
-
-                if (!oneValueData.empty()) {
-                    resultSignal.push_back({weightedRound(oneValueData, timeMean, timeInterval),
-                            i});
-                    oneValueData.clear();
-                }
-            }
-
-            signal = resultSignal;
-//        }
-
-        return 0;
-    }
-
-    return 1;
-}
-
-enum InterpolationType {
-    LAGRANGE,
-    ERMIT_SPLINE
-};
-
-double gornerPolynomialValue(const double *coeffArr, const double argVal,
-        const unsigned int order) {
-    double result = coeffArr[order];
-    for (unsigned int i = 1; i < order + 1; i++) {
-        result *= argVal;
-        result += coeffArr[order - i];
-    }
-
-    return result;
-}
-
-int interpolationCoeffsCalc(double *a, const vector<TimeSeriesValue> inputSignal,
-        const unsigned int inSize, const int n, const InterpolationType it) {
-    if (nullptr != a && !inputSignal.empty()) {
-        switch (it) {
-        case LAGRANGE:
-            a[0] = (n < 1) ? inputSignal[0].value : inputSignal[n - 1].value;
-
-            if (n < 0) {
-                a[3] = 0;
-            } else {
-                if (n < 3) {
-                    a[3] = (inputSignal[n].value - inputSignal[0].value) / 6 + (inputSignal[0].value
-                            - inputSignal[n - 1].value) * 0.5;
-                } else {
-                    if (n < inSize) {
-                        a[3] = (inputSignal[n].value - inputSignal[n - 3].value) / 6
-                                + (inputSignal[n - 2].value - inputSignal[n - 1].value) * 0.5;
-                    } else {
-                        a[3] = (inputSignal[inSize - 1].value - inputSignal[n - 3].value) / 6
-                                + (inputSignal[n - 2].value - inputSignal[n - 1].value) * 0.5;
-                    }
-                }
-            }
-
-            a[1] = -a[3];
-            if (n >= 2 && n < inSize) {
-                a[1] += (inputSignal[n].value - inputSignal[n - 2].value) * 0.5;
-            } else if (n >= inSize) {
-                a[1] += (inputSignal[inSize - 1].value - inputSignal[n - 2].value) * 0.5;
-            }
-
-            a[2] = -a[1] - a[3];
-            if (n >= 1 && n < inSize) {
-                a[2] += inputSignal[n].value - inputSignal[n - 1].value;
-            } else if (n >= inSize) {
-                a[2] += inputSignal[inSize - 1].value - inputSignal[n - 1].value;
-            }
-
-            break;
-
-        case ERMIT_SPLINE:
-            a[0] = (n < 1) ? inputSignal[0].value : inputSignal[n - 1].value;
-
-            if (n < 0) {
-                a[1] = 0;
-            } else {
-                if (n < 2) {
-                    a[1] = (inputSignal[1].value - inputSignal[0].value) * 0.5;
-                } else {
-                    if (n < inSize) {
-                        a[1] = (inputSignal[n].value - inputSignal[n - 2].value) * 0.5;
-                    } else {
-                        a[1] = (inputSignal[inSize - 1].value - inputSignal[n - 2].value) * 0.5;
-                    }
-                }
-            }
-
-            a[3] = a[1];
-            if (n >= 1 && n < 3) {
-                a[3] += ((inputSignal[0].value - inputSignal[n - 1].value) * 2);
-                a[3] += ((inputSignal[n - 1].value - inputSignal[0].value) * 0.5);
-            } else if (n >= 3) {
-                a[3] += ((inputSignal[n - 2].value - inputSignal[n - 1].value) * 2);
-                a[3] += ((inputSignal[n - 1].value - inputSignal[n - 3].value) * 0.5);
-            }
-
-            a[2] = a[3] + a[1];
-            if (n >= 2) {
-                a[2] += inputSignal[n - 2].value - inputSignal[n - 1].value;
-            }
-            break;
-        }
-
-        return 0;
-    }
-
-    return 1;
-}
-
-//int signalResampling(vector<TimeSeriesValue> &outputSignal,
-//        const vector<TimeSeriesValue> inputSignal, const unsigned int upsampleCoeff,
-//        const unsigned int downsampleCoeff) {
-//    if (!inputSignal.empty()) {
-//        double x0 = 0;
-//        int n;
-//        double deltaK;
-//        double a[4];
-
-//        unsigned int outputSignalSize = (unsigned int) ((inputSignal.back().time + 1)
-//                * upsampleCoeff / downsampleCoeff) + 1;
-//        double outputSignalTime;
-
-//        for (unsigned int k = 0; k < outputSignalSize; k++) {
-//            outputSignalTime = k * (double) downsampleCoeff / (double) upsampleCoeff - x0;
-//            outputSignal.push_back({outputSignalTime, outputSignalTime});
-
-//            n = (int) floor(outputSignal[k].value) + 2;
-
-//            deltaK = floor(outputSignal[k].value) + 1 - outputSignal[k].value;
-
-//            interpolationCoeffsCalc(a, inputSignal, inputSignal.size(), n, ERMIT_SPLINE);
-
-//            outputSignal[k].value = gornerPolynomialValue(a, -deltaK, 3);
-//        }
-
-//        return 0;
-//    }
-
-//    return 1;
-//}
-
-// Amplitude frequency response function
-double squareAmplitudeVal(const double k, const double omega) {
-    return (k * k - 2 * k * k * (1 - k) * cos(omega) + k * k * (1 - k) * (1 - k))
-            / pow(2 * (1 - k) * (1 - cos(omega)) + k * k, 2.0) - 0.5;
-}
-
-// Solve the equation by binary search in the interval where function definitely intersects the
-// X axis
-int dichotomy(double &result, double leftIntervalVal, double rightIntervalVal, const double k,
-        const double eps) {
-    if (squareAmplitudeVal(k, leftIntervalVal) * squareAmplitudeVal(k, rightIntervalVal) <= 0) {
-        double intervalCenter = leftIntervalVal + 0.5 * (rightIntervalVal - leftIntervalVal);
-        int i = 0;
-
-        while (fabs(squareAmplitudeVal(k, intervalCenter)) > eps) {
-            if (squareAmplitudeVal(k, leftIntervalVal) * squareAmplitudeVal(k, intervalCenter)
-                    < 0) {
-                rightIntervalVal = intervalCenter;
-            } else {
-                leftIntervalVal = intervalCenter;
-            }
-
-            intervalCenter = leftIntervalVal + 0.5 * (rightIntervalVal - leftIntervalVal);
-
-            i++;
-        }
-
-        cout << "\nIterations count: " << i + 1 << endl;
-        result = intervalCenter;
-
-        return 0;
-    } else {
-        return 1;
-    }
-}
-
-int main()
-{
+int main() {
     vector<TimeSeriesValue> tsCiscoSwitch03;
 
     tsCiscoSwitch03.push_back({7, 0});
@@ -391,20 +48,18 @@ int main()
     tsCiscoSwitch03.push_back({8.5, 49});
 
 //    // Time series with random values generation
-//    unsigned int fullDataCount = 100;
+//    unsigned int fullDataCount = 50;
 //    double randomTime = 0;
 //    srand(time(NULL));
 //    for (unsigned int i = 0; i < fullDataCount; i++) {
-//        tsCiscoSwitch03.push_back({/*sin(0.1 * (i + 1)) / (i + 1) + 1*/ sqrt(0.1 * i)
+//        tsCiscoSwitch03.push_back({/*sin(0.1 * (i + 1)) / (i + 1) + 1*/ sqrt(0.5 * i)
 //                + (double) (rand() % 5) * 0.5, randomTime});
 //        randomTime += (double) (1 + rand() % 5);
 //    }
 
     /* Input incomplete time series ***************************************************************/
-    for (unsigned int i = 0; i < tsCiscoSwitch03.size(); i++) {
-        cout << i << "\t("<< tsCiscoSwitch03[i].time << ", " << tsCiscoSwitch03[i].value << ")\n";
-    }
-    cout << endl;
+    cout << "Input incomplete time series\n";
+    printTs(tsCiscoSwitch03);
 
     /* Input incomplete time series with grouped samples ******************************************/
     double timeSample = tsCiscoSwitch03[1].time - tsCiscoSwitch03[0].time;
@@ -418,23 +73,19 @@ int main()
 
 //    minimumSampleTime = 2;
 
-    smaSmoothing(tsCiscoSwitch03, minimumSampleTime, 5);
+    /* Competleting and smoothing the time series by SMA */
+    vector<TimeSeriesValue> smaCiscoSwitch03 = tsCiscoSwitch03;
 
-    makeWholeTimed(tsCiscoSwitch03, minimumSampleTime);
+    smaSmoothing(smaCiscoSwitch03, minimumSampleTime, 3);
+    smaAfterSmoothing(smaCiscoSwitch03, 3);
+    cout << "\nSMA smoothed time series on the existed data\n";
+    printTs(smaCiscoSwitch03);
 
-    cout << tsCiscoSwitch03.max_size() << "\nWhole timed incomlete time series\n";
-    for (unsigned int i = 0; i < tsCiscoSwitch03.size(); i++) {
-        cout << i << "\t("<< tsCiscoSwitch03[i].time << ", " << tsCiscoSwitch03[i].value << ")\n";
-    }
-    cout << endl;
+//    makeWholeTimed(tsCiscoSwitch03, minimumSampleTime);
+//    cout << tsCiscoSwitch03.max_size() << "\nWhole timed incomlete time series\n";
+//    printTs(tsCiscoSwitch03);
 
-    /* Completing time series using EMA forecast and linear interpolation *************************/
-    vector<TimeSeriesValue> forwardEmaCiscoSwitch03;
-    vector<TimeSeriesValue> linearInterpolatedTsCiscoSwitch03;
-
-    forwardEmaCiscoSwitch03.push_back(tsCiscoSwitch03[0]);
-    linearInterpolatedTsCiscoSwitch03.push_back(tsCiscoSwitch03[0]);
-
+    /* Completing time series using EMA forecast **************************************************/
     unsigned int measureCount = 10 / minimumSampleTime; // For counting the existing data within
     unsigned int lastIntervalDataCount = 0;
     unsigned int totalDataCount = 0;
@@ -446,10 +97,6 @@ int main()
     unsigned int iData = 1; // index of the existing data
 
     vector<double> smoothingCoefficients;
-
-//    unsigned int bufferSize = 50;
-//    vector<TimeSeriesValue> bufferTs;
-//    TimeSeriesValue passageValue;
 
     // Smoothing coefficients definition. Consider that the initial time value is 0
     for (unsigned int i = 1; i < finalTimeMeasuresCount; i++) {
@@ -470,16 +117,21 @@ int main()
             (double) lastIntervalDataCount / (double) (tsCiscoSwitch03.size() - totalDataCount),
             0.2, 0.8)));
 
+    vector<TimeSeriesValue> emaCiscoSwitch03 = tsCiscoSwitch03;
+    emaSmoothing(emaCiscoSwitch03, smoothingCoefficients, measureCount, minimumSampleTime);
+
+    cout << "\nFull time series after double EMA\n";
+    printTs(emaCiscoSwitch03);
+
+    /* Completing time series using linear interpolation ******************************************/
+    vector<TimeSeriesValue> linearInterpolatedTsCiscoSwitch03;
+    linearInterpolatedTsCiscoSwitch03.push_back(tsCiscoSwitch03[0]);
+
     iData = 1;
     for (unsigned int i = 1; i < finalTimeMeasuresCount; i++) {
         if ((tsCiscoSwitch03[iData].time - i * minimumSampleTime) < minimumSampleTime) {
             iData++;
         }
-
-        // Making full time series using EMA with adaptive window. Forward stage
-        forwardEmaCiscoSwitch03.push_back({getExponentialForecastValue(
-                tsCiscoSwitch03[iData - 1].value, smoothingCoefficients[i / measureCount],
-                forwardEmaCiscoSwitch03[i - 1].value), i * minimumSampleTime});
 
         // Making full time series using simple linear interpolation of the missing data
         linearInterpolatedTsCiscoSwitch03.push_back({linearInterpolation(
@@ -488,61 +140,21 @@ int main()
                 i * minimumSampleTime});
     }
 
-    vector<TimeSeriesValue> backwardEmaCiscoSwitch03;
-    backwardEmaCiscoSwitch03.push_back(forwardEmaCiscoSwitch03.back());
-
-    // Making full time series using EMA with adaptive window. Backward stage, now the series is
-    // zero phased
-    unsigned int iBackward;
-    for (unsigned int i = 1; i < forwardEmaCiscoSwitch03.size(); i++) {
-        iBackward = forwardEmaCiscoSwitch03.size() - i - 1;
-        backwardEmaCiscoSwitch03.push_back({getExponentialForecastValue(
-                forwardEmaCiscoSwitch03[iBackward].value,
-                smoothingCoefficients[iBackward / measureCount],
-                backwardEmaCiscoSwitch03[i - 1].value),
-                forwardEmaCiscoSwitch03[iBackward].time});
-    }
-
-    cout << "\nFull time series after forward EMA\n";
-    for (unsigned int i = 0; i < forwardEmaCiscoSwitch03.size(); i++) {
-        cout << i << "\t(" << forwardEmaCiscoSwitch03[i].time << ", "
-                << forwardEmaCiscoSwitch03[i].value << ")\tsmooth coeff "
-                << smoothingCoefficients[i / measureCount] << "\n";
-    }
-    cout << endl;
-
-    cout << "\nFull time series after backward EMA\n";
-    for (unsigned int i = 0; i < backwardEmaCiscoSwitch03.size(); i++) {
-        cout << i << "\t("
-                << backwardEmaCiscoSwitch03[backwardEmaCiscoSwitch03.size() - i - 1].time << ", "
-                << backwardEmaCiscoSwitch03[backwardEmaCiscoSwitch03.size() - i - 1].value
-                << ")\tsmooth coeff " << smoothingCoefficients[i / measureCount] << "\n";
-    }
-    cout << endl;
-
     /* Signal downsampling ************************************************************************/
     vector<TimeSeriesValue> downsampledFullTsCiscoSwitch03;
-    downsampledFullTsCiscoSwitch03.push_back(backwardEmaCiscoSwitch03.back());
+    downsampledFullTsCiscoSwitch03.push_back(emaCiscoSwitch03[0]);
 
     unsigned int downsamplingCoeff = 5;
-//    signalResampling(downsampledTsCiscoSwitch03, forwardEmaCiscoSwitch03, 1, 10);
+//    signalResampling(downsampledTsCiscoSwitch03, emaCiscoSwitch03, 1, 10);
 
-    for (unsigned int i = downsamplingCoeff; i < backwardEmaCiscoSwitch03.size();
+    for (unsigned int i = downsamplingCoeff; i < emaCiscoSwitch03.size();
         i += downsamplingCoeff) {
-        downsampledFullTsCiscoSwitch03.push_back(
-                backwardEmaCiscoSwitch03[backwardEmaCiscoSwitch03.size() - i - 1]);
+        downsampledFullTsCiscoSwitch03.push_back(emaCiscoSwitch03[i]);
     }
-
-    if (backwardEmaCiscoSwitch03.size() % downsamplingCoeff) {
-        downsampledFullTsCiscoSwitch03.push_back(backwardEmaCiscoSwitch03[0]);
-    }
+    downsampledFullTsCiscoSwitch03.push_back(emaCiscoSwitch03.back());
 
     cout << "\nDownsampled time series with coefficient " << downsamplingCoeff << endl;
-    for (unsigned int i = 0; i < downsampledFullTsCiscoSwitch03.size(); i++) {
-        cout << i << "\t("<< downsampledFullTsCiscoSwitch03[i].time << ", "
-                << downsampledFullTsCiscoSwitch03[i].value << ")\n";
-    }
-    cout << endl;
+    printTs(downsampledFullTsCiscoSwitch03);
 
     vector<TimeSeriesValue> downsampledLinIntTsCiscoSwirch03;
     downsampledLinIntTsCiscoSwirch03.push_back(linearInterpolatedTsCiscoSwitch03[0]);
@@ -551,10 +163,7 @@ int main()
         i += downsamplingCoeff) {
         downsampledLinIntTsCiscoSwirch03.push_back(linearInterpolatedTsCiscoSwitch03[i]);
     }
-
-    if (linearInterpolatedTsCiscoSwitch03.size() % downsamplingCoeff) {
-        downsampledLinIntTsCiscoSwirch03.push_back(linearInterpolatedTsCiscoSwitch03.back());
-    }
+    downsampledLinIntTsCiscoSwirch03.push_back(linearInterpolatedTsCiscoSwitch03.back());
 
     /* Writing results to files for plotting ******************************************************/
     FILE *timesFile = fopen("times.txt", "w");
@@ -564,9 +173,14 @@ int main()
             fprintf(timesFile, "%f\n", tsCiscoSwitch03[i].time);
         }
 
+        fprintf(timesFile, "\nFull time series after SMA\n");
+        for (unsigned int i = 0; i < smaCiscoSwitch03.size(); i++) {
+            fprintf(timesFile, "%f\n", smaCiscoSwitch03[i].time);
+        }
+
         fprintf(timesFile, "\nFull time series after EMA\n");
-        for (unsigned int i = 0; i < forwardEmaCiscoSwitch03.size(); i++) {
-            fprintf(timesFile, "%f\n", forwardEmaCiscoSwitch03[i].time);
+        for (unsigned int i = 0; i < emaCiscoSwitch03.size(); i++) {
+            fprintf(timesFile, "%f\n", emaCiscoSwitch03[i].time);
         }
 
         fprintf(timesFile, "\nFull time series after linear interpolation\n");
@@ -574,7 +188,7 @@ int main()
             fprintf(timesFile, "%f\n", linearInterpolatedTsCiscoSwitch03[i].time);
         }
 
-        fprintf(timesFile, "\nDownsampled EMA time series\n");
+        fprintf(timesFile, "\nDownsampled double EMA time series\n");
         for (unsigned int i = 0; i < downsampledFullTsCiscoSwitch03.size(); i++) {
             fprintf(timesFile, "%f\n", downsampledFullTsCiscoSwitch03[i].time);
         }
@@ -592,15 +206,14 @@ int main()
             fprintf(tsValuesFile, "\n");
         }
 
-        fprintf(tsValuesFile, "\nFull time series after EMA\n");
-        for (unsigned int i = 0; i < forwardEmaCiscoSwitch03.size(); i++) {
-            fprintf(tsValuesFile, "%f\n", forwardEmaCiscoSwitch03[i].value);
+        fprintf(tsValuesFile, "\nFull time series after SMA\n");
+        for (unsigned int i = 0; i < smaCiscoSwitch03.size(); i++) {
+            fprintf(tsValuesFile, "%f\n", smaCiscoSwitch03[i].value);
         }
 
-        fprintf(tsValuesFile, "\nZero phase time series after second EMA\n");
-        for (unsigned int i = 0; i < backwardEmaCiscoSwitch03.size(); i++) {
-            fprintf(tsValuesFile, "%f\n", backwardEmaCiscoSwitch03[backwardEmaCiscoSwitch03.size()
-                    - i - 1].value);
+        fprintf(tsValuesFile, "\nFull time series after double EMA\n");
+        for (unsigned int i = 0; i < emaCiscoSwitch03.size(); i++) {
+            fprintf(tsValuesFile, "%f\n", emaCiscoSwitch03[i].value);
         }
 
         fprintf(tsValuesFile, "\nFull time series after linear interpolation\n");
@@ -608,7 +221,7 @@ int main()
             fprintf(tsValuesFile, "%f\n", linearInterpolatedTsCiscoSwitch03[i].value);
         }
 
-        fprintf(tsValuesFile, "\nDownsampled EMA time series\n");
+        fprintf(tsValuesFile, "\nDownsampled double EMA time series\n");
         for (unsigned int i = 0; i < downsampledFullTsCiscoSwitch03.size(); i++) {
             fprintf(tsValuesFile, "%f\n", downsampledFullTsCiscoSwitch03[i].value);
         }
@@ -622,76 +235,64 @@ int main()
     fclose(timesFile);
     fclose(tsValuesFile);
 
-    /* Reaction of EMA on the solitary pulse ******************************************************/
-    vector<TimeSeriesValue> solitaryPulseAffectedEma;
-    solitaryPulseAffectedEma.push_back({0, 0});
+//    /* Reaction of EMA on the solitary pulse ******************************************************/
+//    vector<TimeSeriesValue> solitaryPulseAffectedEma;
+//    solitaryPulseAffectedEma.push_back({0, 0});
 
-    double smoothingCoefficient = getSmoothingCoefficient(7);
-    for (int i = 1; i < 20; i++) {
-        solitaryPulseAffectedEma.push_back({getExponentialForecastValue(((i == 2) ? 1 : 0),
-                smoothingCoefficient, solitaryPulseAffectedEma[i - 1].value), (double) i});
-    }
+//    double smoothingCoefficient = getSmoothingCoefficient(7);
+//    for (int i = 1; i < 20; i++) {
+//        solitaryPulseAffectedEma.push_back({getEmaForecastValue(((i == 2) ? 1 : 0),
+//                smoothingCoefficient, solitaryPulseAffectedEma[i - 1].value), (double) i});
+//    }
 
-    cout << "\nReaction of EMA on the solitary pulse\n";
-    for (unsigned int i = 0; i < solitaryPulseAffectedEma.size(); i++) {
-        cout << i << "\t("<< solitaryPulseAffectedEma[i].time << ", "
-                << solitaryPulseAffectedEma[i].value << ")\tsmooth coeff " << smoothingCoefficient
-                << "\n";
-    }
-    cout << endl;
+//    cout << "\nReaction of EMA on the solitary pulse\n";
+//    printTs(solitaryPulseAffectedEma);
 
-    /* Reaction of EMA on the step ****************************************************************/
-    vector<TimeSeriesValue> stepAffectedEma;
-    stepAffectedEma.push_back({0, 0});
+//    /* Reaction of EMA on the step ****************************************************************/
+//    vector<TimeSeriesValue> stepAffectedEma;
+//    stepAffectedEma.push_back({0, 0});
 
-    smoothingCoefficient = getSmoothingCoefficient(7);
-    for (int i = 1; i < 20; i++) {
-        stepAffectedEma.push_back({getExponentialForecastValue(((i < 2) ? 0 : 1),
-                smoothingCoefficient, stepAffectedEma[i - 1].value), (double) i});
-    }
+//    smoothingCoefficient = getSmoothingCoefficient(7);
+//    for (int i = 1; i < 20; i++) {
+//        stepAffectedEma.push_back({getEmaForecastValue(((i < 2) ? 0 : 1),
+//                smoothingCoefficient, stepAffectedEma[i - 1].value), (double) i});
+//    }
 
-    cout << "\nReaction of EMA on the step\n";
-    for (unsigned int i = 0; i < stepAffectedEma.size(); i++) {
-        cout << i << "\t("<< stepAffectedEma[i].time << ", "
-                << stepAffectedEma[i].value << ")\tsmooth coeff " << smoothingCoefficient
-                << "\n";
-    }
-    cout << endl;
+//    cout << "\nReaction of EMA on the step\n";
+//    printTs(stepAffectedEma);
 
-    /*
-    k = 0.3
-    sqrt((0.09 - 0.126cos(x) + 0.0441) / ((1.4(1 - cos(x)) + 0.09) ^ 2))
-    -arctg(0.7sin(x) / (1 - 0.7cos(x)))
+//    k = 0.3
+//    sqrt((0.09 - 0.126cos(x) + 0.0441) / ((1.4(1 - cos(x)) + 0.09) ^ 2))
+//    -arctg(0.7sin(x) / (1 - 0.7cos(x)))
 
-    k = 0.9
-    sqrt((0.81 - 0.162cos(x) + 0.0081) / ((0.2(1 - cos(x)) + 0.81) ^ 2))
-    -arctg(0.1sin(x) / (1 - 0.1cos(x)))
-    */
+//    k = 0.9
+//    sqrt((0.81 - 0.162cos(x) + 0.0081) / ((0.2(1 - cos(x)) + 0.81) ^ 2))
+//    -arctg(0.1sin(x) / (1 - 0.1cos(x)))
 
-    double cutFreq;
-    smoothingCoefficient = getSmoothingCoefficient(3);
-    if (!dichotomy(cutFreq, 0, M_PI, smoothingCoefficient, 0.001)) {
-        cout << "Cyclic cut frequency: " << cutFreq << ", cut frequency: " << 2 * M_PI * cutFreq
-             << ", smooth coeff: " << smoothingCoefficient << endl;
-    } else {
-        cout << "Function has no roots on the given interval\n";
-    }
+//    double cutFreq;
+//    smoothingCoefficient = getSmoothingCoefficient(3);
+//    if (!dichotomy(cutFreq, 0, M_PI, smoothingCoefficient, 0.001)) {
+//        cout << "Cyclic cut frequency: " << cutFreq << ", cut frequency: " << 2 * M_PI * cutFreq
+//             << ", smooth coeff: " << smoothingCoefficient << endl;
+//    } else {
+//        cout << "Function has no roots on the given interval\n";
+//    }
 
-    smoothingCoefficient = getSmoothingCoefficient(7);
-    if (!dichotomy(cutFreq, 0, M_PI, smoothingCoefficient, 0.001)) {
-        cout << "Cyclic cut frequency: " << cutFreq << ", cut frequency: " << 2 * M_PI * cutFreq
-             << ", smooth coeff: " << smoothingCoefficient << endl;
-    } else {
-        cout << "Function has no roots on the given interval\n";
-    }
+//    smoothingCoefficient = getSmoothingCoefficient(7);
+//    if (!dichotomy(cutFreq, 0, M_PI, smoothingCoefficient, 0.001)) {
+//        cout << "Cyclic cut frequency: " << cutFreq << ", cut frequency: " << 2 * M_PI * cutFreq
+//             << ", smooth coeff: " << smoothingCoefficient << endl;
+//    } else {
+//        cout << "Function has no roots on the given interval\n";
+//    }
 
-    smoothingCoefficient = getSmoothingCoefficient(10);
-    if (!dichotomy(cutFreq, 0, M_PI, smoothingCoefficient, 0.001)) {
-        cout << "Cyclic cut frequency: " << cutFreq << ", cut frequency: " << 2 * M_PI * cutFreq
-             << ", smooth coeff: " << smoothingCoefficient << endl;
-    } else {
-        cout << "Function has no roots on the given interval\n";
-    }
+//    smoothingCoefficient = getSmoothingCoefficient(10);
+//    if (!dichotomy(cutFreq, 0, M_PI, smoothingCoefficient, 0.001)) {
+//        cout << "Cyclic cut frequency: " << cutFreq << ", cut frequency: " << 2 * M_PI * cutFreq
+//             << ", smooth coeff: " << smoothingCoefficient << endl;
+//    } else {
+//        cout << "Function has no roots on the given interval\n";
+//    }
 
     return 0;
 }
