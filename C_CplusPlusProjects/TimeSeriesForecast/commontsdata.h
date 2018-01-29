@@ -5,8 +5,6 @@
 
 using namespace std;
 
-const double cSmoothingStep = 0.1;
-const unsigned int cBaseDataWindowSize = 10;
 const double cMinDouble = 1e-10;
 
 struct TimeSeriesValue {
@@ -22,6 +20,11 @@ struct TimeSeriesValue {
 enum InterpolationType {
     LAGRANGE,
     ERMIT_SPLINE
+};
+
+enum RestoreAndSmoothTsWay {
+    EMA,
+    SMA
 };
 
 double linearInterpolation(const double x0, const double y0, const double x1, const double y1,
@@ -47,6 +50,7 @@ int makeWholeTimed(vector<TimeSeriesValue> &signal, const double timeInterval);
 int dichotomy(double &result, double leftIntervalVal, double rightIntervalVal, const double k,
         const double eps);
 
+/*! Print time series to console */
 int printTs(const vector<TimeSeriesValue> timeSeries);
 
 #endif // COMMONTSDATA_H

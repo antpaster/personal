@@ -74,19 +74,25 @@ int main() {
 //    minimumSampleTime = 2;
 
     /* Competleting and smoothing the time series by SMA */
-    vector<TimeSeriesValue> smaCiscoSwitch03 = tsCiscoSwitch03;
+    unsigned int smaWindowSize = 7;
 
-    smaSmoothing(smaCiscoSwitch03, minimumSampleTime, 3);
-    smaAfterSmoothing(smaCiscoSwitch03, 3);
+    vector<TimeSeriesValue> smaCiscoSwitch03 = tsCiscoSwitch03;
+    smaSmoothing(smaCiscoSwitch03, false, minimumSampleTime, smaWindowSize);
     cout << "\nSMA smoothed time series on the existed data\n";
     printTs(smaCiscoSwitch03);
+
+    vector<TimeSeriesValue> doubleSmaCiscoSwitch03 = smaCiscoSwitch03;
+    smaAfterSmoothing(doubleSmaCiscoSwitch03, smaWindowSize);
+    cout << "\nDouble SMA smoothed time series on the existed data\n";
+    printTs(doubleSmaCiscoSwitch03);
 
 //    makeWholeTimed(tsCiscoSwitch03, minimumSampleTime);
 //    cout << tsCiscoSwitch03.max_size() << "\nWhole timed incomlete time series\n";
 //    printTs(tsCiscoSwitch03);
 
     /* Completing time series using EMA forecast **************************************************/
-    unsigned int measureCount = 10 / minimumSampleTime; // For counting the existing data within
+     // For counting the existing data within
+    unsigned int measureCount = cDefaultMeasureCount / minimumSampleTime;
     unsigned int lastIntervalDataCount = 0;
     unsigned int totalDataCount = 0;
 
@@ -108,17 +114,18 @@ int main() {
             lastIntervalDataCount = iData - totalDataCount;
             totalDataCount += lastIntervalDataCount;
             smoothingCoefficients.push_back(getSmoothingCoefficient(calculateWindowSize(
-                    (double) lastIntervalDataCount / (double) measureCount, 0.2, 0.8)));
+                    (double) lastIntervalDataCount / (double) measureCount, cLowDataWindowSizeCoeff,
+                    cHighDataWindowSizeCoeff)));
         }
     }
 
     lastIntervalDataCount = iData - totalDataCount;
     smoothingCoefficients.push_back(getSmoothingCoefficient(calculateWindowSize(
             (double) lastIntervalDataCount / (double) (tsCiscoSwitch03.size() - totalDataCount),
-            0.2, 0.8)));
+            cLowDataWindowSizeCoeff, cHighDataWindowSizeCoeff)));
 
     vector<TimeSeriesValue> emaCiscoSwitch03 = tsCiscoSwitch03;
-    emaSmoothing(emaCiscoSwitch03, smoothingCoefficients, measureCount, minimumSampleTime);
+    emaSmoothing(emaCiscoSwitch03);
 
     cout << "\nFull time series after double EMA\n";
     printTs(emaCiscoSwitch03);
@@ -209,6 +216,19 @@ int main() {
         fprintf(tsValuesFile, "\nFull time series after SMA\n");
         for (unsigned int i = 0; i < smaCiscoSwitch03.size(); i++) {
             fprintf(tsValuesFile, "%f\n", smaCiscoSwitch03[i].value);
+        }
+
+        fprintf(tsValuesFile, "\nShifted back time series after SMA\n");
+        for (unsigned int i = smaWindowSize / 2; i < smaCiscoSwitch03.size(); i++) {
+            fprintf(tsValuesFile, "%f\n", smaCiscoSwitch03[i].value);
+        }
+        for (unsigned int i = 0; i < smaWindowSize / 2; i++) {
+            fprintf(tsValuesFile, "%f\n", smaCiscoSwitch03.back().value);
+        }
+
+        fprintf(tsValuesFile, "\nFull time series after double SMA\n");
+        for (unsigned int i = 0; i < doubleSmaCiscoSwitch03.size(); i++) {
+            fprintf(tsValuesFile, "%f\n", doubleSmaCiscoSwitch03[i].value);
         }
 
         fprintf(tsValuesFile, "\nFull time series after double EMA\n");

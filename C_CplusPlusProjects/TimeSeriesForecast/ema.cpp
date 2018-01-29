@@ -15,26 +15,68 @@ double getSmoothingCoefficient(const unsigned int averagingWindowSize) {
     return (double) 2 / (double) (averagingWindowSize + 1);
 }
 
-unsigned int calculateWindowSize(const double existingDataRatio, const double lowerRationBound,
-        const double upperRatioBound) {
+unsigned int calculateWindowSize(const double existingDataRatio, const double lowRatioBound,
+        const double highRatioBound) {
     // The rarer data comes, the less the smoothing (seems logical)
-    if (existingDataRatio < lowerRationBound) {
-        return 3;
-    } else if (existingDataRatio >= lowerRationBound && existingDataRatio < upperRatioBound) {
-        return linearInterpolation(lowerRationBound, 3, upperRatioBound, 10, existingDataRatio);
+    if (existingDataRatio < lowRatioBound) {
+        return cLowDataWindowSize;
+    } else if (existingDataRatio >= lowRatioBound && existingDataRatio < highRatioBound) {
+        return linearInterpolation(lowRatioBound, cLowDataWindowSize, highRatioBound,
+                cHighDataWindowSize, existingDataRatio);
     } else {
-        return 10;
+        return cHighDataWindowSize;
     }
 }
 
 /*! Time series EMA completing, smoothing and shift reducing */
-int emaSmoothing(vector<TimeSeriesValue> &incompleteTs, const vector<double> smoothCoeffs,
-        const unsigned int measureCount, const double minSampleTime) {
+int emaSmoothing(vector<TimeSeriesValue> &incompleteTs) {
     if (!incompleteTs.empty()) {
+        double timeSample = incompleteTs[1].time - incompleteTs[0].time;
+        double minSampleTime = timeSample;
+        for (unsigned int i = 1; i < incompleteTs.size() - 1; i++) {
+            timeSample = incompleteTs[i + 1].time - incompleteTs[i].time;
+            if (minSampleTime > timeSample) {
+                minSampleTime = timeSample;
+            }
+        }
+
+         // For counting the existing data within
+        unsigned int measureCount = cDefaultMeasureCount / minSampleTime;
+        unsigned int lastIntervalDataCount = 0;
+        unsigned int totalDataCount = 0;
+
+        unsigned int finalTimeMeasuresCount = (minSampleTime <= 1)
+                ? (unsigned int) ((incompleteTs.back().time + 1) / minSampleTime)
+                : (unsigned int) floor(incompleteTs.back().time  / minSampleTime) + 1;
+
+        unsigned int iData = 1; // index of the existing data
+
+        vector<double> smoothCoeffs;
+
+        // Smoothing coefficients definition. Consider that the initial time value is 0
+        for (unsigned int i = 1; i < finalTimeMeasuresCount; i++) {
+            if ((incompleteTs[iData].time - i * minSampleTime) < minSampleTime) {
+                iData++;
+            }
+
+            if (!(i % measureCount)) {
+                lastIntervalDataCount = iData - totalDataCount;
+                totalDataCount += lastIntervalDataCount;
+                smoothCoeffs.push_back(getSmoothingCoefficient(calculateWindowSize(
+                        (double) lastIntervalDataCount / (double) measureCount,
+                        cLowDataWindowSizeCoeff, cHighDataWindowSizeCoeff)));
+            }
+        }
+
+        lastIntervalDataCount = iData - totalDataCount;
+        smoothCoeffs.push_back(getSmoothingCoefficient(calculateWindowSize(
+                (double) lastIntervalDataCount / (double) (incompleteTs.size() - totalDataCount),
+                cLowDataWindowSizeCoeff, cHighDataWindowSizeCoeff)));
+
         vector<TimeSeriesValue> forwardEmaTs;
         forwardEmaTs.push_back(incompleteTs[0]);
 
-        unsigned int iData = 1;
+        iData = 1;
         double emaValue = incompleteTs[0].value;
 
         for (unsigned int i = 1; i <= incompleteTs.back().time / minSampleTime; i++) {

@@ -12,8 +12,8 @@ double getSmaForecastValue(const double lastData, const double firstData, const 
         unsigned int windowSize);
 
 /*! Time series SMA completing and smoothing */
-int smaSmoothing(vector<TimeSeriesValue> &incompleteTs, const double minSampleTime,
-        const unsigned int windowSize);
+int smaSmoothing(vector<TimeSeriesValue> &incompleteTs, const bool isBackward,
+        const double minSampleTime, const unsigned int windowSize);
 
 /*! Time series double (forward and backward) SMA completing and smoothing */
 int smaAfterSmoothing(vector<TimeSeriesValue> &forwardSmaTs, const unsigned int windowSize);
