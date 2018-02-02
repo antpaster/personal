@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <vector>
 
+#include <map>
+#include <typeinfo>
+
 #include "commontsdata.h"
 #include "ema.h"
 #include "sma.h"
@@ -10,7 +13,120 @@
 
 using namespace std;
 
+double getChebyshevFilteredValue(const vector<double> inputValues, const vector<double> inputCoeffs,
+        const vector<double> outputValues, const vector<double> outputCoeffs) {
+    double result = 0;
+    for (unsigned int i = 0; i < outputValues.size(); i++) {
+        result += inputCoeffs[i] * inputValues[i] + outputCoeffs[i] * outputValues[i];
+    }
+    result += inputCoeffs.back() * inputValues.back();
+
+    return result;
+}
+
+// Not good idea for the task
+int oneStepChebyshevSmoothing(const vector<TimeSeriesValue> inputTs,
+        vector<TimeSeriesValue> &outputTs, vector<double> &inputFilterValues,
+        vector<double> &outputFilterValues, unsigned int &iData, const unsigned int i,
+        const double minSampleTime, double &filteredValue) {
+    if (!inputTs.empty() && !outputTs.empty() && !inputFilterValues.empty()
+            && !outputFilterValues.empty()) {
+        // Coefficients go from old at the begin to new at the end
+//        // 2 poles, fc = 0.01, eps = 0.05
+//        vector<double> inputCoeffs = {8.663387e-04, 1.732678e-03, 8.663387e-04};
+//        vector<double> outputCoeffs = {-9.225943e-01, 1.919129};
+
+        // 2 poles, fc = 0.01, eps = 0.05
+        vector<double> inputCoeffs = {0.285811, 0.5716221, 0.285811};
+        vector<double> outputCoeffs = {-0.1974768, 5.423258e-02};
+
+        if (inputTs[iData].time - i * minSampleTime < minSampleTime) {
+            if (inputFilterValues.size() >= inputCoeffs.size()) {
+                for (unsigned int j = 0; j < inputCoeffs.size() - 1; j++) {
+                    inputFilterValues[j] = inputFilterValues[j + 1];
+                }
+                inputFilterValues[inputCoeffs.size() - 1] = inputTs[iData].value;
+            } else {
+                inputFilterValues.push_back(inputTs[iData].value);
+            }
+
+            iData++;
+        }
+
+        filteredValue = getChebyshevFilteredValue(inputFilterValues, inputCoeffs,
+                outputFilterValues, outputCoeffs);
+
+        outputTs.push_back({filteredValue, i * minSampleTime});
+
+        if (inputFilterValues.size() >= inputCoeffs.size()) {
+            for (unsigned int j = 0; j < inputCoeffs.size() - 1; j++) {
+                inputFilterValues[j] = inputFilterValues[j + 1];
+            }
+            inputFilterValues[inputCoeffs.size() - 1] = inputTs[i].value;
+        } else {
+            inputFilterValues.push_back(inputTs[i].value);
+        }
+
+        if (outputFilterValues.size() >= outputCoeffs.size()) {
+            for (unsigned int j = 0; j < outputCoeffs.size() - 1; j++) {
+                outputFilterValues[j] = outputFilterValues[j + 1];
+            }
+            outputFilterValues[outputCoeffs.size() - 1] = outputTs[i].value;
+        } else {
+            outputFilterValues.push_back(outputTs[i].value);
+        }
+
+        return 0;
+    }
+
+    return 1;
+}
+
+int chebyshevSmoothing(vector<TimeSeriesValue> &inputTs, const bool isBackward,
+        const double minSampleTime) {
+    if (!inputTs.empty()) {
+        vector<TimeSeriesValue> fullChebyshevTs;
+        fullChebyshevTs.push_back(inputTs[0]);
+
+        vector<double> inputValues = {inputTs[0].value, inputTs[0].value, inputTs[0].value};
+        vector<double> outputValues = {inputTs[0].value, inputTs[0].value};
+
+        double filteredValue;
+
+        unsigned int iData;
+
+        if (isBackward) {
+            iData = inputTs.size() - 2;
+
+            for (int i = inputTs.size() - 2; i >= 0; i--) {
+                oneStepChebyshevSmoothing(inputTs, fullChebyshevTs, inputValues, outputValues,
+                        iData, i, minSampleTime, filteredValue);
+            }
+        } else {
+            iData = 1;
+
+            for (unsigned int i = 1; i < inputTs.back().time / minSampleTime + 1; i++) {
+                oneStepChebyshevSmoothing(inputTs, fullChebyshevTs, inputValues, outputValues,
+                        iData, i, minSampleTime, filteredValue);
+            }
+        }
+
+        inputTs.clear();
+        inputTs = fullChebyshevTs;
+
+        return 0;
+    }
+
+    return 1;
+}
+
 int main() {
+//    map<double, double> tsMap;
+//    tsMap[0] = 1;
+//    auto itTsMap = tsMap.begin();
+//    cout << typeid(itTsMap).name() << ' ' << itTsMap->first << ": " << itTsMap->second << endl;
+//    return 0;
+
     vector<TimeSeriesValue> tsCiscoSwitch03;
 
     tsCiscoSwitch03.push_back({7, 0});
@@ -18,27 +134,27 @@ int main() {
     tsCiscoSwitch03.push_back({11, 7});
     tsCiscoSwitch03.push_back({7, 8});
     tsCiscoSwitch03.push_back({39.5, 10});
-    tsCiscoSwitch03.push_back({11, 11});
-    tsCiscoSwitch03.push_back({7, 13});
-    tsCiscoSwitch03.push_back({6, 14});
-    tsCiscoSwitch03.push_back({7, 15});
-    tsCiscoSwitch03.push_back({7, 17});
-    tsCiscoSwitch03.push_back({7, 18});
-    tsCiscoSwitch03.push_back({7, 19});
-    tsCiscoSwitch03.push_back({6.5, 20});
-    tsCiscoSwitch03.push_back({14, 21});
-    tsCiscoSwitch03.push_back({10, 22});
-    tsCiscoSwitch03.push_back({8.5, 23});
+//    tsCiscoSwitch03.push_back({11, 11});
+//    tsCiscoSwitch03.push_back({7, 13});
+//    tsCiscoSwitch03.push_back({6, 14});
+//    tsCiscoSwitch03.push_back({7, 15});
+//    tsCiscoSwitch03.push_back({7, 17});
+//    tsCiscoSwitch03.push_back({7, 18});
+//    tsCiscoSwitch03.push_back({7, 19});
+//    tsCiscoSwitch03.push_back({6.5, 20});
+//    tsCiscoSwitch03.push_back({14, 21});
+//    tsCiscoSwitch03.push_back({10, 22});
+//    tsCiscoSwitch03.push_back({8.5, 23});
 
-    tsCiscoSwitch03.push_back({3, 25});
-    tsCiscoSwitch03.push_back({9, 27});
-    tsCiscoSwitch03.push_back({11, 28});
-    tsCiscoSwitch03.push_back({7, 30});
-    tsCiscoSwitch03.push_back({49.5, 31});
-    tsCiscoSwitch03.push_back({11, 32});
-    tsCiscoSwitch03.push_back({7, 33});
-    tsCiscoSwitch03.push_back({6, 34});
-    tsCiscoSwitch03.push_back({11, 37});
+//    tsCiscoSwitch03.push_back({3, 25});
+//    tsCiscoSwitch03.push_back({9, 27});
+//    tsCiscoSwitch03.push_back({11, 28});
+//    tsCiscoSwitch03.push_back({7, 30});
+//    tsCiscoSwitch03.push_back({49.5, 31});
+//    tsCiscoSwitch03.push_back({11, 32});
+//    tsCiscoSwitch03.push_back({7, 33});
+//    tsCiscoSwitch03.push_back({6, 34});
+//    tsCiscoSwitch03.push_back({11, 37});
     tsCiscoSwitch03.push_back({8, 38});
     tsCiscoSwitch03.push_back({8, 41});
     tsCiscoSwitch03.push_back({7, 43});
@@ -72,6 +188,12 @@ int main() {
     }
 
 //    minimumSampleTime = 2;
+
+//    vector<TimeSeriesValue> chebyshevCiscoSwitch03 = tsCiscoSwitch03;
+//    chebyshevSmoothing(chebyshevCiscoSwitch03, false, minimumSampleTime);
+//    cout << "\nOne way low pass Chebyshev restoring and smoothing\n";
+//    printTs(chebyshevCiscoSwitch03);
+//    return 0;
 
     /* Competleting and smoothing the time series by SMA */
     unsigned int smaWindowSize = 7;
@@ -125,7 +247,7 @@ int main() {
             cLowDataWindowSizeCoeff, cHighDataWindowSizeCoeff)));
 
     vector<TimeSeriesValue> emaCiscoSwitch03 = tsCiscoSwitch03;
-    emaSmoothing(emaCiscoSwitch03);
+    emaSmoothing(emaCiscoSwitch03, minimumSampleTime);
 
     cout << "\nFull time series after double EMA\n";
     printTs(emaCiscoSwitch03);

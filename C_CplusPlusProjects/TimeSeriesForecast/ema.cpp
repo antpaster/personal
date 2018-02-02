@@ -29,7 +29,7 @@ unsigned int calculateWindowSize(const double existingDataRatio, const double lo
 }
 
 /*! Time series EMA completing, smoothing and shift reducing */
-int emaSmoothing(vector<TimeSeriesValue> &incompleteTs) {
+int emaSmoothing(vector<TimeSeriesValue> &incompleteTs, const double resultMinSampleTime) {
     if (!incompleteTs.empty()) {
         double timeSample = incompleteTs[1].time - incompleteTs[0].time;
         double minSampleTime = timeSample;
@@ -79,6 +79,7 @@ int emaSmoothing(vector<TimeSeriesValue> &incompleteTs) {
         iData = 1;
         double emaValue = incompleteTs[0].value;
 
+        // Time series restoring and smoothing using EMA with adaptive window. Forward stage
         for (unsigned int i = 1; i <= incompleteTs.back().time / minSampleTime; i++) {
             if (incompleteTs[iData].time - i * minSampleTime < minSampleTime) {
                 emaValue = getEmaForecastValue(incompleteTs[iData].value,
@@ -96,8 +97,7 @@ int emaSmoothing(vector<TimeSeriesValue> &incompleteTs) {
         vector<TimeSeriesValue> backwardEmaTs;
         backwardEmaTs.push_back(forwardEmaTs.back());
 
-        // Making full time series using EMA with adaptive window. Backward stage, now the series is
-        // zero phased
+        // Backward stage stage of EMA, now the full time series is zero phased
         unsigned int iBackward;
         for (unsigned int i = 1; i < forwardEmaTs.size(); i++) {
             iBackward = forwardEmaTs.size() - i - 1;
@@ -114,8 +114,14 @@ int emaSmoothing(vector<TimeSeriesValue> &incompleteTs) {
             backwardEmaTs[backwardEmaTs.size() - i - 1] = swapTsValue;
         }
 
+        // Downsampling time series according to the result minimum sample time
         incompleteTs.clear();
-        incompleteTs = backwardEmaTs;
+        unsigned int downsamplingCoeff = (unsigned int) ceil(resultMinSampleTime / minSampleTime);
+        for (unsigned int i = downsamplingCoeff; i < backwardEmaTs.size();
+            i += downsamplingCoeff) {
+            incompleteTs.push_back(backwardEmaTs[i]);
+        }
+        incompleteTs.push_back(backwardEmaTs.back());
 
         return 0;
     }

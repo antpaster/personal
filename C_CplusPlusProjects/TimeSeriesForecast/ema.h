@@ -24,7 +24,7 @@ unsigned int calculateWindowSize(const double existingDataRatio, const double lo
         const double upperRatioBound);
 
 /*! Time series EMA completing, smoothing and shift reducing */
-int emaSmoothing(vector<TimeSeriesValue> &incompleteTs);
+int emaSmoothing(vector<TimeSeriesValue> &incompleteTs, const double resultMinSampleTime);
 
 /*! EMA amplitude frequency response function */
 double emaSquareAmplitudeEquation(const double k, const double omega);
