@@ -134,27 +134,27 @@ int main() {
     tsCiscoSwitch03.push_back({11, 7});
     tsCiscoSwitch03.push_back({7, 8});
     tsCiscoSwitch03.push_back({39.5, 10});
-//    tsCiscoSwitch03.push_back({11, 11});
-//    tsCiscoSwitch03.push_back({7, 13});
-//    tsCiscoSwitch03.push_back({6, 14});
-//    tsCiscoSwitch03.push_back({7, 15});
-//    tsCiscoSwitch03.push_back({7, 17});
-//    tsCiscoSwitch03.push_back({7, 18});
-//    tsCiscoSwitch03.push_back({7, 19});
-//    tsCiscoSwitch03.push_back({6.5, 20});
-//    tsCiscoSwitch03.push_back({14, 21});
-//    tsCiscoSwitch03.push_back({10, 22});
-//    tsCiscoSwitch03.push_back({8.5, 23});
+    tsCiscoSwitch03.push_back({11, 11});
+    tsCiscoSwitch03.push_back({7, 13});
+    tsCiscoSwitch03.push_back({6, 14});
+    tsCiscoSwitch03.push_back({7, 15});
+    tsCiscoSwitch03.push_back({7, 17});
+    tsCiscoSwitch03.push_back({7, 18});
+    tsCiscoSwitch03.push_back({7, 19});
+    tsCiscoSwitch03.push_back({6.5, 20});
+    tsCiscoSwitch03.push_back({14, 21});
+    tsCiscoSwitch03.push_back({10, 22});
+    tsCiscoSwitch03.push_back({8.5, 23});
 
-//    tsCiscoSwitch03.push_back({3, 25});
-//    tsCiscoSwitch03.push_back({9, 27});
-//    tsCiscoSwitch03.push_back({11, 28});
-//    tsCiscoSwitch03.push_back({7, 30});
-//    tsCiscoSwitch03.push_back({49.5, 31});
-//    tsCiscoSwitch03.push_back({11, 32});
-//    tsCiscoSwitch03.push_back({7, 33});
-//    tsCiscoSwitch03.push_back({6, 34});
-//    tsCiscoSwitch03.push_back({11, 37});
+    tsCiscoSwitch03.push_back({3, 25});
+    tsCiscoSwitch03.push_back({9, 27});
+    tsCiscoSwitch03.push_back({11, 28});
+    tsCiscoSwitch03.push_back({7, 30});
+    tsCiscoSwitch03.push_back({49.5, 31});
+    tsCiscoSwitch03.push_back({11, 32});
+    tsCiscoSwitch03.push_back({7, 33});
+    tsCiscoSwitch03.push_back({6, 34});
+    tsCiscoSwitch03.push_back({11, 37});
     tsCiscoSwitch03.push_back({8, 38});
     tsCiscoSwitch03.push_back({8, 41});
     tsCiscoSwitch03.push_back({7, 43});
@@ -247,7 +247,7 @@ int main() {
             cLowDataWindowSizeCoeff, cHighDataWindowSizeCoeff)));
 
     vector<TimeSeriesValue> emaCiscoSwitch03 = tsCiscoSwitch03;
-    emaSmoothing(emaCiscoSwitch03, minimumSampleTime);
+    emaSmoothing(emaCiscoSwitch03, /*minimumSampleTime*/5);
 
     cout << "\nFull time series after double EMA\n";
     printTs(emaCiscoSwitch03);

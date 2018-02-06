@@ -11,7 +11,7 @@ const unsigned int cLowDataWindowSize = 3;
 const double cHighDataWindowSizeCoeff = 0.8;
 const unsigned int cHighDataWindowSize = 10;
 
-const unsigned int cDefaultMeasureCount = 50;
+const unsigned int cDefaultMeasureCount = 500;
 
 /*! Exponential moving average formula */
 double getEmaForecastValue(const double forecastData, const double smoothingCoeff,
