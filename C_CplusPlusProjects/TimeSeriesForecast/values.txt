@@ -207,17 +207,8 @@ Full time series after double SMA
 12.105054
 
 Full time series after double EMA
-7.744007
-9.029213
-11.632714
-9.616540
-9.403357
-9.840958
-12.698921
-12.578742
-13.773657
-17.301120
-16.061060
+7.000000
+7.000000
 
 Full time series after linear interpolation
 7.000000
@@ -272,10 +263,8 @@ Full time series after linear interpolation
 8.500000
 
 Downsampled double EMA time series
-7.744007
-9.840958
-16.061060
-16.061060
+7.000000
+7.000000
 
 Downsampled linear interpolated time series
 7.000000

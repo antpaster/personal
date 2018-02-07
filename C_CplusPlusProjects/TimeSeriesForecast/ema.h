@@ -2,16 +2,11 @@
 #define EMA_H
 
 #include <vector>
+#include <map>
 
 #include "commontsdata.h"
 
-const double cLowDataWindowSizeCoeff = 0.2;
-const unsigned int cLowDataWindowSize = 3;
-
-const double cHighDataWindowSizeCoeff = 0.8;
-const unsigned int cHighDataWindowSize = 10;
-
-const unsigned int cDefaultMeasureCount = 500;
+const unsigned int cRmeasureIntervalCount = 5;
 
 /*! Exponential moving average formula */
 double getEmaForecastValue(const double forecastData, const double smoothingCoeff,
@@ -20,11 +15,12 @@ double getEmaForecastValue(const double forecastData, const double smoothingCoef
 /*! Smoothing coefficient formula depending on the averaging window size */
 double getSmoothingCoefficient(const unsigned int averagingWindowSize);
 
-unsigned int calculateWindowSize(const double existingDataRatio, const double lowerRationBound,
-        const double upperRatioBound);
+unsigned int calculateWindowSize(const double existingDataRatio,
+        const map<int, double> smoothingWindowChars);
 
 /*! Time series EMA completing, smoothing and shift reducing */
-int emaSmoothing(vector<TimeSeriesValue> &incompleteTs, const double resultMinSampleTime);
+int emaSmoothing(vector<TimeSeriesValue> &incompleteTs, const map<int, double> smoothingWindowChars,
+        const double resultMinSampleTime);
 
 /*! EMA amplitude frequency response function */
 double emaSquareAmplitudeEquation(const double k, const double omega);

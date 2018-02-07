@@ -1,6 +1,7 @@
-#include <vector>
 #include <iostream>
-#include "math.h"
+#include <math.h>
+#include <vector>
+#include <map>
 
 #include "commontsdata.h"
 #include "ema.h"
@@ -16,22 +17,32 @@ double getSmoothingCoefficient(const unsigned int averagingWindowSize) {
     return (double) 2 / (double) (averagingWindowSize + 1);
 }
 
-unsigned int calculateWindowSize(const double existingDataRatio, const double lowRatioBound,
-        const double highRatioBound) {
+unsigned int calculateWindowSize(const double existingDataRatio,
+        const map<int, double> smoothingWindowChars) {
     // The rarer data comes, the less the smoothing (seems logical)
-    if (existingDataRatio < lowRatioBound) {
-        return cLowDataWindowSize;
-    } else if (existingDataRatio >= lowRatioBound && existingDataRatio < highRatioBound) {
-        return linearInterpolation(lowRatioBound, cLowDataWindowSize, highRatioBound,
-                cHighDataWindowSize, existingDataRatio);
+    auto itLowChars = smoothingWindowChars.begin();
+    auto itHighChars = ++itLowChars;
+    --itLowChars;
+
+    if (existingDataRatio < itLowChars->second) {
+        return itLowChars->first;
+    } else if (existingDataRatio >= itLowChars->second && existingDataRatio < itHighChars->second) {
+        return linearInterpolation(itLowChars->second, itLowChars->first, itHighChars->second,
+                itHighChars->first, existingDataRatio);
     } else {
-        return cHighDataWindowSize;
+        return itHighChars->first;
     }
 }
 
 /*! Time series EMA completing, smoothing and shift reducing */
-int emaSmoothing(vector<TimeSeriesValue> &incompleteTs, const double resultMinSampleTime) {
-    if (!incompleteTs.empty()) {
+int emaSmoothing(vector<TimeSeriesValue> &incompleteTs, const map<int, double> smoothingWindowChars,
+        const double resultMinSampleTime) {
+    if (!incompleteTs.empty() && !smoothingWindowChars.empty()) {
+        // Converting times from microseconds to seconds
+        for (unsigned int i = 0; i < incompleteTs.size(); i++) {
+            incompleteTs[i].time *= 1e-6;
+        }
+
         double timeSample = incompleteTs[1].time - incompleteTs[0].time;
         double minSampleTime = timeSample;
         for (unsigned int i = 1; i < incompleteTs.size() - 1; i++) {
@@ -45,19 +56,13 @@ int emaSmoothing(vector<TimeSeriesValue> &incompleteTs, const double resultMinSa
             minSampleTime = 1;
         }
 
-        std::wcout << std::to_wstring(minSampleTime) << endl;
+        unsigned int finalTimeMeasuresCount = (unsigned int) ((incompleteTs.back().time
+                - incompleteTs[0].time) / minSampleTime) + 1;
 
-         // For counting the existing data within
-        unsigned int measureCount = cDefaultMeasureCount / minSampleTime;
+        // For counting the existing data within
+        unsigned int measureCount = cRmeasureIntervalCount * finalTimeMeasuresCount;
         unsigned int lastIntervalDataCount = 0;
         unsigned int totalDataCount = 0;
-
-        unsigned int finalTimeMeasuresCount = /*(minSampleTime <= 1)
-                ? (unsigned int) ((incompleteTs.back().time + 1) / minSampleTime)
-                : (unsigned int) floor(incompleteTs.back().time  / minSampleTime) + 1;*/
-        (unsigned int) ((incompleteTs.back().time - incompleteTs[0].time) / minSampleTime) + 1;
-
-        std::wcout << std::to_wstring(finalTimeMeasuresCount) << endl;
 
         unsigned int iData = 1; // index of the existing data
 
@@ -65,26 +70,24 @@ int emaSmoothing(vector<TimeSeriesValue> &incompleteTs, const double resultMinSa
 
         // Smoothing coefficients definition
         for (unsigned int i = 1; i < finalTimeMeasuresCount; i++) {
-            if ((incompleteTs[iData].time - i * minSampleTime - incompleteTs[0].time)
-                    < minSampleTime) {
-                iData++;
-            }
-
             if (!(i % measureCount)) {
                 lastIntervalDataCount = iData - totalDataCount;
                 totalDataCount += lastIntervalDataCount;
                 smoothCoeffs.push_back(getSmoothingCoefficient(calculateWindowSize(
                         (double) lastIntervalDataCount / (double) measureCount,
-                        cLowDataWindowSizeCoeff, cHighDataWindowSizeCoeff)));
+                        smoothingWindowChars)));
+            }
+
+            if ((incompleteTs[iData].time - i * minSampleTime - incompleteTs[0].time)
+                    < minSampleTime) {
+                iData++;
             }
         }
 
         lastIntervalDataCount = iData - totalDataCount;
         smoothCoeffs.push_back(getSmoothingCoefficient(calculateWindowSize(
                 (double) lastIntervalDataCount / (double) (incompleteTs.size() - totalDataCount),
-                cLowDataWindowSizeCoeff, cHighDataWindowSizeCoeff)));
-
-        std::wcout << "Coeffs are done\n";
+                smoothingWindowChars)));
 
         vector<TimeSeriesValue> forwardEmaTs;
         forwardEmaTs.push_back(incompleteTs[0]);
@@ -93,7 +96,7 @@ int emaSmoothing(vector<TimeSeriesValue> &incompleteTs, const double resultMinSa
         double emaValue = incompleteTs[0].value;
 
         // Time series restoring and smoothing using EMA with adaptive window. Forward stage
-        for (unsigned int i = 1; i </*= incompleteTs.back().time / minSampleTime*/ finalTimeMeasuresCount; i++) {
+        for (unsigned int i = 1; i < finalTimeMeasuresCount; i++) {
             if (incompleteTs[iData].time - i * minSampleTime - incompleteTs[0].time
                     < minSampleTime) {
                 emaValue = getEmaForecastValue(incompleteTs[iData].value,
@@ -130,17 +133,15 @@ int emaSmoothing(vector<TimeSeriesValue> &incompleteTs, const double resultMinSa
 
         // Downsampling time series according to the result minimum sample time
         incompleteTs.clear();
-        incompleteTs.push_back(backwardEmaTs[0]);
+        incompleteTs.push_back({backwardEmaTs[0].value, backwardEmaTs[0].time * 1e+06});
 
         unsigned int downsamplingCoeff = (unsigned int) ceil(resultMinSampleTime / minSampleTime);
 
-        std::wcout << std::to_wstring(downsamplingCoeff) << endl;
-
         for (unsigned int i = downsamplingCoeff; i < backwardEmaTs.size() - 1;
             i += downsamplingCoeff) {
-            incompleteTs.push_back(backwardEmaTs[i]);
+            incompleteTs.push_back({backwardEmaTs[i].value, backwardEmaTs[i].time * 1e+06});
         }
-        incompleteTs.push_back(backwardEmaTs.back());
+        incompleteTs.push_back({backwardEmaTs.back().value, backwardEmaTs.back().time * 1e+06});
 
         return 0;
     }
