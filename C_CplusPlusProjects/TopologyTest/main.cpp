@@ -20,7 +20,7 @@ inline int infoAndExit(const char *programName)
             << "\nOptions:\n"
             << "\t-n NODE_COUNT [10..50000]\tSpecify nodes count in the topology\n"
             << "\t-lc LAYER_COUNT [2..NODE_COUNT]\tSpecify layers count in the topology\n"
-            << "\t-cc COMPONENT_COUNT [1..1000]\tSpecify processes and interfaces count in a single node\n"
+            << "\t-cc COMPONENT_COUNT [1..1000]\tSpecify processes count and interfaces count in a single node\n"
             << "\t[-ml MAKE_LINKS]\tIf presents, nodes in the topology will be connected. Specify this parameter if "
                "INSTANCES_COUNT = INSTANCE_NUMBER\n"
             << "\t-ic INSTANCES_COUNT [1..5]\tSpecify total instances of this program to be launched\n"
@@ -202,32 +202,6 @@ int main(int argc, char* argv[])
 
     makeContainerTopo(layerCount - 2, containerBase, *leafParentsNames, *childrenNames, topoContainerSnippets,
             instanceNumber == 1);
-
-//    for (int i = 0; i < containerBase; ++i)
-//    {
-//        if (instanceNumber == 1)
-//        {
-//            outputStr = topoContainerSnippets[0] + "root" + topoContainerSnippets[1] + containerStr + to_string(i)
-//                    + topoContainerSnippets[2] + containerStr + to_string(i) + topoContainerSnippets[3];
-//            cout << outputStr;
-//        }
-//    }
-
-//    for (int i = 0; i < containerBase; ++i)
-//    {
-//        parentContainerStrings->push_back(containerStr + to_string(i));
-//        for (int j = 0; j < containerBase; ++j)
-//        {
-//            leafParents->push_back((*parentContainerStrings)[i] + to_string(j));
-//            if (instanceNumber == 1)
-//            {
-//                outputStr = topoContainerSnippets[0] + (*parentContainerStrings)[i] + topoContainerSnippets[1]
-//                        + (*parentContainerStrings)[i] + to_string(j) + topoContainerSnippets[2] + (*parentContainerStrings)[i]
-//                        + to_string(j) + topoContainerSnippets[3];
-//                cout << outputStr;
-//            }
-//        }
-//    }
 
     delete childrenNames;
 
