@@ -172,13 +172,22 @@ int main(int argc, char* argv[])
     totalLeafCount = 100;
     currentLeafCount = totalLeafCount / instanceCount + ((instanceNumber == instanceCount) ? (totalLeafCount % instanceCount) : 0);
 
-    fstream createModels("models.txt", ios::out | ios::trunc);
+    ofstream simpleModelsCreation("simpleModelsCreation.txt", ios::trunc);
 #endif
 
     int containerBase = (int)pow((double)totalLeafCount, 1.0 / (double)(layerCount - 1));
 #if DEBUG
     cout << "Layer count: " << layerCount << ", node count: " << currentLeafCount << ", log base: " << containerBase << endl;
 #endif
+
+    // Writing node count and component count into the file for further using by ModelsParamsTest
+    ofstream topoTestParams("../topoTestParams.txt", ios::trunc);
+    if (topoTestParams.is_open())
+    {
+        topoTestParams << "Node count = " << totalLeafCount
+             << "\nComponent count = " << componentCount << endl;
+    }
+    topoTestParams.close();
 
     /** Making the container tree *********************************************************************************************************/
     array<string, 4> topoContainerSnippets
@@ -244,9 +253,9 @@ int main(int argc, char* argv[])
                     + topoLeafSnippets[3] + to_string(leafIndex) + topoLeafSnippets[4];
             cout << outputStr;
 #if DEBUG
-                if (createModels.is_open())
+                if (simpleModelsCreation.is_open())
                 {
-                    createModels << outputStr;
+                    simpleModelsCreation << outputStr;
                 }
 #endif
             leafIndex++;
@@ -294,9 +303,9 @@ int main(int argc, char* argv[])
                         + to_string(j) + topoComponentSnippets[3];
                 cout << outputStr;
 #if DEBUG
-                if (createModels.is_open())
+                if (simpleModelsCreation.is_open())
                 {
-                    createModels << outputStr;
+                    simpleModelsCreation << outputStr;
                 }
 #endif
             }
@@ -413,7 +422,7 @@ int main(int argc, char* argv[])
 #if DEBUG
     getchar();
 
-    createModels.close();
+    simpleModelsCreation.close();
 #endif
 
     return 0;

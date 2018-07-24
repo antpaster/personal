@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <cstdlib>
 #include <ctime>
@@ -6,6 +7,7 @@
 #include <thread>
 
 #include <list>
+#include <vector>
 #include <array>
 
 #define DEBUG 0
@@ -16,8 +18,8 @@ inline int infoAndExit(const char *programName)
 {
     cerr << "Usage: " << programName << " <option(s)> VALUES"
             << "\nOptions:\n"
-            << "\t-n NODE_COUNT [10..50000]\tSpecify nodes count in the topology\n"
-            << "\t-cc COMPONENT_COUNT [1..1000]\tSpecify processes count and interfaces count in a single node\n"
+//            << "\t-n NODE_COUNT [10..50000]\tSpecify nodes count in the topology\n"
+//            << "\t-cc COMPONENT_COUNT [1..1000]\tSpecify processes count and interfaces count in a single node\n"
             << "\t-s SLEEP\tSpecify sleep duration in seconds between models parameters setting"
             << endl;
     return 1;
@@ -66,23 +68,65 @@ string randMacAddress()
     return result;
 }
 
+void parseParamsFromFile(int &nodeCount, int &componentCount)
+{
+    ifstream topoTestParams("../topoTestParams.txt");
+    vector<string> lines;
+    string line;
+    size_t equalSignIndex;
+    if (topoTestParams.is_open())
+    {
+        while(getline(topoTestParams, line))
+        {
+            equalSignIndex = line.find_last_of('=');
+            lines.push_back(line.substr(equalSignIndex + 2));
+        }
+
+        if (lines.size() == 2)
+        {
+            nodeCount = stoi(lines[0]);
+            componentCount = stoi(lines[1]);
+        }
+    }
+    topoTestParams.close();
+}
+
 int main(int argc, char* argv[])
 {
     int nodeCount, componentCount, sleepDurationSec;
 
 #if !DEBUG
-    if (argc != 7)
+//    // Without topoTestParams.txt
+//    if (argc != 7)
+//    {
+//        return infoAndExit(argv[0]);
+//    }
+//    else
+//    {
+//        array<string, 3> paramNames{argv[1], argv[3], argv[5]};
+//        if (!paramNames[0].compare("-n") && !paramNames[1].compare("-cc") && !paramNames[2].compare("-s"))
+//        {
+//            nodeCount = stoi(argv[2]);
+//            componentCount = stoi(argv[4]);
+//            sleepDurationSec = stoi(argv[6]);
+//        }
+//        else
+//        {
+//            return infoAndExit(argv[0]);
+//        }
+//    }
+
+    // With topoTestParams.txt
+    if (argc != 3)
     {
         return infoAndExit(argv[0]);
     }
     else
     {
-        array<string, 3> paramNames{argv[1], argv[3], argv[5]};
-        if (!paramNames[0].compare("-n") && !paramNames[1].compare("-cc") && !paramNames[2].compare("-s"))
+        string paramName{argv[1]};
+        if (!paramName.compare("-s"))
         {
-            nodeCount = stoi(argv[2]);
-            componentCount = stoi(argv[4]);
-            sleepDurationSec = stoi(argv[6]);
+            sleepDurationSec = stoi(argv[2]);
         }
         else
         {
@@ -94,6 +138,8 @@ int main(int argc, char* argv[])
     componentCount = 5;
     sleepDurationSec = 60;
 #endif
+
+    parseParamsFromFile(nodeCount, componentCount);
 
     const string commonNodeName = "unixHost";
 
@@ -120,10 +166,11 @@ int main(int argc, char* argv[])
         }
     };
 
-    array<string, 44> updateInterfaceSnippets
+    array<string, 45> updateInterfaceSnippets
     {
         "updateComponent VariableContainer[modelAddr: Address[\"",
-        "\"], cTag: \"interface\", ifIndex: ",
+        "\"], cTag: \"interface\", id: \"",
+        "\", ifIndex: ",
         ", ifType: ",
         ", ifName: \"",
         "\", description: \"",
@@ -266,51 +313,53 @@ int main(int argc, char* argv[])
         {
             for (int i = 0; i < defaultComponents[0].second; ++i) // interfaces updating
             {
+                componentName = defaultComponents[0].first + to_string(id) + '_' + to_string(i);
                 ifSpeed = rand() % 65536;
                 outputStr = updateInterfaceSnippets[0] + commonNodeName + to_string(id)
-                        + updateInterfaceSnippets[1] + to_string(componentCounter) // ifIndex
-                        + updateInterfaceSnippets[2] + to_string(rand() % 6) // ifType
-                        + updateInterfaceSnippets[3] + defaultComponents[0].first + to_string(componentCounter) // ifName
-                        + updateInterfaceSnippets[4] + randAsciiIntervalString(20, 97, 123) // description
-                        + updateInterfaceSnippets[5] + to_string(rand() % 6) // operStatus
-                        + updateInterfaceSnippets[6] + to_string(rand() % 6) // adminStatus
-                        + updateInterfaceSnippets[7] + randLocalIp() // ipAddress
-                        + updateInterfaceSnippets[8] + to_string(68 + rand() % (65536 - 68)) // ifMtu
-                        + updateInterfaceSnippets[9] + randMacAddress() // physAddress
-                        + updateInterfaceSnippets[10] + to_string(ifSpeed) // speed
-                        + updateInterfaceSnippets[11] + randAsciiIntervalString(15, 97, 123) // trunkDynamicState
-                        + updateInterfaceSnippets[12] + randAsciiIntervalString(15, 97, 123) // trunkDynamicStatus
-                        + updateInterfaceSnippets[13] + to_string(rand() % 65536) // ifInOctets
-                        + updateInterfaceSnippets[14] + to_string(rand() % 65536) // ifInUcastPkts
-                        + updateInterfaceSnippets[15] + to_string(rand() % 65536) // ifInNUcastPkts
-                        + updateInterfaceSnippets[16] + to_string(rand() % 65536) // ifInDiscards
-                        + updateInterfaceSnippets[17] + to_string(rand() % 65536) // ifInErrors
-                        + updateInterfaceSnippets[18] + to_string(rand() % 65536) // ifInUnknownProtos
-                        + updateInterfaceSnippets[19] + to_string(rand() % 65536) // ifOutOctets
-                        + updateInterfaceSnippets[20] + to_string(rand() % 65536) // ifOutUcastPkts
-                        + updateInterfaceSnippets[21] + to_string(rand() % 65536) // ifOutNUcastPkts
-                        + updateInterfaceSnippets[22] + to_string(rand() % 65536) // ifOutDiscards
-                        + updateInterfaceSnippets[23] + to_string(rand() % 65536) // ifOutErrors
-                        + updateInterfaceSnippets[24] + to_string(rand() % 65536) // ifOutQLen
-                        + updateInterfaceSnippets[25] + to_string(rand() % 65536) // ifSpecific
-                        + updateInterfaceSnippets[26] + randAsciiIntervalString(15, 97, 123) // ifAlias
-                        + updateInterfaceSnippets[27] + randLocalIp() // neighbour
-                        + updateInterfaceSnippets[28] + to_string(rand() % 65536) // ifInMulticastPkts
-                        + updateInterfaceSnippets[29] + to_string(rand() % 65536) // ifInBroadcastPkts
-                        + updateInterfaceSnippets[30] + to_string(rand() % 65536) // ifOutMulticastPkts
-                        + updateInterfaceSnippets[31] + to_string(rand() % 65536) // ifOutBroadcastPkts
-                        + updateInterfaceSnippets[32] + to_string(rand() % 65536) // ifHCInOctets
-                        + updateInterfaceSnippets[33] + to_string(rand() % 65536) // ifHCInUcastPkts
-                        + updateInterfaceSnippets[34] + to_string(rand() % 65536) // ifHCInMulticastPkts
-                        + updateInterfaceSnippets[35] + to_string(rand() % 65536) // ifHCInBroadcastPkts
-                        + updateInterfaceSnippets[36] + to_string(rand() % 65536) // ifHCOutOctets
-                        + updateInterfaceSnippets[37] + to_string(rand() % 65536) // ifHCOutUcastPkts
-                        + updateInterfaceSnippets[38] + to_string(rand() % 65536) // ifHCOutMulticastPkts
-                        + updateInterfaceSnippets[39] + to_string(rand() % 65536) // ifHCOutBroadcastPkts
-                        + updateInterfaceSnippets[40] + to_string(ifSpeed + rand() % (65536 - ifSpeed)) // ifHighSpeed
-                        + updateInterfaceSnippets[41] + randAsciiIntervalString(15, 97, 123) // dot3StatsDuplexStatus
-                        + updateInterfaceSnippets[42] + randAsciiIntervalString(15, 97, 123) // vlan
-                        + updateInterfaceSnippets[43];
+                        + updateInterfaceSnippets[1] + componentName // id
+                        + updateInterfaceSnippets[2] + to_string(componentCounter) // ifIndex
+                        + updateInterfaceSnippets[3] + to_string(rand() % 6) // ifType
+                        + updateInterfaceSnippets[4] + componentName // ifName
+                        + updateInterfaceSnippets[5] + componentName + ' ' + randAsciiIntervalString(15, 97, 123) // description
+                        + updateInterfaceSnippets[6] + to_string(rand() % 6) // operStatus
+                        + updateInterfaceSnippets[7] + to_string(rand() % 6) // adminStatus
+                        + updateInterfaceSnippets[8] + randLocalIp() // ipAddress
+                        + updateInterfaceSnippets[9] + to_string(68 + rand() % (65536 - 68)) // ifMtu
+                        + updateInterfaceSnippets[10] + randMacAddress() // physAddress
+                        + updateInterfaceSnippets[11] + to_string(ifSpeed) // speed
+                        + updateInterfaceSnippets[12] + randAsciiIntervalString(15, 97, 123) // trunkDynamicState
+                        + updateInterfaceSnippets[13] + randAsciiIntervalString(15, 97, 123) // trunkDynamicStatus
+                        + updateInterfaceSnippets[14] + to_string(rand() % 65536) // ifInOctets
+                        + updateInterfaceSnippets[15] + to_string(rand() % 65536) // ifInUcastPkts
+                        + updateInterfaceSnippets[16] + to_string(rand() % 65536) // ifInNUcastPkts
+                        + updateInterfaceSnippets[17] + to_string(rand() % 65536) // ifInDiscards
+                        + updateInterfaceSnippets[18] + to_string(rand() % 65536) // ifInErrors
+                        + updateInterfaceSnippets[19] + to_string(rand() % 65536) // ifInUnknownProtos
+                        + updateInterfaceSnippets[20] + to_string(rand() % 65536) // ifOutOctets
+                        + updateInterfaceSnippets[21] + to_string(rand() % 65536) // ifOutUcastPkts
+                        + updateInterfaceSnippets[22] + to_string(rand() % 65536) // ifOutNUcastPkts
+                        + updateInterfaceSnippets[23] + to_string(rand() % 65536) // ifOutDiscards
+                        + updateInterfaceSnippets[24] + to_string(rand() % 65536) // ifOutErrors
+                        + updateInterfaceSnippets[25] + to_string(rand() % 65536) // ifOutQLen
+                        + updateInterfaceSnippets[26] + to_string(rand() % 65536) // ifSpecific
+                        + updateInterfaceSnippets[27] + randAsciiIntervalString(15, 97, 123) // ifAlias
+                        + updateInterfaceSnippets[28] + randLocalIp() // neighbour
+                        + updateInterfaceSnippets[29] + to_string(rand() % 65536) // ifInMulticastPkts
+                        + updateInterfaceSnippets[30] + to_string(rand() % 65536) // ifInBroadcastPkts
+                        + updateInterfaceSnippets[31] + to_string(rand() % 65536) // ifOutMulticastPkts
+                        + updateInterfaceSnippets[32] + to_string(rand() % 65536) // ifOutBroadcastPkts
+                        + updateInterfaceSnippets[33] + to_string(rand() % 65536) // ifHCInOctets
+                        + updateInterfaceSnippets[34] + to_string(rand() % 65536) // ifHCInUcastPkts
+                        + updateInterfaceSnippets[35] + to_string(rand() % 65536) // ifHCInMulticastPkts
+                        + updateInterfaceSnippets[36] + to_string(rand() % 65536) // ifHCInBroadcastPkts
+                        + updateInterfaceSnippets[37] + to_string(rand() % 65536) // ifHCOutOctets
+                        + updateInterfaceSnippets[38] + to_string(rand() % 65536) // ifHCOutUcastPkts
+                        + updateInterfaceSnippets[39] + to_string(rand() % 65536) // ifHCOutMulticastPkts
+                        + updateInterfaceSnippets[40] + to_string(rand() % 65536) // ifHCOutBroadcastPkts
+                        + updateInterfaceSnippets[41] + to_string(ifSpeed + rand() % (65536 - ifSpeed)) // ifHighSpeed
+                        + updateInterfaceSnippets[42] + randAsciiIntervalString(15, 97, 123) // dot3StatsDuplexStatus
+                        + updateInterfaceSnippets[43] + randAsciiIntervalString(15, 97, 123) // vlan
+                        + updateInterfaceSnippets[44];
                 cout << outputStr;
                 componentCounter++;
             }
@@ -333,7 +382,7 @@ int main(int argc, char* argv[])
             }
         }
 
-        componentCounter = 0;
+//        componentCounter = 0;
         for (auto& id: *nodeIds)
         {
             for (int i = 0; i < defaultComponents[2].second; ++i) // processors updating
@@ -347,7 +396,7 @@ int main(int argc, char* argv[])
                         + updateProcessorSnippets[5] + to_string(20 + rand() % 75) // temperature [20..95] degrees Celcius
                         + updateProcessorSnippets[6];
                 cout << outputStr;
-                componentCounter++;
+//                componentCounter++;
             }
         }
 
