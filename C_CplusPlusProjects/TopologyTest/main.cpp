@@ -14,11 +14,13 @@
 
 using namespace std;
 
+const string commonLeafName = "unixHost";
+
 inline int infoAndExit(const char *programName)
 {
     cerr << "Usage: " << programName << " <option(s)> VALUES"
             << "\nOptions:\n"
-            << "\t-n NODE_COUNT [10..50000]\tSpecify nodes count in the topology\n"
+            << "\t-n NODE_COUNT [10..50000]\tSpecify total nodes count in the topology\n"
             << "\t-lc LAYER_COUNT [2..NODE_COUNT]\tSpecify layers count in the topology\n"
             << "\t-cc COMPONENT_COUNT [1..1000]\tSpecify processes count and interfaces count in a single node\n"
             << "\t[-ml MAKE_LINKS]\tIf presents, nodes in the topology will be connected. Specify this parameter if "
@@ -65,8 +67,12 @@ int logBase(int layerCount, int nodeCount)
  * Each container has @param childCount children by default, names of the containers in the current layer are stored in
  * @param parentsNames, their children in @param childrenNames respectively. @param topoContainerSnippets is used for constructing the
  * std::string for std::cout. Do this or not, says @param doOutput. */
-void makeContainerTopo(int layerCount, int childCount, vector<string> &parentsNames, vector<string> &childrenNames,
-        const array<string, 4> &topoContainerSnippets, bool doOutput)
+void makeContainersTree(int layerCount, int childCount, vector<string> &parentsNames, vector<string> &childrenNames,
+        const array<string, 4> &topoContainerSnippets, bool doOutput
+#if DEBUG
+        , ofstream &creationFile
+#endif
+        )
 {
     string outputStr;
     for (int i = 0; i < layerCount; ++i)
@@ -91,6 +97,12 @@ void makeContainerTopo(int layerCount, int childCount, vector<string> &parentsNa
                                 + topoContainerSnippets[2] + childrenNames.back() + topoContainerSnippets[3];
                     }
                     cout << outputStr;
+#if DEBUG
+                    if (creationFile.is_open())
+                    {
+                        creationFile << outputStr;
+                    }
+#endif
                 }
             }
         }
@@ -98,10 +110,151 @@ void makeContainerTopo(int layerCount, int childCount, vector<string> &parentsNa
     }
 }
 
+void connectLeavesInTopology(int topoBase, const list<list<int>> *topoTree, const array<string, 5> &topoConnectionSnippets,
+        const array<pair<string, int>, 4> &defaultComponents
+#if DEBUG
+        , ofstream &creationFile
+#endif
+        )
+{
+    /** Making the connections in the topology ************************************************************************************/
+    string interfaceParentNodePrefix, interfaceChildNodePrefix, outputStr;
+
+    cout << endl;
+
+    // Making connections for all levels but the last
+    auto topoLayersIt = topoTree->cbegin();
+    auto topoChildrenIt = next(topoLayersIt)->cbegin();
+    for (; topoLayersIt != prev(topoTree->cend(), 2); ++topoLayersIt)
+    {
+        topoChildrenIt = next(topoLayersIt)->cbegin();
+        for (auto topoParentsIt = topoLayersIt->cbegin(); topoParentsIt != topoLayersIt->cend(); ++topoParentsIt)
+        {
+            for (int i = 0; i < topoBase; ++i)
+            {
+                interfaceParentNodePrefix = defaultComponents[0].first + to_string(*topoParentsIt) + '_' + to_string(i
+                        + ((topoLayersIt == topoTree->cbegin()) ? 0 : 1));
+                interfaceChildNodePrefix = defaultComponents[0].first + to_string(*topoChildrenIt) + "_0";
+                outputStr = topoConnectionSnippets[0] + commonLeafName + to_string(*topoParentsIt) + topoConnectionSnippets[1]
+                        + commonLeafName + to_string(*topoChildrenIt) + topoConnectionSnippets[2] + interfaceParentNodePrefix
+                        + topoConnectionSnippets[3] + interfaceChildNodePrefix + topoConnectionSnippets[4];
+                cout << outputStr;
+#if DEBUG
+                if (creationFile.is_open())
+                {
+                    creationFile << outputStr;
+                }
+#endif
+                topoChildrenIt++;
+            }
+        }
+    }
+
+    // Connecting the last level with pre-last
+    topoLayersIt = prev(topoTree->cend(), 2); // pre-leaf layer
+    topoChildrenIt = next(topoLayersIt)->cbegin(); // leaf layer
+    int extraLeafCount = next(topoLayersIt)->size() % topoLayersIt->size();
+    int defaultLeavesInContainer = next(topoLayersIt)->size() / topoLayersIt->size();
+    int inc;
+    for (auto topoParentsIt = topoLayersIt->cbegin(); topoParentsIt != topoLayersIt->cend(); ++topoParentsIt)
+    {
+        if (extraLeafCount)
+        {
+            inc = 1;
+            extraLeafCount--;
+        }
+        else
+        {
+            inc = 0;
+        }
+        for (int i = 0; i < defaultLeavesInContainer + inc; ++i)
+        {
+            interfaceParentNodePrefix = defaultComponents[0].first + to_string(*topoParentsIt) + '_' + to_string(i + 1);
+            interfaceChildNodePrefix = defaultComponents[0].first + to_string(*topoChildrenIt) + "_0";
+            outputStr = topoConnectionSnippets[0] + commonLeafName + to_string(*topoParentsIt)+ topoConnectionSnippets[1]
+                    + commonLeafName + to_string(*topoChildrenIt) + topoConnectionSnippets[2] + interfaceParentNodePrefix
+                    + topoConnectionSnippets[3] + interfaceChildNodePrefix + topoConnectionSnippets[4];
+            cout << outputStr;
+#if DEBUG
+            if (creationFile.is_open())
+            {
+                creationFile << outputStr;
+            }
+#endif
+            topoChildrenIt++;
+        }
+    }
+}
+
+void makeLeafTopology(int topoBase, int totalLeafCount, int leafStartIndex, const array<pair<string, int>, 4> &defaultComponents
+#if DEBUG
+       , ofstream &creationFile
+#endif
+       )
+{
+    list<list<int>> *topoTree = new list<list<int>>;
+    int currentNodeCount = 0, layerIndex = 0, leafCounter = 0, currLayerNodeCount;
+
+    while (true)
+    {
+        currLayerNodeCount = (int)pow((double)topoBase, (double)layerIndex);
+        currentNodeCount += currLayerNodeCount;
+        if (currentNodeCount <= totalLeafCount)
+        {
+            topoTree->push_back(list<int>{});
+            for (int j = 0; j < currLayerNodeCount; ++j)
+            {
+                topoTree->back().push_back(leafStartIndex + leafCounter);
+                leafCounter++;
+            }
+            layerIndex++;
+        }
+        else
+        {
+            topoTree->push_back(list<int>{});
+            for (int j = leafCounter; j < totalLeafCount; ++j)
+            {
+                topoTree->back().push_back(leafStartIndex + j);
+            }
+            break;
+        }
+    }
+
+    array<string, 5> topoConnectionSnippets
+    {
+        "connection VariableContainer[firstModelAddr: Address[\"",
+        "\"], secondModelAddr: Address[\"",
+        "\"], firstId: \"",
+        "\", secondId: \"",
+        "\", cTag: \"interface\"];\n"
+    };
+
+    connectLeavesInTopology(topoBase, topoTree, topoConnectionSnippets, defaultComponents
+#if DEBUG
+            , creationFile);
+#else
+            );
+#endif
+
+    // Connect the topology in one container with the topology in another one
+    if (leafStartIndex)
+    {
+        string interfaceParentNodePrefix = defaultComponents[0].first + to_string(leafStartIndex - 1) + "_1";
+        string interfaceChildNodePrefix = defaultComponents[0].first + to_string(leafStartIndex + totalLeafCount - 2) + "_1";
+        string outputStr = topoConnectionSnippets[0] + commonLeafName + to_string(leafStartIndex - 1)+ topoConnectionSnippets[1]
+                + commonLeafName + to_string(leafStartIndex + totalLeafCount - 2) + topoConnectionSnippets[2] + interfaceParentNodePrefix
+                + topoConnectionSnippets[3] + interfaceChildNodePrefix + topoConnectionSnippets[4];
+        cout << outputStr;
+    }
+
+    delete topoTree;
+}
+
 int main(int argc, char* argv[])
 {
     int layerCount, currentLeafCount, totalLeafCount, componentCount, instanceCount, instanceNumber;
     bool isLinked = false;
+    const int usedInterfacesDivisor = 10; // only one tenth of interface amount will be used for connections in topology
 
 #if !DEBUG
 //    for (int i = 0; i < argc; ++i)
@@ -127,8 +280,6 @@ int main(int argc, char* argv[])
                 componentCount = stoi(argv[6]);
                 instanceCount = stoi(argv[8]);
                 instanceNumber = stoi(argv[10]);
-                currentLeafCount = totalLeafCount / instanceCount + ((instanceNumber == instanceCount) ? (totalLeafCount % instanceCount)
-                        : 0);
             }
             else
             {
@@ -150,8 +301,6 @@ int main(int argc, char* argv[])
                 {
                     isLinked = true;
                 }
-                currentLeafCount = totalLeafCount / instanceCount + ((instanceNumber == instanceCount) ? (totalLeafCount % instanceCount)
-                        : 0);
             }
             else
             {
@@ -164,28 +313,30 @@ int main(int argc, char* argv[])
         }
     }
 #else
-    layerCount = 5;
-    componentCount = 10;
-    isLinked = false;
-    instanceCount = 5;
-    instanceNumber = 5;
+    layerCount = 4;
+    componentCount = 30;
+    isLinked = true;
+    instanceCount = 1;
+    instanceNumber = 1;
     totalLeafCount = 100;
-    currentLeafCount = totalLeafCount / instanceCount + ((instanceNumber == instanceCount) ? (totalLeafCount % instanceCount) : 0);
 
     ofstream simpleModelsCreation("simpleModelsCreation.txt", ios::trunc);
 #endif
 
+    currentLeafCount = totalLeafCount / instanceCount + ((instanceNumber == instanceCount) ? (totalLeafCount % instanceCount) : 0);
     int containerBase = (int)pow((double)totalLeafCount, 1.0 / (double)(layerCount - 1));
 #if DEBUG
     cout << "Layer count: " << layerCount << ", node count: " << currentLeafCount << ", log base: " << containerBase << endl;
 #endif
 
     // Writing node count and component count into the file for further using by ModelsParamsTest
-    ofstream topoTestParams("../topoTestParams.txt", ios::trunc);
+    ofstream topoTestParams("topoTestParams.txt", ios::trunc);
     if (topoTestParams.is_open())
     {
         topoTestParams << "Node count = " << totalLeafCount
-             << "\nComponent count = " << componentCount << endl;
+             << "\nComponent count = " << componentCount
+             << "\nInstance count = " << instanceCount
+             << "\nInstance number = " << instanceNumber << endl;
     }
     topoTestParams.close();
 
@@ -197,7 +348,6 @@ int main(int argc, char* argv[])
         "\"], name: \"",
         "\"];\n"
     };
-//    string containerStr = "container";
     vector<string> *leafParentsNames = new vector<string>;
     if (layerCount == 2)
     {
@@ -209,8 +359,12 @@ int main(int argc, char* argv[])
     }
     vector<string> *childrenNames = new vector<string>;
 
-    makeContainerTopo(layerCount - 2, containerBase, *leafParentsNames, *childrenNames, topoContainerSnippets,
-            instanceNumber == 1);
+    makeContainersTree(layerCount - 2, containerBase, *leafParentsNames, *childrenNames, topoContainerSnippets,
+            instanceNumber == 1
+#if DEBUG
+            , simpleModelsCreation
+#endif
+            );
 
     delete childrenNames;
 
@@ -239,12 +393,13 @@ int main(int argc, char* argv[])
     int leafIndex = (instanceNumber - 1) * (totalLeafCount / instanceCount);
     int inc;
     list<int> *leavesIds = new list<int>;
-    const string commonLeafName = "unixHost";
+    list<int> *leafCountPerContainer = new list<int>;
     string leafName;
     for (int i = leafParentBeginIndex; i < leafParentBeginIndex + currentLeafParentsSize; ++i)
     {
 //        cout << [=](){return (i < extraLeafCount - 1) ? 1 : 0;} << endl;
         inc = (i < leafParentBeginIndex + extraLeafCount) ? 1 : 0;
+        leafCountPerContainer->push_back(defaultLeavesInContainer + inc);
         for (int j = 0; j < defaultLeavesInContainer + inc; ++j)
         {
             leafName = commonLeafName + to_string(leafIndex);
@@ -253,10 +408,10 @@ int main(int argc, char* argv[])
                     + topoLeafSnippets[3] + to_string(leafIndex) + topoLeafSnippets[4];
             cout << outputStr;
 #if DEBUG
-                if (simpleModelsCreation.is_open())
-                {
-                    simpleModelsCreation << outputStr;
-                }
+            if (simpleModelsCreation.is_open())
+            {
+                simpleModelsCreation << outputStr;
+            }
 #endif
             leafIndex++;
         }
@@ -276,14 +431,12 @@ int main(int argc, char* argv[])
     const array<pair<string, int>, 4> defaultComponents
     {
         {
+            {"interface", componentCount},
+            {"process", componentCount},
 #if !DEBUG
-            {"interface", componentCount}, // Default interface count is 100
-            {"process", componentCount}, // Default process count is 1000
             {"processor", 10}, // Default processor count is 10
             {"diskUtilization", 5} // Default disk count is 5
 #else
-            {"interface", componentCount},
-            {"process", componentCount},
             {"processor", 2},
             {"diskUtilization", 1}
 #endif
@@ -312,111 +465,137 @@ int main(int argc, char* argv[])
         }
     }
 
-    if (instanceNumber == instanceCount)
+    delete leavesIds;
+
+    if ((instanceNumber == instanceCount) && isLinked)
     {
         /** Making the topology ***********************************************************************************************************/
-        int topoBase = logBase(layerCount, totalLeafCount);
-        list<list<int>> *topoTree = new list<list<int>>;
-        auto leavesNamesIt = leavesIds->cbegin();
+        // Fixed amount of connections, except in the last layer (it's less or equal there)
+        int topoBase = componentCount / usedInterfacesDivisor;
+        if (!topoBase)
+        {
+            topoBase = 1;
+        }
+
         leafIndex = 0;
-        int currentNodeCount = 0, currLayerNodeCount, layerIndex = 0;
-
-        while (true)
+        for (auto &leafCount: *leafCountPerContainer)
         {
-            currLayerNodeCount = (int)pow((double)topoBase, (double)layerIndex);
-            currentNodeCount += currLayerNodeCount;
-            if (currentNodeCount <= totalLeafCount)
-            {
-                topoTree->push_back(list<int>{});
-                for (int j = 0; j < currLayerNodeCount; ++j)
-                {
-                    topoTree->back().push_back(leafIndex);
-                    leavesNamesIt++;
-                    leafIndex++;
-                }
-                layerIndex++;
-            }
-            else
-            {
-                break;
-            }
+            makeLeafTopology(topoBase, leafCount, leafIndex, defaultComponents
+#if DEBUG
+            , simpleModelsCreation
+#endif
+            );
+            leafIndex += leafCount;
         }
 
-        for (int i = leafIndex; i < totalLeafCount; ++i)
-        {
-             topoTree->back().push_back(i);
-             leavesNamesIt++;
-        }
+//        list<list<int>> *topoTree = new list<list<int>>;
+//        leafIndex = 0;
+//        int currentNodeCount = 0, currLayerNodeCount, layerIndex = 0;
 
-        delete leavesIds;
+//        while (true)
+//        {
+//            currLayerNodeCount = (int)pow((double)topoBase, (double)layerIndex);
+//            currentNodeCount += currLayerNodeCount;
+//            if (currentNodeCount <= totalLeafCount)
+//            {
+//                topoTree->push_back(list<int>{});
+//                for (int j = 0; j < currLayerNodeCount; ++j)
+//                {
+//                    topoTree->back().push_back(leafIndex);
+//                    leafIndex++;
+//                }
+//                layerIndex++;
+//            }
+//            else
+//            {
+//                topoTree->push_back(list<int>{});
+//                for (int j = leafIndex; j < totalLeafCount; ++j)
+//                {
+//                    topoTree->back().push_back(j);
+//                }
+//                break;
+//            }
+//        }
 
-        if (isLinked)
-        {
-            /** Making the connections in the topology ************************************************************************************/
-            array<string, 5> topoConnectionSnippets
-            {
-                "connection VariableContainer[firstModelAddr: Address[\"",
-                "\"], secondModelAddr: Address[\"",
-                "\"], firstId: \"",
-                "\", secondId: \"",
-                "\", cTag: \"interface\"];\n"
-            };
-            string interfaceParentNodePrefix, interfaceChildNodePrefix;
+//        if (isLinked)
+//        {
+//            /** Making the connections in the topology ************************************************************************************/
+//            array<string, 5> topoConnectionSnippets
+//            {
+//                "connection VariableContainer[firstModelAddr: Address[\"",
+//                "\"], secondModelAddr: Address[\"",
+//                "\"], firstId: \"",
+//                "\", secondId: \"",
+//                "\", cTag: \"interface\"];\n"
+//            };
+//            string interfaceParentNodePrefix, interfaceChildNodePrefix;
 
-            cout << endl;
+//            cout << endl;
 
-            // Making connections for all levels but the last
-            auto topoLayersIt = topoTree->cbegin();
-            auto topoChildrenIt = next(topoLayersIt)->cbegin();
-            for (; topoLayersIt != prev(topoTree->cend(), 2); ++topoLayersIt)
-            {
-                topoChildrenIt = next(topoLayersIt)->cbegin();
-                for (auto topoParentsIt = topoLayersIt->cbegin(); topoParentsIt != topoLayersIt->cend(); ++topoParentsIt)
-                {
-                    for (int i = 0; i < topoBase; ++i)
-                    {
-                        interfaceParentNodePrefix = defaultComponents[0].first + to_string(*topoParentsIt) + '_' + to_string(i
-                                + ((topoLayersIt == topoTree->cbegin()) ? 0 : 1));
-                        interfaceChildNodePrefix = defaultComponents[0].first + to_string(*topoChildrenIt) + "_0";
-                        outputStr = topoConnectionSnippets[0] + commonLeafName + to_string(*topoParentsIt) + topoConnectionSnippets[1]
-                                + commonLeafName + to_string(*topoChildrenIt) + topoConnectionSnippets[2] + interfaceParentNodePrefix
-                                + topoConnectionSnippets[3] + interfaceChildNodePrefix + topoConnectionSnippets[4];
-                        cout << outputStr;
-                        topoChildrenIt++;
-                    }
-                }
-            }
+//            // Making connections for all levels but the last
+//            auto topoLayersIt = topoTree->cbegin();
+//            auto topoChildrenIt = next(topoLayersIt)->cbegin();
+//            for (; topoLayersIt != prev(topoTree->cend(), 2); ++topoLayersIt)
+//            {
+//                topoChildrenIt = next(topoLayersIt)->cbegin();
+//                for (auto topoParentsIt = topoLayersIt->cbegin(); topoParentsIt != topoLayersIt->cend(); ++topoParentsIt)
+//                {
+//                    for (int i = 0; i < topoBase; ++i)
+//                    {
+//                        interfaceParentNodePrefix = defaultComponents[0].first + to_string(*topoParentsIt) + '_' + to_string(i
+//                                + ((topoLayersIt == topoTree->cbegin()) ? 0 : 1));
+//                        interfaceChildNodePrefix = defaultComponents[0].first + to_string(*topoChildrenIt) + "_0";
+//                        outputStr = topoConnectionSnippets[0] + commonLeafName + to_string(*topoParentsIt) + topoConnectionSnippets[1]
+//                                + commonLeafName + to_string(*topoChildrenIt) + topoConnectionSnippets[2] + interfaceParentNodePrefix
+//                                + topoConnectionSnippets[3] + interfaceChildNodePrefix + topoConnectionSnippets[4];
+//                        cout << outputStr;
+//#if DEBUG
+//                        if (simpleModelsCreation.is_open())
+//                        {
+//                            simpleModelsCreation << outputStr;
+//                        }
+//#endif
+//                        topoChildrenIt++;
+//                    }
+//                }
+//            }
 
-            // Connecting the last level with pre-last
-            topoLayersIt = prev(topoTree->cend(), 2); // pre-leaf layer
-            topoChildrenIt = next(topoLayersIt)->cbegin(); // leaf layer
-            extraLeafCount = next(topoLayersIt)->size() % topoLayersIt->size();
-            defaultLeavesInContainer = next(topoLayersIt)->size() / topoLayersIt->size();
-            for (auto topoParentsIt = topoLayersIt->cbegin(); topoParentsIt != topoLayersIt->cend(); ++topoParentsIt)
-            {
-                if (extraLeafCount)
-                {
-                    inc = 1;
-                    extraLeafCount--;
-                }
-                else
-                {
-                    inc = 0;
-                }
-                for (int i = 0; i < defaultLeavesInContainer + inc; ++i)
-                {
-                    interfaceParentNodePrefix = defaultComponents[0].first + to_string(*topoParentsIt) + '_' + to_string(i + 1);
-                    interfaceChildNodePrefix = defaultComponents[0].first + to_string(*topoChildrenIt) + "_0";
-                    outputStr = topoConnectionSnippets[0] + commonLeafName + to_string(*topoParentsIt)+ topoConnectionSnippets[1]
-                            + commonLeafName + to_string(*topoChildrenIt) + topoConnectionSnippets[2] + interfaceParentNodePrefix
-                            + topoConnectionSnippets[3] + interfaceChildNodePrefix + topoConnectionSnippets[4];
-                    cout << outputStr;
-                    topoChildrenIt++;
-                }
-            }
-        }
+//            // Connecting the last level with pre-last
+//            topoLayersIt = prev(topoTree->cend(), 2); // pre-leaf layer
+//            topoChildrenIt = next(topoLayersIt)->cbegin(); // leaf layer
+//            extraLeafCount = next(topoLayersIt)->size() % topoLayersIt->size();
+//            defaultLeavesInContainer = next(topoLayersIt)->size() / topoLayersIt->size();
+//            for (auto topoParentsIt = topoLayersIt->cbegin(); topoParentsIt != topoLayersIt->cend(); ++topoParentsIt)
+//            {
+//                if (extraLeafCount)
+//                {
+//                    inc = 1;
+//                    extraLeafCount--;
+//                }
+//                else
+//                {
+//                    inc = 0;
+//                }
+//                for (int i = 0; i < defaultLeavesInContainer + inc; ++i)
+//                {
+//                    interfaceParentNodePrefix = defaultComponents[0].first + to_string(*topoParentsIt) + '_' + to_string(i + 1);
+//                    interfaceChildNodePrefix = defaultComponents[0].first + to_string(*topoChildrenIt) + "_0";
+//                    outputStr = topoConnectionSnippets[0] + commonLeafName + to_string(*topoParentsIt)+ topoConnectionSnippets[1]
+//                            + commonLeafName + to_string(*topoChildrenIt) + topoConnectionSnippets[2] + interfaceParentNodePrefix
+//                            + topoConnectionSnippets[3] + interfaceChildNodePrefix + topoConnectionSnippets[4];
+//                    cout << outputStr;
+//#if DEBUG
+//                    if (simpleModelsCreation.is_open())
+//                    {
+//                        simpleModelsCreation << outputStr;
+//                    }
+//#endif
+//                    topoChildrenIt++;
+//                }
+//            }
+//        }
 
-        delete topoTree;
+        delete leafCountPerContainer;
     }
 
 #if DEBUG
