@@ -203,8 +203,8 @@ int main(int argc, char* argv[])
 //#if !DEBUG
             {"interface", componentCount}, // Default interface count is 100
             {"process", componentCount}, // Default process count is 1000
-            {"processor", 10}, // Default processor count is 10
-            {"diskUtilization", 5} // Default disk count is 5
+            {"processor", 1}, // Default processor count is 10
+            {"diskUtilization", 1} // Default disk count is 5
 //#else
 //            {"interface", 5},
 //            {"process", 10},
@@ -313,21 +313,21 @@ int main(int argc, char* argv[])
         ", cpuLoad1min: ",
         ", cpuLoad5min: ",
         ", cpuLoad15min: ",
-//        ", availRAMpercent: ",
-//        ", usedRAMpercent: ",
+//        ", availRamPercent: ",
+//        ", usedRamPercent: ",
         ", cpuUserTime: ",
         ", cpuRootTime: ",
         ", cpuSystemTime: ",
         ", cpuIdleTime: ",
-        ", totalSwapkb: ",
-        ", availSwapkb: ",
-        ", totalRAMkb: ",
-        ", availRAMkb: ",
-        ", usedRAMkb: ",
-        ", totalFreekb: ",
-        ", totalRAMSharedkb: ",
-        ", totalRAMBufferkb: ",
-        ", totalCachekb: ",
+        ", totalSwapKb: ",
+        ", availSwapKb: ",
+        ", totalRamKb: ",
+        ", availRamKb: ",
+        ", usedRamKb: ",
+        ", totalFreeKb: ",
+        ", totalRamSharedKb: ",
+        ", totalRamBufferKb: ",
+        ", totalCacheKb: ",
 //        ", pmiThreadStateWaits: ",
 //        ", pmiThreadStateInterruptSleep: ",
 //        ", statCpuStealPercent: ",
@@ -335,13 +335,13 @@ int main(int argc, char* argv[])
 //        ", statCpuNicePercent: ",
 //        ", statCpuUserPercent: ",
 //        ", statCpuIdlePercent: ",
-//        ", statCpuIOWaitPercent: ",
+//        ", statCpuIoWaitPercent: ",
 //        ", startTime: ",
 //        ", version: ",
-//        ", hostname: ",
+//        ", hostName: ",
 //        ", apache: ",
 //        ", hosts: ",
-//        ", iptables: ",
+//        ", ipTables: ",
         "];\n"
     };
 
@@ -379,13 +379,13 @@ int main(int argc, char* argv[])
                         + updateInterfaceSnippets[2] + to_string(componentCounter) // ifIndex
                         + updateInterfaceSnippets[3] + to_string(rand() % 6) // ifType
                         + updateInterfaceSnippets[4] + quoteString(componentName) // ifName
-//                        + updateInterfaceSnippets[5]
-//                        + quoteString(componentName + ' ' + randAsciiIntervalString(15, 97, 123)) // description
+                        + updateInterfaceSnippets[5]
+                        + quoteString(componentName + ' ' + randAsciiIntervalString(15, 97, 123)) // description
                         + updateInterfaceSnippets[6] + to_string(rand() % 3) // operStatus
                         + updateInterfaceSnippets[7] + to_string(rand() % 3) // adminStatus
-//                        + updateInterfaceSnippets[8] + quoteString(randLocalIp()) // ipAddress
+                        + updateInterfaceSnippets[8] + quoteString(randLocalIp()) // ipAddress
                         + updateInterfaceSnippets[9] + to_string(68 + rand() % (65536 - 68)) // ifMtu
-//                        + updateInterfaceSnippets[10] + quoteString(randMacAddress()) // physAddress
+                        + updateInterfaceSnippets[10] + quoteString(randMacAddress()) // physAddress
                         + updateInterfaceSnippets[11] + to_string(ifSpeed) // speed
                         + updateInterfaceSnippets[12] + quoteString(randAsciiIntervalString(15, 97, 123)) // trunkDynamicState
                         + updateInterfaceSnippets[13] + quoteString(randAsciiIntervalString(15, 97, 123)) // trunkDynamicStatus
@@ -402,8 +402,8 @@ int main(int argc, char* argv[])
                         + updateInterfaceSnippets[24] + to_string(rand() % 65536) // ifOutErrors
                         + updateInterfaceSnippets[25] + to_string(rand() % 65536) // ifOutQLen
                         + updateInterfaceSnippets[26] + to_string(rand() % 65536) // ifSpecific
-//                        + updateInterfaceSnippets[27] + quoteString(randAsciiIntervalString(15, 97, 123)) // ifAlias
-//                        + updateInterfaceSnippets[28] + quoteString(randLocalIp()) // neighbour
+                        + updateInterfaceSnippets[27] + quoteString(randAsciiIntervalString(15, 97, 123)) // ifAlias
+                        + updateInterfaceSnippets[28] + quoteString(randLocalIp()) // neighbour
                         + updateInterfaceSnippets[29] + to_string(rand() % 65536) // ifInMulticastPkts
                         + updateInterfaceSnippets[30] + to_string(rand() % 65536) // ifInBroadcastPkts
                         + updateInterfaceSnippets[31] + to_string(rand() % 65536) // ifOutMulticastPkts
@@ -445,7 +445,7 @@ int main(int argc, char* argv[])
                 outputStr = updateProcessSnippets[0] + quoteString(commonNodeName + to_string(id))
                         + updateProcessSnippets[1] + quoteString(componentName) // id
                         + updateProcessSnippets[2] + quoteString(componentName) // name
-//                        + updateProcessSnippets[3] + quoteString(componentName + ' ' + randAsciiIntervalString(15, 97, 123)) // description
+                        + updateProcessSnippets[3] + quoteString(componentName + ' ' + randAsciiIntervalString(15, 97, 123)) // description
                         + updateProcessSnippets[4] + to_string(componentCounter) // pid
                         + updateProcessSnippets[5];
                 cout << outputStr;
@@ -472,7 +472,7 @@ int main(int argc, char* argv[])
                 outputStr = updateProcessorSnippets[0] + quoteString(commonNodeName + to_string(id))
                         + updateProcessorSnippets[1] + quoteString(componentName) // id
                         + updateProcessorSnippets[2] + quoteString(componentName) // name
-//                        + updateProcessorSnippets[3] + quoteString(componentName + ' ' + randAsciiIntervalString(15, 97, 123)) // description
+                        + updateProcessorSnippets[3] + quoteString(componentName + ' ' + randAsciiIntervalString(15, 97, 123)) // description
                         + updateProcessorSnippets[4] + to_string(2000 + rand() % 2000) // frequency [2000..4000] MHz
                         + updateProcessorSnippets[5] + to_string(20 + rand() % 75) // temperature [20..95] degrees Celcius
                         + updateProcessorSnippets[6];
