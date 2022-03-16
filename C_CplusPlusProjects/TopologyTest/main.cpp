@@ -172,8 +172,8 @@ void connectLeavesInTopology(int topoBase, const list<list<int>> *topoTree, stri
                             + commonLeafName + to_string(*topoChildrenIt) + topoConnectionSnippets[2] + interfaceParentNodePrefix
                             + topoConnectionSnippets[3] + interfaceChildNodePrefix + topoConnectionSnippets[4] + "pe"
                             + to_string(*topoParentsIt) + '-' + to_string(i + ((topoLayersIt == topoTree->cbegin()) ? 0 : 1)) + "<--->pe"
-                            + to_string(*topoChildrenIt) + "-0" + topoConnectionSnippets[5] + "portEntity"
-                            + topoConnectionSnippets[6] + "portEntity" + topoConnectionSnippets[7] + "ethLink"
+                            + to_string(*topoChildrenIt) + "-0" + topoConnectionSnippets[5] + "interface"
+                            + topoConnectionSnippets[6] + "interface" + topoConnectionSnippets[7] + "ethLink"
                             + topoConnectionSnippets[8];
                     cout << outputStr;
 #if DEBUG
@@ -223,7 +223,7 @@ void connectLeavesInTopology(int topoBase, const list<list<int>> *topoTree, stri
                         + commonLeafName + to_string(*topoChildrenIt) + topoConnectionSnippets[2] + interfaceParentNodePrefix
                         + topoConnectionSnippets[3] + interfaceChildNodePrefix + topoConnectionSnippets[4] + "pe"
                         + to_string(*topoParentsIt) + '-' + to_string(i + 1) + "<--->pe" + to_string(*topoChildrenIt) + "-0"
-                        + topoConnectionSnippets[5] + "portEntity" + topoConnectionSnippets[6] + "portEntity" + topoConnectionSnippets[7]
+                        + topoConnectionSnippets[5] + "interface" + topoConnectionSnippets[6] + "interface" + topoConnectionSnippets[7]
                         + "ethLink" + topoConnectionSnippets[8];
                 cout << outputStr;
 #if DEBUG
@@ -250,7 +250,7 @@ void connectLeavesInTopology(int topoBase, const list<list<int>> *topoTree, stri
                             + ((topoLayersIt == topoTree->cbegin()) ? 0 : 1));
                     interfaceChildNodePrefix = defaultComponents[0].first + to_string(*topoChildrenIt) + "-0";
                     outputStr = "updateComponent VariableContainer[modelAddr: Address[" + commonLeafName + to_string(*topoParentsIt)
-                            + "], cTag: \"portEntity\", id: " + interfaceParentNodePrefix + ", ifAlias: \"$" + commonLeafName
+                            + "], cTag: \"interface\", id: " + interfaceParentNodePrefix + ", ifAlias: \"$" + commonLeafName
                             + to_string(*topoChildrenIt) + '_' + interfaceChildNodePrefix + "$\"];\n";
                     cout << outputStr;
 #if DEBUG
@@ -283,7 +283,7 @@ void connectLeavesInTopology(int topoBase, const list<list<int>> *topoTree, stri
                 interfaceParentNodePrefix = defaultComponents[0].first + to_string(*topoParentsIt) + '-' + to_string(i + 1);
                 interfaceChildNodePrefix = defaultComponents[0].first + to_string(*topoChildrenIt) + "-0";
                 outputStr = "updateComponent VariableContainer[modelAddr: Address[\"" + commonLeafName + to_string(*topoParentsIt)
-                        + "\"], cTag: \"portEntity\", id: \"" + interfaceParentNodePrefix + "\", ifAlias: \"$" + commonLeafName
+                        + "\"], cTag: \"interface\", id: \"" + interfaceParentNodePrefix + "\", ifAlias: \"$" + commonLeafName
                         + to_string(*topoChildrenIt) + '_' + interfaceChildNodePrefix + "$\"];\n";
                 cout << outputStr;
 #if DEBUG
@@ -371,7 +371,7 @@ void makeLeafTopology(int topoBase, int totalLeafCount, int leafStartIndex, stri
             interfaceParentNodePrefix = defaultComponents[0].first + to_string(leafStartIndex - 1) + "-1";
             interfaceChildNodePrefix = defaultComponents[0].first + to_string(leafStartIndex + totalLeafCount - 2) + "-1";
             outputStr = "updateComponent VariableContainer[modelAddr: Address[\"" + commonLeafName + to_string(leafStartIndex - 1)
-                    + "\"], cTag: \"portEntity\", id: \"" + interfaceParentNodePrefix + "\", ifAlias: \"$" + commonLeafName
+                    + "\"], cTag: \"interface\", id: \"" + interfaceParentNodePrefix + "\", ifAlias: \"$" + commonLeafName
                     + to_string(leafStartIndex + totalLeafCount - 2) + '_' + interfaceChildNodePrefix + "$\"];\n";
         }
 
@@ -577,7 +577,7 @@ int main(int argc, char* argv[])
     const array<pair<string, int>, 4> defaultComponents
     {
         {
-            {"portEntity", componentCount},
+            {"interface", componentCount},
             {"volume", 4},
             {"memory", 1},
             {"cpuLoad", 2}
